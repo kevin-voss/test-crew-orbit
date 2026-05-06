@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 import { useMarketStore } from "../../stores/market";
 
@@ -12,27 +12,14 @@ function finitePricedSymbols(prices: Record<string, number>): string[] {
   return keys;
 }
 
-const FLASH_DURATION_MS = 380;
+const FLASH_DURATION_MS = 400;
 
-/** Row background keyed by directional flash tone (presentational only). */
-function rowHighlightStyle(tone: "green" | "red" | undefined): CSSProperties {
-  if (tone === "green") {
-    return {
-      transition: "background-color 220ms ease",
-      backgroundColor: "rgba(34, 197, 94, 0.22)",
-    };
-  }
-  if (tone === "red") {
-    return {
-      transition: "background-color 220ms ease",
-      backgroundColor: "rgba(239, 68, 68, 0.22)",
-    };
-  }
-  return {
-    transition: "background-color 220ms ease",
-    backgroundColor: "transparent",
-  };
-}
+const rowLayoutStyle: CSSProperties = {
+  display: "flex",
+  gap: "0.5rem",
+  alignItems: "baseline",
+  padding: "0.15rem 0",
+};
 
 export function TickerPanel(): JSX.Element {
   const prices = useMarketStore((s) => s.prices);
@@ -40,7 +27,7 @@ export function TickerPanel(): JSX.Element {
   const baselineRef = useRef<Record<string, number>>({});
   const [flashes, setFlashes] = useState<Partial<Record<string, "green" | "red">>>({});
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const symList = finitePricedSymbols(prices);
     const active = new Set(symList);
     const baseline = { ...baselineRef.current };
@@ -52,12 +39,21 @@ export function TickerPanel(): JSX.Element {
     const updates: Partial<Record<string, "green" | "red">> = {};
 
     for (const sym of symList) {
-      const next = prices[sym]!;
+      const current = prices[sym]!;
       const prev = baseline[sym];
-      if (prev !== undefined && prev !== next) {
-        updates[sym] = next > prev ? "green" : "red";
+
+      if (prev === undefined) {
+        baseline[sym] = current;
+        continue;
       }
-      baseline[sym] = next;
+
+      if (current === prev) {
+        baseline[sym] = current;
+        continue;
+      }
+
+      updates[sym] = current > prev ? "green" : "red";
+      baseline[sym] = current;
     }
 
     baselineRef.current = baseline;
@@ -88,33 +84,61 @@ export function TickerPanel(): JSX.Element {
   }, [flashes]);
 
   return (
-    <section data-testid="ticker-panel" aria-label="Live ticker">
-      {symbols.length === 0 ? (
-        <span data-testid="live-ticker-empty">No quote</span>
-      ) : (
-        <ul data-testid="live-ticker-list" role="list" style={{ listStyle: "none", margin: 0, padding: 0 }}>
-          {symbols.map((sym) => {
-            const flash = flashes[sym];
-            return (
-              <li
-                key={sym}
-                data-testid={`live-ticker-row-${sym}`}
-                data-live-ticker-flash={flash ?? null}
-                style={{
-                  display: "flex",
-                  gap: "0.5rem",
-                  alignItems: "baseline",
-                  padding: "0.15rem 0",
-                  ...rowHighlightStyle(flash),
-                }}
-              >
-                <span data-testid={`live-ticker-symbol-${sym}`}>{sym}</span>
-                <span data-testid={`live-ticker-price-${sym}`}>{prices[sym]}</span>
-              </li>
-            );
-          })}
-        </ul>
-      )}
-    </section>
+    <>
+      <style>{`
+        @keyframes live-ticker-flash-green-bg {
+          0% {
+            background-color: rgba(34, 197, 94, 0.28);
+          }
+          100% {
+            background-color: transparent;
+          }
+        }
+        @keyframes live-ticker-flash-red-bg {
+          0% {
+            background-color: rgba(239, 68, 68, 0.28);
+          }
+          100% {
+            background-color: transparent;
+          }
+        }
+        .live-ticker-row-flash-green {
+          animation: live-ticker-flash-green-bg ${FLASH_DURATION_MS}ms ease-out forwards;
+        }
+        .live-ticker-row-flash-red {
+          animation: live-ticker-flash-red-bg ${FLASH_DURATION_MS}ms ease-out forwards;
+        }
+      `}</style>
+      <section data-testid="ticker-panel" aria-label="Live ticker">
+        {symbols.length === 0 ? (
+          <span data-testid="live-ticker-empty">No quote</span>
+        ) : (
+          <ul data-testid="live-ticker-list" role="list" style={{ listStyle: "none", margin: 0, padding: 0 }}>
+            {symbols.map((sym) => {
+              const flash = flashes[sym];
+              const rowFlashClass =
+                flash === "green"
+                  ? "live-ticker-row-flash-green"
+                  : flash === "red"
+                    ? "live-ticker-row-flash-red"
+                    : undefined;
+
+              return (
+                <li
+                  key={sym}
+                  data-testid={`live-ticker-row-${sym}`}
+                  data-live-ticker-flash={flash ?? null}
+                  className={rowFlashClass}
+                  style={rowLayoutStyle}
+                >
+                  <span data-testid={`live-ticker-symbol-${sym}`}>{sym}</span>
+                  <span data-testid={`live-ticker-price-${sym}`}>{prices[sym]}</span>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </section>
+    </>
   );
 }
