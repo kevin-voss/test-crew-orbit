@@ -1,4 +1,4 @@
-import { useCallback, useId, useMemo, useState, type CSSProperties } from "react";
+import { useCallback, useEffect, useId, useMemo, useState, type CSSProperties } from "react";
 
 import { maxWholeSharesAffordable, simulateTradeExecution } from "../../market/simulateTradeExecution";
 import { useMarketStore } from "../../stores/market";
@@ -38,13 +38,22 @@ export function TradingTerminal(): JSX.Element {
   const price =
     typeof rawPrice === "number" && Number.isFinite(rawPrice) && rawPrice > 0 ? rawPrice : null;
 
-  const maxBuy = price != null ? maxWholeSharesAffordable(cash, price) : 0;
-  const sharesHeld = position?.shares ?? 0;
+  /** Reactive max buy — deps match store inputs updated by ticks (cash, price). */
+  const maxBuy = useMemo(() => {
+    return price != null ? maxWholeSharesAffordable(cash, price) : 0;
+  }, [cash, price]);
 
   const maxBuyLabel = useMemo(() => {
     if (side !== "buy") return "";
     return `Max buy: ${maxBuy} shares`;
   }, [side, maxBuy]);
+
+  const sharesHeld = position?.shares ?? 0;
+
+  useEffect(() => {
+    setQtyInput("");
+    setFeedback("");
+  }, [selectedTicker, side]);
 
   const onSubmit = useCallback(() => {
     setFeedback("");
@@ -90,57 +99,96 @@ export function TradingTerminal(): JSX.Element {
   const submitDisabled =
     !canTradeSymbol || !showPrice || qtyPreview === null;
 
+  const panelBorder = "#e7e5e4";
+  const muted = "#78716c";
+  const labelColor = "#44403c";
+
   const sectionStyle: CSSProperties = {
-    margin: "16px 0",
-    padding: "16px",
+    margin: 0,
+    padding: "12px 16px",
     borderRadius: 8,
-    border: "1px solid #e7e5e4",
+    border: `1px solid ${panelBorder}`,
     background: "#fafaf9",
     fontSize: 14,
     maxWidth: 420,
+    boxSizing: "border-box",
   };
 
   return (
     <section data-testid="trading-terminal" aria-label="Trading terminal" style={sectionStyle}>
       {!canTradeSymbol ? (
-        <p style={{ margin: "0 0 12px", color: "#57534e" }}>
+        <p style={{ margin: "0 0 10px", color: muted }}>
           Select a stock symbol in the dashboard to use the trading terminal.
         </p>
       ) : null}
 
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         <div>
-          <span style={{ color: "#44403c" }}>Cash: </span>
+          <span style={{ color: labelColor }}>Cash: </span>
           <span style={{ fontVariantNumeric: "tabular-nums" }}>{formatCash(cash)}</span>
         </div>
 
         {canTradeSymbol ? (
           <div>
-            <span style={{ color: "#44403c" }}>Symbol: </span>
-            <span>{selectedTicker}</span>
+            <span style={{ color: labelColor }}>Symbol: </span>
+            <span style={{ fontWeight: 600 }}>{selectedTicker}</span>
           </div>
         ) : null}
 
         {showPrice ? (
           <div>
-            <span style={{ color: "#44403c" }}>Price: </span>
+            <span style={{ color: labelColor }}>Price: </span>
             <span style={{ fontVariantNumeric: "tabular-nums" }}>{formatPrice(price)}</span>
           </div>
         ) : canTradeSymbol ? (
-          <div style={{ color: "#78716c" }}>Price: —</div>
+          <div style={{ color: muted }}>Price: —</div>
         ) : null}
 
         {side === "sell" && canTradeSymbol ? (
           <div>
-            <span style={{ color: "#44403c" }}>Shares held: </span>
-            <span>{sharesHeld}</span>
+            <span style={{ color: labelColor }}>Shares held: </span>
+            <span style={{ fontVariantNumeric: "tabular-nums" }}>{sharesHeld}</span>
           </div>
         ) : null}
 
         <fieldset style={{ margin: 0, padding: 0, border: "none" }}>
-          <legend style={{ fontWeight: 600, marginBottom: 8 }}>Action</legend>
-          <div style={{ display: "flex", gap: 16 }}>
-            <label style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer" }}>
+          <legend style={{ fontWeight: 600, marginBottom: 6, fontSize: 14, color: labelColor }}>
+            Action
+          </legend>
+          <div
+            role="presentation"
+            style={{
+              display: "flex",
+              gap: 0,
+              padding: 4,
+              borderRadius: 8,
+              border: `1px solid ${panelBorder}`,
+              background: "#ffffff",
+              boxSizing: "border-box",
+            }}
+          >
+            <label
+              data-testid="trade-side-buy"
+              style={{
+                flex: 1,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 6,
+                cursor: "pointer",
+                padding: "8px 12px",
+                borderRadius: 6,
+                fontWeight: 600,
+                fontSize: 14,
+                ...(side === "buy"
+                  ? {
+                      background: "#1c1917",
+                      color: "#fafaf9",
+                      boxShadow: "inset 0 0 0 1px #1c1917",
+                    }
+                  : { background: "transparent", color: muted }),
+              }}
+            >
               <input
                 id={buyId}
                 type="radio"
@@ -153,7 +201,28 @@ export function TradingTerminal(): JSX.Element {
               />
               Buy
             </label>
-            <label style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer" }}>
+            <label
+              data-testid="trade-side-sell"
+              style={{
+                flex: 1,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 6,
+                cursor: "pointer",
+                padding: "8px 12px",
+                borderRadius: 6,
+                fontWeight: 600,
+                fontSize: 14,
+                ...(side === "sell"
+                  ? {
+                      background: "#b91c1c",
+                      color: "#fafaf9",
+                      boxShadow: "inset 0 0 0 1px #b91c1c",
+                    }
+                  : { background: "transparent", color: muted }),
+              }}
+            >
               <input
                 id={sellId}
                 type="radio"
@@ -170,8 +239,12 @@ export function TradingTerminal(): JSX.Element {
         </fieldset>
 
         {side === "buy" && canTradeSymbol && showPrice ? (
-          <div aria-live="polite" style={{ color: "#44403c" }}>
+          <div aria-live="polite" style={{ color: labelColor }}>
             {maxBuyLabel}
+          </div>
+        ) : side === "buy" && canTradeSymbol && showPrice === false ? (
+          <div aria-live="polite" style={{ color: muted }}>
+            Max buy unavailable until the live ticker updates prices.
           </div>
         ) : null}
 
@@ -203,8 +276,9 @@ export function TradingTerminal(): JSX.Element {
 
         <button
           type="button"
-          disabled={submitDisabled}
-          {...(submitDisabled ? { "aria-disabled": true as const } : {})}
+          data-testid="trade-submit"
+          disabled={!canTradeSymbol}
+          {...(!canTradeSymbol ? { "aria-disabled": true as const } : {})}
           onClick={onSubmit}
           style={{
             padding: "10px 14px",
