@@ -1,16 +1,19 @@
 ---
-description: Persisted market store — TypeScript, Zustand, Vitest; state layer and rehydration boundaries
+description: Market domain — Zustand store, GBM market engine, Vitest; state/persistence and engine-only boundaries
 globs:
-  - "crew-orbit/**/*.ts"
-  - "crew-orbit/**/*.tsx"
-  - "**/*.ts"
-  - "**/*.tsx"
+  - "src/**/*.ts"
+  - "src/**/*.tsx"
 alwaysApply: false
 ---
 
-# Feature: market store (persisted)
+# Feature: market store + GBM engine
 
-Target stack for implementation: **TypeScript** (ESM), **Zustand**, **Vitest** — not necessarily every file in this checkout; see root `AGENTS.md` for where code may live.
+Target stack in this checkout: **TypeScript** (ESM), **Zustand**, **Vitest** under `src/`. See root `AGENTS.md` for coordination vs. host-app merge.
+
+**Specs (read before editing the matching area):**
+
+- Persisted store / rehydration: `crew-orbit/feature-set-up-persisted-market-store/design/design-spec.md`
+- GBM stepping, history caps, symbols: `crew-orbit/feature-implement-gbm-market-engine/design/design-spec.md` (engine work stays in `src/utils/marketEngine.ts` — no UI there)
 
 ## Boundaries
 
@@ -25,7 +28,7 @@ Target stack for implementation: **TypeScript** (ESM), **Zustand**, **Vitest** �
 
 ## Tests
 
-- Prefer **Vitest** for unit tests around store actions, selectors, and persistence boundaries. Do not introduce alternate test runners for this feature without team agreement.
+- Prefer **Vitest** for unit tests around store actions, selectors, persistence boundaries, and **`marketEngine`** behavior (use the injectable RNG hooks from the GBM spec). Do not introduce alternate test runners for this feature without team agreement.
 
 ## Scope discipline
 

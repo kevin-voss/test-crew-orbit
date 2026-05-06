@@ -1,11 +1,12 @@
 # Agent guidance (Cursor)
 
-This repository is a **crew-orbit** coordination checkout: feature specs and role outputs under `crew-orbit/`. Implementation for the persisted market store may live in a sibling feature workspace with **TypeScript**, **Zustand**, and **Vitest** (see that tree’s `package.json`).
+This repository is a **crew-orbit** coordination checkout: feature specs under `crew-orbit/` and implementation under `src/` (**TypeScript**, **Zustand**, **Vitest** — see root `package.json`).
 
 **Before coding**
 
-- Read the feature **design spec**: `crew-orbit/feature-set-up-persisted-market-store/design/design-spec.md`.
-- Prefer **state-layer-only** changes in the store package: no UI or presentation imports in the store module; consumers use `useMarketStore` (per requirements in `spec/` when present).
+- **Persisted market store:** `crew-orbit/feature-set-up-persisted-market-store/design/design-spec.md`.
+- **GBM market engine:** `crew-orbit/feature-implement-gbm-market-engine/design/design-spec.md` (utility-only in `src/utils/marketEngine.ts`; no new UI here).
+- Prefer **state-layer-only** changes in the store: no UI or presentation imports in the store module; consumers use `useMarketStore` (per requirements in `spec/` when present).
 
 **Cursor**
 
