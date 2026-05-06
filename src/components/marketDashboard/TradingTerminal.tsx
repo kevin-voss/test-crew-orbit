@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useId, useMemo, useState, type CSSProperties } from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState, type CSSProperties } from "react";
 
 import { maxWholeSharesAffordable, simulateTradeExecution } from "../../market/simulateTradeExecution";
 import { useMarketStore } from "../../stores/market";
@@ -33,6 +33,7 @@ export function TradingTerminal(): JSX.Element {
   const [side, setSide] = useState<"buy" | "sell">("buy");
   const [qtyInput, setQtyInput] = useState("");
   const [feedback, setFeedback] = useState("");
+  const submitCoalesceRef = useRef(false);
 
   const rawPrice = selectedTicker != null ? prices[selectedTicker] : undefined;
   const price =
@@ -56,21 +57,33 @@ export function TradingTerminal(): JSX.Element {
   }, [selectedTicker, side]);
 
   const onSubmit = useCallback(() => {
+    if (submitCoalesceRef.current) return;
+    submitCoalesceRef.current = true;
+
+    const releaseCoalesceSoon = () => {
+      queueMicrotask(() => {
+        submitCoalesceRef.current = false;
+      });
+    };
+
     setFeedback("");
     const st = useMarketStore.getState();
     const ticker = st.selectedTicker;
     if (ticker == null) {
+      submitCoalesceRef.current = false;
       setFeedback("Select a ticker from the market list before trading.");
       return;
     }
     const livePrice = st.prices[ticker];
     if (typeof livePrice !== "number" || !Number.isFinite(livePrice) || livePrice <= 0) {
+      submitCoalesceRef.current = false;
       setFeedback("No simulated price is available for this symbol yet.");
       return;
     }
 
     const qty = parseWholeShares(qtyInput.trim());
     if (qty == null) {
+      submitCoalesceRef.current = false;
       setFeedback("Enter a whole number of shares (at least 1).");
       return;
     }
@@ -85,12 +98,14 @@ export function TradingTerminal(): JSX.Element {
     });
 
     if (!outcome.ok) {
+      submitCoalesceRef.current = false;
       setFeedback(outcome.error.message);
       return;
     }
 
     useMarketStore.getState().applyTradeResult(outcome.result);
     setQtyInput("");
+    releaseCoalesceSoon();
   }, [qtyInput, side]);
 
   const canTradeSymbol = selectedTicker != null;
