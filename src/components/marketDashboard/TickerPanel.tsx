@@ -95,12 +95,11 @@ export function TickerPanel(): JSX.Element {
         <ul data-testid="live-ticker-list" role="list" style={{ listStyle: "none", margin: 0, padding: 0 }}>
           {symbols.map((sym) => {
             const flash = flashes[sym];
-            const tone = flash ?? null;
             return (
               <li
                 key={sym}
                 data-testid={`live-ticker-row-${sym}`}
-                data-live-ticker-flash={tone}
+                data-live-ticker-flash={flash ?? null}
                 style={{
                   display: "flex",
                   gap: "0.5rem",
