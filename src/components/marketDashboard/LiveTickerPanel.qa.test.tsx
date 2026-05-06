@@ -235,8 +235,9 @@ describe("LiveTickerPanel QA (adversarial / boundaries)", () => {
       useMarketStore.setState({ prices: {} });
     });
 
-    const rowsAfterClear = within(list).getAllByRole("listitem");
-    expect(rowsAfterClear).toHaveLength(1);
-    expect(rowsAfterClear[0]!.textContent ?? "").toMatch(/No quotes yet/i);
+    expect(screen.queryByRole("list", { name: /live ticker/i })).toBeNull();
+    expect(screen.queryAllByRole("listitem")).toHaveLength(0);
+    const emptyHint = screen.getByTestId("live-ticker-empty");
+    expect(emptyHint.textContent ?? "").toMatch(/No quotes yet/i);
   });
 });
