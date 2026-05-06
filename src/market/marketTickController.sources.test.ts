@@ -4,11 +4,11 @@ import { fileURLToPath } from "node:url";
 
 import { describe, expect, it } from "vitest";
 
-const marketTickDir = dirname(fileURLToPath(import.meta.url));
-const srcDir = join(marketTickDir, "..");
+const thisDir = dirname(fileURLToPath(import.meta.url));
+const srcDir = join(thisDir, "..");
 
-const loopPath = join(marketTickDir, "marketTickLoop.ts");
-const hookPath = join(marketTickDir, "useMarketTickController.ts");
+const controllerPath = join(thisDir, "marketTickController.ts");
+const hookPath = join(thisDir, "useMarketTickController.ts");
 const dashboardPath = join(srcDir, "components", "MarketDashboard.tsx");
 const marketDashboardDir = join(srcDir, "components", "marketDashboard");
 
@@ -25,9 +25,9 @@ function readReq(path: string): string {
 }
 
 describe("market tick controller — source contracts (review / audit)", () => {
-  it("keeps the tick loop client-only, on a ~2000 ms cadence, and documents background throttling expectations", () => {
+  it("keeps the tick controller client-only, on a ~2000 ms cadence, and documents background throttling expectations", () => {
     // covers AC-4, AC-9
-    const src = readReq(loopPath);
+    const src = readReq(controllerPath);
     expect(src).toMatch(/2000|2_000/);
     expect(src.toLowerCase()).toMatch(/throttl|background|foreground|tab/);
     expect(src).not.toMatch(/\bfetch\s*\(/);
@@ -40,7 +40,7 @@ describe("market tick controller — source contracts (review / audit)", () => {
     const src = readReq(hookPath);
     expect(src).toContain("onMarketStoreHydrationComplete");
     expect(src).toContain("marketStoreHasHydrated");
-    expect(src).toContain("startMarketTickLoop");
+    expect(src).toContain("createMarketTickController");
   });
 
   it("keeps dashboard, hook, and panel sources free of simulation setInterval scheduling", () => {
@@ -63,11 +63,11 @@ describe("market tick controller — source contracts (review / audit)", () => {
     }
   });
 
-  it("does not add visibility-based pause/resume hacks to the tick hook or loop", () => {
+  it("does not add visibility-based pause/resume hacks to the tick hook or controller", () => {
     // covers AC-14
     const hookSrc = readReq(hookPath);
-    const loopSrc = readReq(loopPath);
+    const controllerSrc = readReq(controllerPath);
     expect(hookSrc).not.toMatch(/visibilitychange|visibilityState|document\.hidden/i);
-    expect(loopSrc).not.toMatch(/visibilitychange|visibilityState|document\.hidden/i);
+    expect(controllerSrc).not.toMatch(/visibilitychange|visibilityState|document\.hidden/i);
   });
 });

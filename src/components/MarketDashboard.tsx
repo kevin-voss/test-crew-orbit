@@ -1,4 +1,4 @@
-import { useMarketTickController } from "../marketTick/useMarketTickController";
+import { useMarketTickController } from "../market/useMarketTickController";
 import { AnalyticsPanel } from "./marketDashboard/AnalyticsPanel";
 import { ChartStripPanel } from "./marketDashboard/ChartStripPanel";
 import { TickerPanel } from "./marketDashboard/TickerPanel";

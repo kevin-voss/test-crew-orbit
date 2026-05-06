@@ -1,3 +1,7 @@
+/**
+ * Periodic GBM market tick: `setInterval` at **2000 ms** in the foreground tab.
+ * Browsers may throttle timers in background tabs; ticks may pause or coarsen when the tab is not focused.
+ */
 import { useMarketStore } from "../stores/market/marketStore";
 import type { MarketStoreState } from "../stores/market/types";
 import {
