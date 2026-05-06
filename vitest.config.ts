@@ -1,5 +1,13 @@
 import { defineConfig } from "vitest/config";
 
+/**
+ * TL `act()` needs React's development build. Shells often set `NODE_ENV=production`; `??=` would not replace it.
+ */
+process.env.NODE_ENV =
+  process.env.NODE_ENV === "production"
+    ? "development"
+    : (process.env.NODE_ENV ?? "development");
+
 export default defineConfig({
   mode: "test",
   define: {
