@@ -1,40 +1,74 @@
-import { useMarketStore } from "../../stores/market";
+import { useMemo } from "react";
 
-function resolveTickerSymbol(
-  selectedTicker: string | null,
-  prices: Record<string, number>,
-): string | null {
-  if (
-    selectedTicker != null &&
-    typeof prices[selectedTicker] === "number" &&
-    Number.isFinite(prices[selectedTicker])
-  ) {
-    return selectedTicker;
-  }
-  for (const k of Object.keys(prices).sort()) {
-    const p = prices[k];
-    if (typeof p === "number" && Number.isFinite(p)) return k;
-  }
-  return null;
+import { useMarketStore } from "../../stores/market";
+import { computeMarkToMarketEquity } from "../../utils/portfolioEquity";
+
+function fmtUsd(n: number): string {
+  return new Intl.NumberFormat(undefined, {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 2,
+  }).format(n);
+}
+
+function fmtPct(n: number): string {
+  return `${n.toFixed(2)}%`;
 }
 
 export function AnalyticsPanel(): JSX.Element {
-  const selectedTicker = useMarketStore((s) => s.selectedTicker);
+  const cash = useMarketStore((s) => s.cash);
+  const positions = useMarketStore((s) => s.positions);
   const prices = useMarketStore((s) => s.prices);
-  const marketHistory = useMarketStore((s) => s.marketHistory);
+  const referenceEquity = useMarketStore((s) => s.referenceEquity);
+  const dayOpenEquity = useMarketStore((s) => s.dayOpenEquity);
 
-  const ticker = resolveTickerSymbol(selectedTicker, prices);
-  const series = ticker != null ? (marketHistory[ticker] ?? []) : [];
-  const lastChange =
-    series.length >= 2
-      ? series[series.length - 1]!.price - series[series.length - 2]!.price
-      : null;
+  const equity = useMemo(
+    () => computeMarkToMarketEquity(cash, positions, prices),
+    [cash, positions, prices],
+  );
+
+  const roi = referenceEquity > 0 ? (equity / referenceEquity - 1) * 100 : 0;
+  const totalPnl = equity - referenceEquity;
+  const dayPnl = equity - dayOpenEquity;
 
   return (
     <section data-testid="analytics-panel" aria-label="Analytics">
-      <span data-testid="analytics-history-count">{series.length}</span>
-      <span data-testid="analytics-last-price-change">{lastChange != null ? lastChange : ""}</span>
-      {ticker != null ? <span data-testid="analytics-symbol">{ticker}</span> : null}
+      <div
+        data-testid="portfolio-analytics-metrics"
+        style={{
+          border: "1px solid rgba(0,0,0,0.12)",
+          borderRadius: 6,
+          padding: 12,
+          background: "#faf9f7",
+        }}
+      >
+        <h3 style={{ margin: "0 0 10px", fontSize: 14, fontWeight: 600 }}>Analytics</h3>
+        <p style={{ margin: "0 0 10px", fontSize: 11, color: "rgba(0,0,0,0.55)" }}>
+          <span data-testid="portfolio-analytics-reference-equity">
+            Reference equity: {fmtUsd(referenceEquity)}
+          </span>
+        </p>
+        <dl style={{ margin: 0, display: "grid", gap: 10 }}>
+          <div>
+            <dt style={{ fontSize: 12, fontWeight: 600 }}>ROI (%)</dt>
+            <dd data-testid="portfolio-analytics-roi-value" style={{ margin: "4px 0 0", fontSize: 14 }}>
+              {fmtPct(roi)}
+            </dd>
+          </div>
+          <div>
+            <dt style={{ fontSize: 12, fontWeight: 600 }}>Day P&L</dt>
+            <dd data-testid="portfolio-analytics-day-pnl-value" style={{ margin: "4px 0 0", fontSize: 14 }}>
+              {fmtUsd(dayPnl)}
+            </dd>
+          </div>
+          <div>
+            <dt style={{ fontSize: 12, fontWeight: 600 }}>Total P&L</dt>
+            <dd data-testid="portfolio-analytics-total-pnl-value" style={{ margin: "4px 0 0", fontSize: 14 }}>
+              {fmtUsd(totalPnl)}
+            </dd>
+          </div>
+        </dl>
+      </div>
     </section>
   );
 }

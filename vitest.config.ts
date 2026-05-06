@@ -19,6 +19,7 @@ export default defineConfig({
     environment: "node",
     include: ["src/**/*.test.ts", "src/**/*.test.tsx", "src/**/*.react.test.tsx"],
     environmentMatchGlobs: [["**/*.react.test.tsx", "happy-dom"]],
+    setupFiles: ["./src/test/happyDomBoundingRect.ts"],
     env: {
       NODE_ENV: "test",
     },

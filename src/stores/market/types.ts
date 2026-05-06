@@ -27,6 +27,12 @@ export type PricePoint = {
   price: number;
 };
 
+/** Portfolio mark-to-market total at a logical tick time (charting only; domain math stays out of UI modules). */
+export type EquityPoint = {
+  t: number;
+  equity: number;
+};
+
 export type MarketTickPayload = {
   /** Latest prices keyed by ticker (replace or merge entry per ticker). */
   prices: Partial<Record<string, number>>;
@@ -45,6 +51,14 @@ export type MarketStoreData = {
   marketHistory: Record<string, PricePoint[]>;
   selectedTicker: string | null;
   prices: Record<string, number>;
+  /** Rolling equity samples for the equity curve (updated on ticks and fills). */
+  portfolioEquityHistory: EquityPoint[];
+  /** Baseline total portfolio value for ROI / total P&L (set at hydration if absent). */
+  referenceEquity: number;
+  /** Local calendar day key (`Date#toDateString`) for Day P&L anchoring. */
+  equityDayKey: string | null;
+  /** Equity at the start of the current `equityDayKey` (mark-to-market). */
+  dayOpenEquity: number;
 };
 
 export type MarketStoreActions = {

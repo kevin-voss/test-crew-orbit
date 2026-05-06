@@ -1,6 +1,7 @@
 import { useMarketStore } from "./marketStore";
 
 export type {
+  EquityPoint,
   Holding,
   MarketStoreActions,
   MarketStoreData,
