@@ -98,6 +98,13 @@ function isValidPriceInput(p: number | undefined): p is number {
   return typeof p === "number" && Number.isFinite(p) && p > 0;
 }
 
+/** Standard-normal draw for symbol index `i`, falling back when `shocks` is short or has gaps. */
+function shockOrRand(i: number, shocks: number[] | undefined): number {
+  const z = shocks?.[i];
+  if (typeof z === "number" && Number.isFinite(z)) return z;
+  return standardNormalRand();
+}
+
 /** One N(0,1) sample via polar Box–Muller (browser-local PRNG only). */
 function standardNormalRand(): number {
   let u = 0;
@@ -154,16 +161,28 @@ export function runMarketTick(input: RunMarketTickInput): RunMarketTickResult {
 
 /**
  * Advance all symbols one GBM step. Deterministic given the same inputs and shocks.
+ * Invalid Δt, spots, or parameters skip that symbol (or all symbols if Δt is unusable); no NaN/∞ prices are emitted.
  */
 export function stepMarketEngine(input: StepMarketEngineInput): StepMarketEngineOutput {
   const { now, dt, symbols, shocks } = input;
   const prices: Partial<Record<string, number>> = {};
   const histories: Record<string, PricePoint[]> = {};
 
+  if (!Number.isFinite(dt) || dt < 0) {
+    return { prices, histories };
+  }
+
   for (let i = 0; i < symbols.length; i++) {
     const sym = symbols[i]!;
-    const z = shocks !== undefined ? shocks[i]! : standardNormalRand();
-    const nextSpot = nextGbmPrice(sym.spot, sym.mu, sym.sigma, dt, z);
+    if (!isValidPriceInput(sym.spot)) continue;
+
+    const { mu, sigma } = sym;
+    if (!Number.isFinite(mu) || !Number.isFinite(sigma) || sigma < 0) continue;
+
+    const z = shockOrRand(i, shocks);
+    const nextSpot = nextGbmPrice(sym.spot, mu, sigma, dt, z);
+    if (!Number.isFinite(nextSpot) || nextSpot <= 0) continue;
+
     const point: PricePoint = { t: now, price: nextSpot };
     prices[sym.ticker] = nextSpot;
     histories[sym.ticker] = clampHistory([...sym.history, point]);
