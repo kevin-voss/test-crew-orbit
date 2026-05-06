@@ -1,39 +1,41 @@
 # Market tick controller — documentation summary
 
-**Task:** Periodic GBM-driven market simulation bridged into the persisted Zustand store; single tick source for dashboard UI.
+**Task:** Periodic GBM-driven market simulation bridged into the persisted Zustand store; **single tick source** per dashboard shell; store-only writes.
 
 ## What shipped
 
-- **`createMarketTickController`** (`src/market/marketTickController.ts`): client-side `setInterval` loop, default **2000 ms**. Each tick reads current store state, runs **`runMarketTick`** from `src/utils/marketEngine.ts` for all **tracked** symbols (engine default params ∪ `prices` keys ∪ `marketHistory` keys), then commits **once** via **`applyMarketTick`** (no `setState` bypass).
-- **`useMarketTickController`** (`src/market/useMarketTickController.ts`): React hook that creates the controller, starts after **`onMarketStoreHydrationComplete`** (or immediately if already hydrated), **`stop`** + hydration unsubscribe on unmount; generation guard avoids stale starts.
-- **Dashboard wiring:** `src/dashboard/Dashboard.tsx` calls **`useMarketTickController()`** once; `MarketTickerStrip`, `PriceHistorySnippet`, and `AnalyticsReadout` remain **read-only** `useMarketStore` consumers (no duplicate timers).
+- **`createMarketTickController`** (`src/market/marketTickController.ts`): **`setInterval`** loop (default **2000 ms**). Each tick reads store state, runs **`runMarketTick`** / **`marketEngine`** for tracked symbols (default params ∪ store price/history keys), commits **once** via **`applyMarketTick`**. **`executeGbmMarketStep`** centralizes the GBM step for tests and adapters. **`MarketController`** type aliases the controller handle.
+- **`useMarketTickController`** (`src/market/useMarketTickController.ts`): Hook wrapping **`createMarketTickController`** — hydration-gated **start/stop**, optional injectable **`runMarketTick`** / **`intervalMs`** in tests; generation guard for StrictMode.
+- **`Dashboard`** (`src/dashboard/Dashboard.tsx`): **`useMarketTickController()`** once; read-only **`useMarketStore`** children.
+- **`MarketDashboard`** (`src/components/MarketDashboard.tsx`): Same hook once; **`TickerPanel`**, **`ChartStripPanel`**, **`AnalyticsPanel`** are store-only consumers.
 
 ## Key files
 
 | Area | Path |
 |------|------|
-| Controller factory | `src/market/marketTickController.ts` |
-| Lifecycle hook | `src/market/useMarketTickController.ts` |
-| Mount site | `src/dashboard/Dashboard.tsx` |
+| Controller factory + GBM adapter | `src/market/marketTickController.ts` |
+| Hook | `src/market/useMarketTickController.ts` |
+| Example shells | `src/dashboard/Dashboard.tsx`, `src/components/MarketDashboard.tsx` |
 | Engine | `src/utils/marketEngine.ts` |
-| Store write API | `applyMarketTick` in `src/stores/market/marketStore.ts` |
-| Tests | `src/market/marketTickController.acceptance.test.ts`, `src/market/useMarketTickController.test.tsx`, `src/dashboard/Dashboard.integration.test.tsx` |
+| Store | `src/stores/market/` (`applyMarketTick`, hydration helpers) |
+| Tests | `src/market/*.test.*`, `src/dashboard/Dashboard.integration.test.tsx` |
 
-## Coordination / rules (already in repo)
+## Spec / rules
 
-- `AGENTS.md` links this feature’s design spec.
-- `.cursor/rules/feature-market-store.mdc` documents tick boundaries (one loop, one mount, rehydration alignment).
+- Feature design: `crew-orbit/feature-add-market-tick-controller/design/design-spec.md`
+- Editor boundaries: `.cursor/rules/feature-market-store.mdc` → Market tick controller
 
-## How to verify (for the next implementer or QA)
+## How to verify
 
-- Run Vitest on the market package / focused files (e.g. `marketTickController`, `useMarketTickController`, `Dashboard.integration`) and confirm interval cleanup and single `applyMarketTick` per tick assertions pass.
-- Manually: open Dashboard, observe store-driven panels updating on a ~2 s cadence; navigate away / unmount and ensure no continued updates (no leaked interval).
+- Run Vitest on tick controller, hooks, and dashboard integration suites.
+- Manual: open a dashboard shell → panels update ~every **2s** from one store snapshot; unmount → no leaked interval.
 
 ## Follow-ups
 
-- Host apps with persistence: confirm product rules for **when** to start the loop relative to `onFinishHydration` (this hook already waits for hydration via `src/stores/market/index.ts` helpers).
-- Do not add second `setInterval` or engine calls inside individual panels; extend the controller or store if new symbols or cadence rules are needed.
+- **Host merge:** one **`useMarketTickController` call** per owning layout.
+- **Persistence:** align tick **start** with product rules vs **`onFinishHydration`** (hooks already gate on store hydration helpers).
+- **Background tabs:** timers may throttle; wall-clock spacing can exceed **2s**.
 
-## References
+## Context gap
 
-- Design: `crew-orbit/feature-add-market-tick-controller/design/design-spec.md` (implement/validate summaries were absent here; content reflects design + `src/` review.)
+- `crew-orbit/.../implement/summary.md` and `validate/results.md` were **not** present in this checkout; summary aligns with **`src/`** and the feature **design-spec**.

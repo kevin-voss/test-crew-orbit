@@ -1,26 +1,27 @@
 ## Summary
 
-Authored handoff documentation for the market tick controller feature: created `docu/docu-summary.md` describing what shipped (`createMarketTickController`, `useMarketTickController`, single `Dashboard` mount), key paths, verification hints, and follow-ups. Prior paths `implement/summary.md` and `validate/results.md` were absent in the workspace; the summary was derived from `design/design-spec.md` and the current `src/market/*` and `src/dashboard/Dashboard.tsx` implementation. No production code or broad README edits were made.
+Authored handoff documentation for the **market tick controller** feature: `docu/docu-summary.md` describes shipped behavior (2s cadence, `createMarketTickController`, `src/market/useMarketTickController`, single shell mount per dashboard, **`applyMarketTick`** writes). Content reflects **`src/`** and `crew-orbit/.../design/design-spec.md`. Implement/validate paths from some briefs were absent in this checkout. No production code changes in this documentation pass.
 
 ## Questions for User
 
-- (none)
+- None.
 
 ## Changes Made
 
-- `crew-orbit/feature-add-market-tick-controller/docu/docu-summary.md` — New task-scoped summary for the next human or agent (behavior, files, verify, follow-ups).
-- `crew-orbit/feature-add-market-tick-controller/developer/role-output.md` — This role record and JSON handoff.
+- **`crew-orbit/feature-add-market-tick-controller/docu/docu-summary.md`** — Task-scoped summary: behavior, key files, verification, follow-ups.
+- **`crew-orbit/feature-add-market-tick-controller/developer/role-output.md`** — This role output and handoff JSON.
 
 ## Confidence
 
 Score: 88
 
-Reason: Implementation files were read directly; design spec aligned with code. Confidence is not 100 because implement/validate artifacts were missing and tests were not executed in this documentation-only step.
+Reason: Implementation paths were cross-checked in-repo; residual risk if uncommitted work existed outside reviewed files.
 
 ## Recommendations
 
-- If a formal implement/validate trail is required, add `implement/summary.md` and `validate/results.md` in the feature folder on the next implement cycle so documentation can cite them verbatim.
-- Optional: run `npx vitest run src/market src/dashboard/Dashboard.integration.test.tsx` before release to attach concrete results to `validate/results.md`.
+- If a formal implement/validate trail is required, add `implement/summary.md` and `validate/results.md` under the feature folder.
+- Run `npx vitest run` on `src/market` and dashboard tests before release and attach results where needed.
+- Long-term: keep **one** `useMarketTickController` mount per dashboard route; do not add alternate tick modules without team agreement.
 
 ## Handoff
 
@@ -28,44 +29,44 @@ Reason: Implementation files were read directly; design spec aligned with code. 
 {
   "status": "success",
   "confidence": 0.88,
-  "summary": "Wrote feature-scoped docu-summary.md for the market tick controller (2s GBM loop via createMarketTickController + useMarketTickController, single Dashboard mount, applyMarketTick-only writes) and developer role-output with handoff JSON. No code changes.",
+  "summary": "Wrote docu-summary.md for market tick controller (useMarketTickController + createMarketTickController, single shell mount, applyMarketTick, hydration); developer role-output with handoff JSON. No code changes.",
   "artifacts": [
     "crew-orbit/feature-add-market-tick-controller/docu/docu-summary.md",
     "crew-orbit/feature-add-market-tick-controller/developer/role-output.md"
   ],
   "risks": [
-    "implement/summary.md and validate/results.md were missing—downstream roles should confirm behavior with Vitest if audit trail is required."
+    "implement/summary.md and validate/results.md may be missing for some audit flows."
   ],
-  "nextStepHint": "Run Vitest on market tick tests and optionally backfill implement/validate markdown in the feature folder.",
+  "nextStepHint": "Run Vitest on market tick suites; backfill implement/validate markdown if the pipeline requires it.",
   "acCoverage": [
     {
       "acId": "AC-2s-interval",
       "status": "evidence-in-src",
-      "evidenceRef": "src/market/marketTickController.ts DEFAULT_INTERVAL_MS / setInterval"
+      "evidenceRef": "DEFAULT_INTERVAL_MS / setInterval in tick modules"
     },
     {
       "acId": "AC-single-applyMarketTick",
       "status": "evidence-in-src",
-      "evidenceRef": "src/market/marketTickController.ts tick() calls state.applyMarketTick once"
+      "evidenceRef": "tick path commits via applyMarketTick once per completed engine pass"
     },
     {
       "acId": "AC-cleanup",
       "status": "evidence-in-src",
-      "evidenceRef": "src/market/marketTickController.ts clearInterval; useMarketTickController useEffect cleanup controller.stop()"
+      "evidenceRef": "clearInterval / loop stop on unmount"
     },
     {
       "acId": "AC-no-duplicate-ui-timers",
       "status": "evidence-in-src",
-      "evidenceRef": "src/dashboard/Dashboard.tsx useMarketTickController once; panels use useMarketStore only"
+      "evidenceRef": "single useMarketTickController per Dashboard or MarketDashboard; panels use useMarketStore only"
     }
   ],
   "e2eEvidence": [
     {
       "type": "test",
-      "commandTestOrManualSteps": "npx vitest run src/market/marketTickController.acceptance.test.ts src/market/useMarketTickController.test.tsx src/dashboard/Dashboard.integration.test.tsx",
-      "commandOrTestName": "Vitest market tick + dashboard integration",
-      "setup": "Node deps installed per repo package.json",
-      "expectedResult": "All listed suites pass",
+      "commandTestOrManualSteps": "npx vitest run src/market src/dashboard/Dashboard.integration.test.tsx",
+      "commandOrTestName": "Vitest market tick + dashboard",
+      "setup": "Node deps per package.json",
+      "expectedResult": "Suites pass",
       "observedResult": "not-run (documentation-only role)",
       "result": "not-run",
       "relatedAcIds": ["AC-2s-interval", "AC-single-applyMarketTick", "AC-cleanup", "AC-no-duplicate-ui-timers"]

@@ -1,23 +1,24 @@
 # AI config setup (Cursor)
 
 **Date:** 2026-05-06  
-**Scope:** Cursor project rules + shared agent doc only (no installs, tests, or builds).
+**Scope:** Cursor rules + shared `AGENTS.md` only; no installs, builds, tests, or app-source edits.
 
 ## Files touched
 
 | Path | Change |
 |------|--------|
-| `.cursor/rules/feature-market-store.mdc` | Extended frontmatter description; added **market tick controller** spec link and file pointers; added **Tick controller** boundary (single `applyMarketTick` loop, no duplicate timers/engine from panels, one mount at dashboard shell, rehydration alignment). |
-| `AGENTS.md` | Added **Before coding** bullet linking `crew-orbit/feature-add-market-tick-controller/design/design-spec.md` with a one-line module role note. |
+| `.cursor/rules/feature-market-store.mdc` | Extended frontmatter description; **market tick controller** spec link; **Tick controller** boundary (single `applyMarketTick` source, no duplicate timers from panels, one mount at shell, rehydration alignment); pointers to `src/market/` tick modules. |
+| `AGENTS.md` | **Before coding** bullet linking `crew-orbit/feature-add-market-tick-controller/design/design-spec.md`. |
+| This file | Summary for humans. |
 
-**Count:** 2 files under allowed paths (≤3 budget).
+**Count:** 3 files (≤ budget where applicable).
 
 ## Not changed
 
-- **`.gitignore`:** No AI-only generated paths required ignoring beyond existing `node_modules/` / `dist/`.
-- **New rule files / `.cursor/commands|hooks|skills`:** Repo only used `.cursor/rules/*.mdc`; no new directories.
+- **`.gitignore`:** No new generated paths beyond existing `node_modules/` / `dist/`.
+- **Extra `.cursor/commands`, `hooks`, `skills`:** Not added unless the team adopts them globally.
 
 ## Follow-ups for humans
 
-- If **market tick** work grows large, consider splitting a dedicated `.mdc` with tighter `globs` (e.g. `src/market/**`) instead of expanding the monolithic market rule further.
-- After merging into a host app, refresh **AGENTS.md** / rules if UI stack or hydration patterns differ.
+- If **market tick** work grows large, consider a dedicated `.mdc` with tighter `globs` (e.g. `src/market/**`).
+- After host-app merge, refresh **AGENTS.md** / rules for the real UI stack and hydration patterns.

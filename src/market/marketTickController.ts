@@ -41,6 +41,9 @@ function trackedTickerSymbols(state: MarketStoreState): string[] {
   return [...keys];
 }
 
+/** Public alias for dashboards and tests referencing a “MarketController”. */
+export type MarketController = MarketTickControllerHandle;
+
 function historiesForEngine(state: MarketStoreState): RunMarketTickInput["histories"] {
   const histories: RunMarketTickInput["histories"] = {};
   for (const ticker of trackedTickerSymbols(state)) {
@@ -50,6 +53,10 @@ function historiesForEngine(state: MarketStoreState): RunMarketTickInput["histor
   return histories;
 }
 
+/**
+ * Client-side periodic GBM ticks: reads store snapshot, runs the engine for tracked symbols, writes via `applyMarketTick`.
+ * Production dashboards use `useMarketTickController` (hydration-gated), which wraps this factory.
+ */
 export function createMarketTickController(
   options?: CreateMarketTickControllerOptions,
 ): MarketTickControllerHandle {
@@ -90,3 +97,5 @@ export function createMarketTickController(
     isRunning: () => intervalId !== null,
   };
 }
+
+export const createMarketController = createMarketTickController;
