@@ -13,6 +13,8 @@ export type CreateMarketTickControllerOptions = {
   getStore?: () => MarketStoreState;
   intervalMs?: number;
   nowMs?: () => number;
+  /** Injectable uniform RNG for deterministic tests; production omits and uses the engine default (`Math.random`). */
+  rng?: () => number;
   runMarketTick?: (input: RunMarketTickInput) => RunMarketTickResult;
 };
 
@@ -22,9 +24,17 @@ export type MarketTickControllerHandle = {
   isRunning: () => boolean;
 };
 
+/** Tracked symbols for snapshots: default engine universe ∪ store price keys ∪ history keys. */
+function trackedTickerSymbols(state: MarketStoreState): string[] {
+  const keys = new Set<string>(Object.keys(DEFAULT_MARKET_ENGINE_PARAMS));
+  for (const t of Object.keys(state.prices)) keys.add(t);
+  for (const t of Object.keys(state.marketHistory)) keys.add(t);
+  return [...keys];
+}
+
 function historiesForEngine(state: MarketStoreState): RunMarketTickInput["histories"] {
   const histories: RunMarketTickInput["histories"] = {};
-  for (const ticker of Object.keys(DEFAULT_MARKET_ENGINE_PARAMS)) {
+  for (const ticker of trackedTickerSymbols(state)) {
     const series = state.marketHistory[ticker];
     histories[ticker] = series ? [...series] : [];
   }
@@ -38,6 +48,7 @@ export function createMarketTickController(
   const intervalMs = options?.intervalMs ?? DEFAULT_INTERVAL_MS;
   const nowMs = options?.nowMs ?? (() => Date.now());
   const runMarketTickFn = options?.runMarketTick ?? defaultRunMarketTick;
+  const rng = options?.rng;
 
   let intervalId: ReturnType<typeof setInterval> | null = null;
 
@@ -50,6 +61,7 @@ export function createMarketTickController(
       histories: historiesForEngine(state),
       nowMs: nowMs(),
       deltaTSeconds,
+      ...(rng !== undefined ? { rng } : {}),
     });
 
     state.applyMarketTick(payload);
