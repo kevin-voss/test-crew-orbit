@@ -13,6 +13,11 @@ import {
 
 const DEFAULT_INTERVAL_MS = 2000;
 
+/** Default GBM step for hooks outside `market/` — keeps engine imports centralized per acceptance audit AC-7. */
+export function executeGbmMarketStep(input: RunMarketTickInput): RunMarketTickResult {
+  return defaultRunMarketTick(input);
+}
+
 export type CreateMarketTickControllerOptions = {
   getStore?: () => MarketStoreState;
   intervalMs?: number;
