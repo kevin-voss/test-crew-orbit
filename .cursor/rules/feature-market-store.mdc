@@ -1,0 +1,32 @@
+---
+description: Persisted market store — TypeScript, Zustand, Vitest; state layer and rehydration boundaries
+globs:
+  - "crew-orbit/**/*.ts"
+  - "crew-orbit/**/*.tsx"
+  - "**/*.ts"
+  - "**/*.tsx"
+alwaysApply: false
+---
+
+# Feature: market store (persisted)
+
+Target stack for implementation: **TypeScript** (ESM), **Zustand**, **Vitest** — not necessarily every file in this checkout; see root `AGENTS.md` for where code may live.
+
+## Boundaries
+
+- Treat the store as **state + persistence + domain rules** only. Do not add React, Vite, Tailwind, Radix, or other UI dependencies from this rule unless the host app repo already uses them.
+- UI and hooks that render must **consume** the public store API (e.g. `useMarketStore`); keep presentation out of the store module.
+- After merge into a host app, **repeat discovery** on that repo for UI primitives and design tokens; until then, follow `crew-orbit/feature-set-up-persisted-market-store/design/design-spec.md` for non-code UX intent.
+
+## Persistence and session
+
+- Restored session must not be **contradicted** by interactive UI until rehydration is complete (align with feature requirements AC-3 / AC-11 where applicable).
+- Handle invalid or blocked storage with clear, calm failure modes at the store or adapter boundary — avoid decorative or marketing-style error UI in code comments; implement what the host stack allows.
+
+## Tests
+
+- Prefer **Vitest** for unit tests around store actions, selectors, and persistence boundaries. Do not introduce alternate test runners for this feature without team agreement.
+
+## Scope discipline
+
+- Match existing naming, file layout, and patterns in the tree you are editing. Prefer small, focused changes over wide refactors.

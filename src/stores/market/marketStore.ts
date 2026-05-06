@@ -17,6 +17,11 @@ export const MARKET_STORE_STORAGE_KEY = "sim-market-store-v1";
 
 type PersistedSlice = Partial<MarketStoreData>;
 
+/** Non-array plain objects suitable for keyed maps in persisted state */
+function isRecordMap(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
 function getLocalLikeStorage(): Pick<Storage, "getItem" | "removeItem" | "setItem"> | null {
   try {
     if (typeof globalThis === "object" && globalThis !== null && "localStorage" in globalThis) {
@@ -152,18 +157,16 @@ export const useMarketStore = create<MarketStoreState>()(
         return {
           ...current,
           cash: typeof p.cash === "number" && Number.isFinite(p.cash) ? p.cash : d.cash,
-          positions:
-            typeof p.positions === "object" && p.positions !== null ? p.positions : d.positions,
+          positions: isRecordMap(p.positions) ? (p.positions as MarketStoreData["positions"]) : d.positions,
           tradeHistory: Array.isArray(p.tradeHistory) ? p.tradeHistory : d.tradeHistory,
-          marketHistory:
-            typeof p.marketHistory === "object" && p.marketHistory !== null
-              ? p.marketHistory
-              : d.marketHistory,
+          marketHistory: isRecordMap(p.marketHistory)
+            ? (p.marketHistory as MarketStoreData["marketHistory"])
+            : d.marketHistory,
           selectedTicker:
             typeof p.selectedTicker === "string" || p.selectedTicker === null
               ? p.selectedTicker
               : d.selectedTicker,
-          prices: typeof p.prices === "object" && p.prices !== null ? p.prices : d.prices,
+          prices: isRecordMap(p.prices) ? (p.prices as MarketStoreData["prices"]) : d.prices,
         };
       },
     },
