@@ -1,3 +1,7 @@
+/**
+ * Geometric Brownian Motion (GBM) spot simulator for client-only market ticks.
+ * Discrete step on log-price: S' = S * exp((μ - σ²/2)Δt + σ√Δt * Z).
+ */
 import type { MarketTickPayload, PricePoint } from "../stores/market/types";
 
 /** Engine-local max points per ticker (chart initialization / rolling strip). */
@@ -35,6 +39,30 @@ export type RunMarketTickResult = {
   histories: Record<string, PricePoint[]>;
 };
 
+export type SymbolEngineState = {
+  ticker: string;
+  /** Drift μ */
+  mu: number;
+  /** Volatility σ */
+  sigma: number;
+  spot: number;
+  history: PricePoint[];
+};
+
+export type StepMarketEngineInput = {
+  /** Timestamp for the new sample */
+  now: number;
+  /** Time step Δt (same units as μ, σ scaling) */
+  dt: number;
+  symbols: SymbolEngineState[];
+  /** One standard-normal draw per symbol (order-aligned); omitted draws use Box–Muller from Math.random */
+  shocks?: number[];
+};
+
+export type StepMarketEngineOutput = MarketTickPayload & {
+  histories: Record<string, PricePoint[]>;
+};
+
 function clampHistory(series: PricePoint[]): PricePoint[] {
   if (series.length <= MARKET_ENGINE_HISTORY_MAX) return series;
   return series.slice(-MARKET_ENGINE_HISTORY_MAX);
@@ -61,6 +89,15 @@ function nextGbmPrice(s0: number, mu: number, sigma: number, dt: number, z: numb
 
 function isValidPriceInput(p: number | undefined): p is number {
   return typeof p === "number" && Number.isFinite(p) && p > 0;
+}
+
+/** One N(0,1) sample via polar Box–Muller (browser-local PRNG only). */
+function standardNormalRand(): number {
+  let u = 0;
+  let v = 0;
+  while (u <= Number.EPSILON) u = Math.random();
+  while (v <= Number.EPSILON) v = Math.random();
+  return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
 }
 
 /**
@@ -106,4 +143,24 @@ export function runMarketTick(input: RunMarketTickInput): RunMarketTickResult {
   };
 
   return { payload, histories: historiesOut };
+}
+
+/**
+ * Advance all symbols one GBM step. Deterministic given the same inputs and shocks.
+ */
+export function stepMarketEngine(input: StepMarketEngineInput): StepMarketEngineOutput {
+  const { now, dt, symbols, shocks } = input;
+  const prices: Partial<Record<string, number>> = {};
+  const histories: Record<string, PricePoint[]> = {};
+
+  for (let i = 0; i < symbols.length; i++) {
+    const sym = symbols[i]!;
+    const z = shocks !== undefined ? shocks[i]! : standardNormalRand();
+    const nextSpot = nextGbmPrice(sym.spot, sym.mu, sym.sigma, dt, z);
+    const point: PricePoint = { t: now, price: nextSpot };
+    prices[sym.ticker] = nextSpot;
+    histories[sym.ticker] = clampHistory([...sym.history, point]);
+  }
+
+  return { prices, histories };
 }
