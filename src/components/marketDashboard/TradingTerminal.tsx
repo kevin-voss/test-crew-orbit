@@ -108,10 +108,10 @@ export function TradingTerminal(): JSX.Element {
         </p>
       ) : null}
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         <div>
           <span style={{ color: "#44403c" }}>Cash: </span>
-          <span>{formatCash(cash)}</span>
+          <span style={{ fontVariantNumeric: "tabular-nums" }}>{formatCash(cash)}</span>
         </div>
 
         {canTradeSymbol ? (
@@ -124,7 +124,7 @@ export function TradingTerminal(): JSX.Element {
         {showPrice ? (
           <div>
             <span style={{ color: "#44403c" }}>Price: </span>
-            <span>{formatPrice(price)}</span>
+            <span style={{ fontVariantNumeric: "tabular-nums" }}>{formatPrice(price)}</span>
           </div>
         ) : canTradeSymbol ? (
           <div style={{ color: "#78716c" }}>Price: —</div>

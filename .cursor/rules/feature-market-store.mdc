@@ -1,12 +1,12 @@
 ---
-description: Market domain — Zustand store, GBM engine, tick controller, live ticker UI, Vitest; state/persistence and controller/UI boundaries per AGENTS.md + feature specs
+description: Market domain — Zustand store, GBM engine, tick controller, live ticker + trading terminal UI, Vitest; state/persistence and controller/UI boundaries per AGENTS.md + feature specs
 globs:
   - "src/**/*.ts"
   - "src/**/*.tsx"
 alwaysApply: false
 ---
 
-# Feature: market store + GBM engine + tick controller + live ticker
+# Feature: market store + GBM engine + tick controller + live ticker + trading terminal
 
 Target stack in this checkout: **TypeScript** (ESM), **React 18** (peer), **Zustand**, **Vitest** under `src/`. See root `AGENTS.md` for coordination vs. host-app merge.
 
@@ -16,6 +16,7 @@ Target stack in this checkout: **TypeScript** (ESM), **React 18** (peer), **Zust
 - GBM stepping, history caps, symbols: `crew-orbit/feature-implement-gbm-market-engine/design/design-spec.md` (engine work stays in `src/utils/marketEngine.ts` — no UI there)
 - Market tick controller (interval, hydration gate, single dashboard entry): `crew-orbit/feature-add-market-tick-controller/design/design-spec.md` (`src/market/marketTickController.ts`, `src/market/useMarketTickController.ts` — **no rendered UI** in those modules)
 - Live ticker / market dashboard panels (semantics, spacing, flash/motion, plain React styling — no new UI kits): `crew-orbit/feature-build-live-ticker-panel/design/design-spec.md` — **read before** changing `TickerPanel`, `LiveTickerPanel`, or related `marketDashboard/` UI
+- Trading terminal (native controls, a11y, quote block, simulated order actions): `crew-orbit/feature-build-trading-terminal/design/design-spec.md` — **read before** changing `TradingTerminal.tsx` or its test ids / `aria-*` contracts
 
 ## Boundaries
 
@@ -28,12 +29,18 @@ Target stack in this checkout: **TypeScript** (ESM), **React 18** (peer), **Zust
 
 - Treat tick logic as a **lifecycle + bridge**: schedule/step the engine and write into the store; keep **timer / loop code free of UI imports** (tick spec vs dashboard shell composition).
 - **Single entry:** invoke `useMarketTickController` (or equivalent) **once** at the dashboard shell — not in each panel.
-- **Panels stay passive:** no `setInterval`, per-panel polling, or duplicate tick sources in `TickerPanel`, `LiveTickerPanel`, `ChartStripPanel`, or `AnalyticsPanel` — selectors and markup only.
+- **Panels stay passive:** no `setInterval`, per-panel polling, or duplicate tick sources in `TickerPanel`, `LiveTickerPanel`, `ChartStripPanel`, `AnalyticsPanel`, or `TradingTerminal` — selectors and markup only.
 
 ## Live ticker panel (UI)
 
 - Follow the **live ticker design spec** for spacing scale, flash timing (background-color only), typography, and **no** Tailwind/Radix/shadcn in this sandbox unless a future host repo already ships them.
 - Keep panels **store-driven**: `useMarketStore` selectors for prices/state; do not introduce parallel data fetching or tick loops in panel files.
+
+## Trading terminal (UI)
+
+- Same dashboard boundaries as other panels: **no** `setInterval`, tick hooks, or engine calls inside `TradingTerminal.tsx`; shell mounts `useMarketTickController` once (see trading-terminal spec + `MarketDashboard.tsx`).
+- **Store-only data** for quotes, cash, holdings, `selectedTicker` — align with **`simulateTradeExecution`** / market actions contract in code + spec; do not add shadow state that diverges from the store.
+- Preserve **semantic HTML**, **`data-testid="trading-terminal"`**, and **`aria-live` / `role="status"`** patterns from the design spec unless the spec is updated deliberately.
 
 ## Persistence and session
 
