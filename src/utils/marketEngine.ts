@@ -1,6 +1,13 @@
 /**
- * Geometric Brownian Motion (GBM) spot simulator for client-only market ticks.
- * Discrete step on log-price: S' = S * exp((μ - σ²/2)Δt + σ√Δt * Z).
+ * Client-only GBM price simulation for the market tick loop.
+ *
+ * Uses discrete-time Geometric Brownian Motion in log space:
+ * `S_{t+Δt} = S_t * exp((μ − σ²/2)Δt + σ√(Δt) Z)` with Z ~ N(0,1) per symbol per tick.
+ *
+ * - **Δt** defaults to **2 seconds** (`deltaTSeconds`), matching the ~2s controller cadence.
+ * - **μ** (drift) and **σ** (volatility) are expressed per **second** in the same time basis as `Δt`.
+ * - **Independence:** each tracked symbol draws its own standard normal (via Box–Muller on the injectable uniform RNG); shocks are not shared across tickers.
+ * - **Output shape** matches `MarketTickPayload` for direct `applyMarketTick` consumption.
  */
 import type { MarketTickPayload, PricePoint } from "../stores/market/types";
 
