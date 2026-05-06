@@ -1,24 +1,25 @@
 ---
-description: Market domain — Zustand store, GBM engine, market tick controller, Vitest; state/persistence and controller/UI boundaries
+description: Market domain — Zustand store, GBM engine, tick controller, live ticker UI, Vitest; state/persistence and controller/UI boundaries
 globs:
   - "src/**/*.ts"
   - "src/**/*.tsx"
 alwaysApply: false
 ---
 
-# Feature: market store + GBM engine + tick controller
+# Feature: market store + GBM engine + tick controller + live ticker
 
-Target stack in this checkout: **TypeScript** (ESM), **Zustand**, **Vitest** under `src/`. See root `AGENTS.md` for coordination vs. host-app merge.
+Target stack in this checkout: **TypeScript** (ESM), **React 18** (peer), **Zustand**, **Vitest** under `src/`. See root `AGENTS.md` for coordination vs. host-app merge.
 
 **Specs (read before editing the matching area):**
 
 - Persisted store / rehydration: `crew-orbit/feature-set-up-persisted-market-store/design/design-spec.md`
 - GBM stepping, history caps, symbols: `crew-orbit/feature-implement-gbm-market-engine/design/design-spec.md` (engine work stays in `src/utils/marketEngine.ts` — no UI there)
 - Market tick controller (interval, hydration gate, single dashboard entry): `crew-orbit/feature-add-market-tick-controller/design/design-spec.md` (`src/market/marketTickController.ts`, `src/market/useMarketTickController.ts` — **no rendered UI** in those modules)
+- Live ticker panel (semantics, spacing, flash/motion, plain React styling — no new UI kits): `crew-orbit/feature-build-live-ticker-panel/design/design-spec.md`
 
 ## Boundaries
 
-- Treat the store as **state + persistence + domain rules** only. Do not add React, Vite, Tailwind, Radix, or other UI dependencies from this rule unless the host app repo already uses them.
+- Treat the store as **state + persistence + domain rules** only. Dashboard code uses **React** as in root `package.json`; do **not** add Tailwind, Radix, shadcn/ui, or other component stacks unless the **host** app you merge into already uses them (then follow host tokens; see live ticker spec).
 - UI and hooks that render must **consume** the public store API (e.g. `useMarketStore`); keep presentation out of the store module.
 - **Tick controller:** one loop drives updates via **`applyMarketTick`**; do not add parallel `setInterval` / duplicate engine calls from panels. Mount the tick hook **once** at the shell that owns the market surface (not per cell/card). Start/stop timing must respect rehydration rules in the tick-controller spec when persistence is on.
 - After merge into a host app, **repeat discovery** on that repo for UI primitives and design tokens; until then, follow `crew-orbit/feature-set-up-persisted-market-store/design/design-spec.md` for non-code UX intent.
@@ -27,7 +28,7 @@ Target stack in this checkout: **TypeScript** (ESM), **Zustand**, **Vitest** und
 
 - Treat tick logic as a **lifecycle + bridge**: schedule/step the engine and write into the store; keep **timer / loop code free of UI imports** (tick spec vs dashboard shell composition).
 - **Single entry:** invoke `useMarketTickController` (or equivalent) **once** at the dashboard shell — not in each panel.
-- **Panels stay passive:** no `setInterval`, per-panel polling, or duplicate tick sources in `TickerPanel`, `ChartStripPanel`, or `AnalyticsPanel` — selectors and markup only.
+- **Panels stay passive:** no `setInterval`, per-panel polling, or duplicate tick sources in `TickerPanel`, `LiveTickerPanel`, `ChartStripPanel`, or `AnalyticsPanel` — selectors and markup only.
 
 ## Persistence and session
 

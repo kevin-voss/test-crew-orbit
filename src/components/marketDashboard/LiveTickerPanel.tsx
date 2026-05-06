@@ -71,47 +71,67 @@ export function LiveTickerPanel(): JSX.Element {
         display: "flex",
         flexDirection: "column",
         gap: 8,
+        minWidth: 200,
       }}
     >
-      {symbols.map((sym) => {
-        const price = prices[sym]!;
-        const flash = flashBySymbol[sym] ?? null;
-        const gain = flash === "up";
-        const loss = flash === "down";
+      {symbols.length === 0 ? (
+        <li
+          role="listitem"
+          style={{
+            padding: "8px 12px",
+            color: "#78716c",
+            fontSize: 14,
+          }}
+        >
+          No quotes yet
+        </li>
+      ) : (
+        symbols.map((sym) => {
+          const price = prices[sym]!;
+          const flash = flashBySymbol[sym] ?? null;
+          const gain = flash === "up";
+          const loss = flash === "down";
 
-        return (
-          <li
-            key={sym}
-            role="listitem"
-            data-live-flash={flash ?? undefined}
-            className={
-              gain
-                ? "liveTickerRow liveTickerRowGain"
-                : loss
-                  ? "liveTickerRow liveTickerRowLoss"
-                  : "liveTickerRow"
-            }
-            style={{
-              display: "block",
-              padding: "8px 12px",
-              borderRadius: 8,
-              border: "1px solid #e7e5e4",
-              color: "#1c1917",
-              fontSize: 14,
-              fontVariantNumeric: "tabular-nums",
-              backgroundColor: gain
-                ? "rgba(16, 185, 129, 0.35)"
-                : loss
-                  ? "rgba(244, 63, 94, 0.35)"
-                  : "#fafaf9",
-              transition: "background-color 0.15s ease",
-            }}
-          >
-            <span style={{ fontWeight: 600 }}>{sym}</span>
-            <span style={{ marginLeft: 8 }}>{formatPrice(price)}</span>
-          </li>
-        );
-      })}
+          return (
+            <li
+              key={sym}
+              role="listitem"
+              data-live-flash={flash ?? undefined}
+              className={
+                gain
+                  ? "liveTickerRow liveTickerRowGain"
+                  : loss
+                    ? "liveTickerRow liveTickerRowLoss"
+                    : "liveTickerRow"
+              }
+              style={{
+                display: "block",
+                boxSizing: "border-box",
+                padding: "8px 12px",
+                borderRadius: 8,
+                border: "1px solid #e7e5e4",
+                borderLeft: gain
+                  ? "3px solid rgb(5, 150, 105)"
+                  : loss
+                    ? "3px solid rgb(225, 29, 72)"
+                    : "3px solid transparent",
+                color: "#1c1917",
+                fontSize: 14,
+                fontVariantNumeric: "tabular-nums",
+                backgroundColor: gain
+                  ? "rgba(16, 185, 129, 0.35)"
+                  : loss
+                    ? "rgba(244, 63, 94, 0.35)"
+                    : "#fafaf9",
+                transition: "background-color 0.18s ease",
+              }}
+            >
+              <span style={{ fontWeight: 600 }}>{sym}</span>
+              <span style={{ marginLeft: 8 }}>{formatPrice(price)}</span>
+            </li>
+          );
+        })
+      )}
     </ul>
   );
 }
