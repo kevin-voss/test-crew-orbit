@@ -1,6 +1,6 @@
 import { useCallback, useId, useMemo, useState, type CSSProperties } from "react";
 
-import type { Holding, TradeExecutionResult } from "../../stores/market";
+import { maxWholeSharesAffordable, simulateTradeExecution } from "../../market/simulateTradeExecution";
 import { useMarketStore } from "../../stores/market";
 
 function formatCash(n: number): string {
@@ -11,82 +11,10 @@ function formatPrice(n: number): string {
   return n.toFixed(2);
 }
 
-function newTradeId(): string {
-  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
-    return crypto.randomUUID();
-  }
-  return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-}
-
-function maxWholeBuyShares(cash: number, price: number): number {
-  if (!Number.isFinite(cash) || !Number.isFinite(price) || price <= 0) return 0;
-  return Math.floor(cash / price);
-}
-
 function parseWholeShares(raw: string): number | null {
   const n = Number(raw);
   if (!Number.isFinite(n) || !Number.isInteger(n) || n < 1) return null;
   return n;
-}
-
-function executeBuyAtPrice(
-  ticker: string,
-  shares: number,
-  pricePerShare: number,
-  cash: number,
-  positions: Record<string, Holding>,
-): TradeExecutionResult {
-  const prev = positions[ticker];
-  const prevShares = prev?.shares ?? 0;
-  const prevAvg = prev?.averageCost;
-  const newShares = prevShares + shares;
-  const averageCost =
-    prevShares <= 0 || prevAvg === undefined
-      ? pricePerShare
-      : (prevShares * prevAvg + shares * pricePerShare) / newShares;
-
-  return {
-    trade: {
-      id: newTradeId(),
-      ticker,
-      side: "buy",
-      shares,
-      pricePerShare,
-      timestamp: Date.now(),
-    },
-    nextCash: cash - shares * pricePerShare,
-    positions: { ...positions, [ticker]: { shares: newShares, averageCost } },
-  };
-}
-
-function executeSellAtPrice(
-  ticker: string,
-  shares: number,
-  pricePerShare: number,
-  cash: number,
-  positions: Record<string, Holding>,
-): TradeExecutionResult {
-  const prev = positions[ticker];
-  const next: Record<string, Holding> = { ...positions };
-  const newShares = (prev?.shares ?? 0) - shares;
-  if (newShares <= 0) {
-    delete next[ticker];
-  } else {
-    next[ticker] = { shares: newShares, averageCost: prev?.averageCost };
-  }
-
-  return {
-    trade: {
-      id: newTradeId(),
-      ticker,
-      side: "sell",
-      shares,
-      pricePerShare,
-      timestamp: Date.now(),
-    },
-    nextCash: cash + shares * pricePerShare,
-    positions: next,
-  };
 }
 
 export function TradingTerminal(): JSX.Element {
@@ -96,7 +24,6 @@ export function TradingTerminal(): JSX.Element {
   const position = useMarketStore((s) =>
     s.selectedTicker != null ? s.positions[s.selectedTicker] : undefined,
   );
-  const applyTradeResult = useMarketStore((s) => s.applyTradeResult);
 
   const uid = useId();
   const buyId = `${uid}-buy`;
@@ -107,12 +34,11 @@ export function TradingTerminal(): JSX.Element {
   const [qtyInput, setQtyInput] = useState("");
   const [feedback, setFeedback] = useState("");
 
+  const rawPrice = selectedTicker != null ? prices[selectedTicker] : undefined;
   const price =
-    selectedTicker != null && typeof prices[selectedTicker] === "number"
-      ? prices[selectedTicker]!
-      : null;
+    typeof rawPrice === "number" && Number.isFinite(rawPrice) && rawPrice > 0 ? rawPrice : null;
 
-  const maxBuy = price != null ? maxWholeBuyShares(cash, price) : 0;
+  const maxBuy = price != null ? maxWholeSharesAffordable(cash, price) : 0;
   const sharesHeld = position?.shares ?? 0;
 
   const maxBuyLabel = useMemo(() => {
@@ -140,34 +66,29 @@ export function TradingTerminal(): JSX.Element {
       return;
     }
 
-    if (side === "buy") {
-      const cap = maxWholeBuyShares(st.cash, livePrice);
-      if (qty > cap) {
-        setFeedback(`Buy quantity exceeds max buy (${cap} shares at the current price).`);
-        return;
-      }
-      const result = executeBuyAtPrice(ticker, qty, livePrice, st.cash, st.positions);
-      applyTradeResult(result);
-      setQtyInput("");
+    const outcome = simulateTradeExecution({
+      cash: st.cash,
+      positions: st.positions,
+      ticker,
+      side,
+      quantity: qty,
+      pricePerShare: livePrice,
+    });
+
+    if (!outcome.ok) {
+      setFeedback(outcome.error.message);
       return;
     }
 
-    const held = st.positions[ticker]?.shares ?? 0;
-    if (held <= 0) {
-      setFeedback("You have no shares to sell for this symbol.");
-      return;
-    }
-    if (qty > held) {
-      setFeedback(`Sell quantity cannot exceed your holdings (${held} shares).`);
-      return;
-    }
-    const result = executeSellAtPrice(ticker, qty, livePrice, st.cash, st.positions);
-    applyTradeResult(result);
+    useMarketStore.getState().applyTradeResult(outcome.result);
     setQtyInput("");
-  }, [applyTradeResult, qtyInput, side]);
+  }, [qtyInput, side]);
 
   const canTradeSymbol = selectedTicker != null;
   const showPrice = price != null;
+  const qtyPreview = parseWholeShares(qtyInput.trim());
+  const submitDisabled =
+    !canTradeSymbol || !showPrice || qtyPreview === null;
 
   const sectionStyle: CSSProperties = {
     margin: "16px 0",
@@ -282,17 +203,17 @@ export function TradingTerminal(): JSX.Element {
 
         <button
           type="button"
-          disabled={!canTradeSymbol}
-          {...(!canTradeSymbol ? { "aria-disabled": true as const } : {})}
+          disabled={submitDisabled}
+          {...(submitDisabled ? { "aria-disabled": true as const } : {})}
           onClick={onSubmit}
           style={{
             padding: "10px 14px",
             borderRadius: 6,
             border: "1px solid #292524",
-            background: canTradeSymbol ? "#1c1917" : "#a8a29e",
+            background: submitDisabled ? "#a8a29e" : "#1c1917",
             color: "#fafaf9",
             fontWeight: 600,
-            cursor: canTradeSymbol ? "pointer" : "not-allowed",
+            cursor: submitDisabled ? "not-allowed" : "pointer",
           }}
         >
           {side === "buy" ? "Place buy" : "Place sell"}
