@@ -10,19 +10,39 @@ import {
 } from "./week.js";
 
 /**
- * @param {Record<string, string[]>} completions
+ * Normalize persisted completion values to a list of date strings.
+ * Arrays are filtered to strings only; a bare string is one calendar key (exact match in `isCompleted`).
+ *
+ * @param {Record<string, unknown>} completions
+ * @param {string} habitId
+ * @returns {string[]}
+ */
+function datesListForHabit(completions, habitId) {
+  const raw = completions[habitId];
+  if (raw == null) return [];
+  if (Array.isArray(raw)) {
+    return raw.filter((d) => typeof d === "string");
+  }
+  if (typeof raw === "string") {
+    return raw === "" ? [] : [raw];
+  }
+  return [];
+}
+
+/**
+ * @param {Record<string, unknown>} completions
  * @param {string} habitId
  * @param {string} dateKey
  */
 export function isCompleted(completions, habitId, dateKey) {
-  return (completions[habitId] ?? []).includes(dateKey);
+  return datesListForHabit(completions, habitId).includes(dateKey);
 }
 
 /**
  * Toggle completion if the date is eligible (today or past within current review week).
  * Idempotent when `completed` is true and the date is already marked.
  *
- * @param {Record<string, string[]>} completions
+ * @param {Record<string, unknown>} completions
  * @param {string} habitId
  * @param {string} dateKey YYYY-MM-DD (local calendar)
  * @param {boolean} completed
@@ -44,7 +64,7 @@ export function setToggle(completions, habitId, dateKey, completed, ctx) {
   }
 
   const comps = { ...completions };
-  const set = new Set(comps[habitId] ?? []);
+  const set = new Set(datesListForHabit(comps, habitId));
   if (completed) {
     set.add(dateKey);
   } else {
