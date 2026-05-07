@@ -1,0 +1,8 @@
+[build]
+target = "browser"
+entrypoints = ["./index.tsx"]
+outdir = "./dist"
+
+[test]
+test-name-pattern = ".*"
+timeout = 10000
