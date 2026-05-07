@@ -1,17 +1,6 @@
-import { useMarketTickController } from "../market/useMarketTickController";
+import { DashboardShell } from "./DashboardShell";
 
-import { AnalyticsReadout } from "./AnalyticsReadout";
-import { MarketTickerStrip } from "./MarketTickerStrip";
-import { PriceHistorySnippet } from "./PriceHistorySnippet";
-
+/** Integration entry: shares the same shell and tick lifecycle as {@link MarketDashboard}. */
 export function Dashboard(): JSX.Element {
-  useMarketTickController();
-
-  return (
-    <>
-      <MarketTickerStrip />
-      <PriceHistorySnippet />
-      <AnalyticsReadout />
-    </>
-  );
+  return <DashboardShell />;
 }

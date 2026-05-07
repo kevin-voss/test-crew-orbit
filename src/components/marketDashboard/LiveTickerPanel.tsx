@@ -80,6 +80,7 @@ export function LiveTickerPanel(): JSX.Element {
         </p>
       ) : (
         <ul
+          data-testid="ticker-prices"
           role="list"
           aria-label="Live ticker"
           style={{

@@ -1,3 +1,5 @@
+"use client";
+
 import { AnalyticsPanel } from "../components/marketDashboard/AnalyticsPanel";
 import { ChartStripPanel } from "../components/marketDashboard/ChartStripPanel";
 import { EquityCurveChart } from "../components/marketDashboard/EquityCurveChart";
@@ -5,6 +7,7 @@ import { HoldingsDiversificationChart } from "../components/marketDashboard/Hold
 import { LiveTickerPanel } from "../components/marketDashboard/LiveTickerPanel";
 import { SelectedTickerPriceChart } from "../components/marketDashboard/SelectedTickerPriceChart";
 import { TradingTerminal } from "../components/marketDashboard/TradingTerminal";
+import { useMarketTickController } from "../market/useMarketTickController";
 
 /**
  * Responsive three-column grid: Tickers | Chart/Trade | Portfolio (stacked on narrow viewports).
@@ -13,6 +16,9 @@ import { TradingTerminal } from "../components/marketDashboard/TradingTerminal";
  * Regions use scroll containers and semantic labels for stability and accessibility.
  */
 export function DashboardShell(): JSX.Element {
+  // AC-10: persisted store rehydration completes, then tick controller starts, then subscribed UI updates.
+  useMarketTickController();
+
   return (
     <div
       data-testid="responsive-dashboard-shell"

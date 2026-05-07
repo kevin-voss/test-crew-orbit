@@ -53,6 +53,9 @@ export function AnalyticsPanel(): JSX.Element {
 
   return (
     <section data-testid="analytics-panel" aria-label="Analytics">
+      <span className="sr-only" data-testid="analytics-readout">
+        {cash.toFixed(2)}
+      </span>
       <div
         data-testid="portfolio-analytics-metrics"
         style={{
