@@ -34,12 +34,15 @@ export function MarketDashboard(): JSX.Element {
           gap: 12,
           minWidth: 0,
           width: "100%",
+          alignItems: "flex-start",
         }}
       >
         <SelectedTickerPriceChart />
         <EquityCurveChart />
       </div>
-      <HoldingsDiversificationChart />
+      <div style={{ width: "100%", minWidth: 0 }}>
+        <HoldingsDiversificationChart />
+      </div>
       <AnalyticsPanel />
       <ChartStripPanel />
     </div>

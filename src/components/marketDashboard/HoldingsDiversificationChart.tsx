@@ -7,11 +7,15 @@ import { useChartInnerWidth } from "./useChartInnerWidth";
 const COLORS = ["#1a5f4a", "#3d6e8c", "#c45c3e", "#6b4f9a", "#b8860b", "#2c5282"];
 
 const panelStyle: CSSProperties = {
+  position: "relative",
   border: "1px solid rgba(0,0,0,0.12)",
   borderRadius: 6,
   padding: 8,
   background: "#faf9f7",
   minWidth: 0,
+  width: "100%",
+  maxWidth: "100%",
+  boxSizing: "border-box",
 };
 
 type SliceRow = { name: string; value: number };
