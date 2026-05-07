@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Habit Tracker</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app">
+      <header class="hero">
+        <h1>Habit Tracker</h1>
+        <p class="muted">Daily habits with a simple weekly view.</p>
+      </header>
+
+      <section class="card" aria-labelledby="add-heading">
+        <h2 id="add-heading">Add a habit</h2>
+        <form id="add-form" class="row">
+          <label class="grow">
+            <span class="sr-only">Habit name</span>
+            <input id="habit-name" name="name" type="text" maxlength="120" placeholder="Morning stretch…" autocomplete="off" />
+          </label>
+          <button type="submit">Save</button>
+        </form>
+        <p id="add-feedback" class="feedback" hidden></p>
+      </section>
+
+      <section class="card" aria-labelledby="weekly-heading">
+        <h2 id="weekly-heading">Weekly progress</h2>
+        <div id="week-range" class="muted week-range"></div>
+        <div id="weekly-body"></div>
+      </section>
+
+      <section class="card" aria-labelledby="today-heading">
+        <h2 id="today-heading">Mark complete</h2>
+        <p class="muted">Toggle today or earlier days this week.</p>
+        <div id="today-body"></div>
+      </section>
+    </div>
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
