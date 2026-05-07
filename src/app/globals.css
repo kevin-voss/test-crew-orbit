@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .flash-up {
+    @apply bg-emerald-500/25 transition-colors duration-500;
+  }
+
+  .flash-down {
+    @apply bg-rose-500/25 transition-colors duration-500;
+  }
+
+  .flash-neutral-first-tick {
+    @apply bg-slate-500/20 transition-colors duration-500;
+  }
+}
