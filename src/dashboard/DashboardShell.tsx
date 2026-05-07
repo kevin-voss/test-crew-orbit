@@ -8,6 +8,8 @@ import { TradingTerminal } from "../components/marketDashboard/TradingTerminal";
 
 /**
  * Responsive three-column grid: Tickers | Chart/Trade | Portfolio (stacked on narrow viewports).
+ * AC-4 column map: LiveTickerPanel (tickers-only) | SelectedTickerPriceChart above TradingTerminal,
+ * then ChartStripPanel | portfolio analytics charts (no primary price chart in column 3).
  * Regions use scroll containers and semantic labels for stability and accessibility.
  */
 export function DashboardShell(): JSX.Element {
@@ -38,8 +40,8 @@ export function DashboardShell(): JSX.Element {
           <h2 id="dashboard-region-chart-trade-heading" className="sr-only">
             Chart and trade
           </h2>
-          <TradingTerminal />
           <SelectedTickerPriceChart />
+          <TradingTerminal />
           <ChartStripPanel />
         </section>
         <section
