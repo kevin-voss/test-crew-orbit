@@ -98,3 +98,32 @@ export function isEligibleForToggle(dateKey, todayKey) {
   }
   return compareISODate(dateKey, todayKey) <= 0;
 }
+
+/**
+ * @param {string} dateKey YYYY-MM-DD
+ * @returns {Date} local civil calendar midnight for that key
+ */
+function localMidnightFromDateKey(dateKey) {
+  const [y, m, d] = dateKey.split("-").map(Number);
+  return new Date(y, (m ?? 1) - 1, d ?? 1);
+}
+
+/**
+ * One-line caption for the review week (local calendar), e.g. "May 4 – May 10, 2026".
+ * @param {{ startISO: string, endISO: string }} weekRange
+ */
+export function formatWeekRangeCaption(weekRange) {
+  const start = localMidnightFromDateKey(weekRange.startISO);
+  const end = localMidnightFromDateKey(weekRange.endISO);
+  const sameYear = start.getFullYear() === end.getFullYear();
+  const md = new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric" });
+  const mdy = new Intl.DateTimeFormat(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+  if (sameYear) {
+    return `${md.format(start)} – ${md.format(end)}, ${start.getFullYear()}`;
+  }
+  return `${mdy.format(start)} – ${mdy.format(end)}`;
+}

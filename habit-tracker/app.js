@@ -5,6 +5,7 @@ import { validateName } from "./habits.js";
 import {
   compareISODate,
   expandWeekDaysFromMonday,
+  formatWeekRangeCaption,
   isEligibleForToggle,
   localDateKey,
 } from "./week.js";
@@ -88,15 +89,62 @@ const $ = (sel) => document.querySelector(sel);
 
 const dayLabels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
+/** @type {"tracker" | "weekly"} */
+let activeView = "tracker";
+
 function todayLocalKey() {
   return localDateKey(new Date());
 }
 
+function syncTabPanels() {
+  const trackerPanel = /** @type {HTMLElement | null} */ ($("#panel-tracker"));
+  const weeklyPanel = /** @type {HTMLElement | null} */ ($("#panel-weekly"));
+  const tabTracker = /** @type {HTMLButtonElement | null} */ ($("#tab-tracker"));
+  const tabWeekly = /** @type {HTMLButtonElement | null} */ ($("#tab-weekly"));
+  if (!trackerPanel || !weeklyPanel || !tabTracker || !tabWeekly) return;
+
+  const isTracker = activeView === "tracker";
+  trackerPanel.hidden = !isTracker;
+  weeklyPanel.hidden = isTracker;
+  tabTracker.setAttribute("aria-selected", String(isTracker));
+  tabWeekly.setAttribute("aria-selected", String(!isTracker));
+  tabTracker.tabIndex = isTracker ? 0 : -1;
+  tabWeekly.tabIndex = isTracker ? -1 : 0;
+}
+
+/**
+ * @param {"tracker" | "weekly"} view
+ */
+function setView(view) {
+  activeView = view;
+  syncTabPanels();
+}
+
+/**
+ * @param {HTMLButtonElement} next
+ */
+function focusTab(next) {
+  next.focus();
+  const id = next.id;
+  setView(id === "tab-tracker" ? "tracker" : "weekly");
+  rerender();
+}
+
 function renderWeekly() {
   const progress = tracker.getWeeklyProgress();
-  $("#week-range").textContent = `${progress.weekRange.startISO} → ${progress.weekRange.endISO}`;
-
+  const rangeEl = $("#week-range");
   const body = $("#weekly-body");
+  if (!rangeEl || !body) return;
+
+  const caption = formatWeekRangeCaption(progress.weekRange);
+  rangeEl.replaceChildren();
+  const strong = document.createElement("strong");
+  strong.textContent = caption;
+  const iso = document.createElement("span");
+  iso.className = "muted week-range-iso";
+  iso.textContent = ` (${progress.weekRange.startISO} → ${progress.weekRange.endISO})`;
+  rangeEl.append(strong, iso);
+
   body.replaceChildren();
   const today = todayLocalKey();
 
@@ -264,7 +312,29 @@ function rerender() {
   renderHabitsList();
   renderWeekly();
   renderCompletionToggles();
+  syncTabPanels();
 }
+
+const tabTrackerEl = /** @type {HTMLButtonElement | null} */ ($("#tab-tracker"));
+const tabWeeklyEl = /** @type {HTMLButtonElement | null} */ ($("#tab-weekly"));
+
+tabTrackerEl?.addEventListener("click", () => {
+  setView("tracker");
+  rerender();
+});
+
+tabWeeklyEl?.addEventListener("click", () => {
+  setView("weekly");
+  rerender();
+});
+
+document.querySelector(".tablist")?.addEventListener("keydown", (e) => {
+  if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+  e.preventDefault();
+  const goWeekly = e.key === "ArrowRight";
+  const next = goWeekly ? tabWeeklyEl : tabTrackerEl;
+  if (next) focusTab(next);
+});
 
 $("#add-form").addEventListener("submit", (e) => {
   e.preventDefault();

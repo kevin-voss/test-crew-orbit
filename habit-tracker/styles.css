@@ -52,6 +52,67 @@ body {
   margin-bottom: 1.75rem;
 }
 
+.app-nav {
+  margin: 0 0 1.25rem;
+}
+
+.tablist {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+  padding: 0.35rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--bg) 45%, transparent);
+}
+
+.tab {
+  flex: 1 1 140px;
+  padding: 0.5rem 0.85rem;
+  border-radius: 9px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.tab[aria-selected="true"] {
+  color: var(--text);
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+}
+
+.tab[aria-selected="false"]:hover {
+  color: var(--text);
+  background: color-mix(in srgb, var(--card) 55%, transparent);
+}
+
+.view-panel[hidden] {
+  display: none;
+}
+
+.week-intro {
+  margin: 0 0 0.65rem;
+}
+
+.week-range {
+  margin-bottom: 0.85rem;
+  font-size: 0.95rem;
+  line-height: 1.45;
+  color: var(--text);
+}
+
+.week-range-iso {
+  font-size: 0.85rem;
+  font-weight: 400;
+}
+
+.weekly-body {
+  min-height: 2rem;
+}
+
 .card {
   background: color-mix(in srgb, var(--card) 92%, transparent);
   border: 1px solid var(--border);
@@ -147,11 +208,6 @@ input:focus-visible {
 
 .habits-list .muted.empty-list {
   margin: 0;
-}
-
-.week-range {
-  margin-bottom: 0.85rem;
-  font-size: 0.9rem;
 }
 
 .weekly-table {
