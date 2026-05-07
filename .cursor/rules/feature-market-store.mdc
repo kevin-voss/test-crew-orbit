@@ -1,12 +1,12 @@
 ---
-description: Market domain — Zustand store, GBM engine, tick controller, live ticker + trading terminal UI, Vitest; state/persistence and controller/UI boundaries per AGENTS.md + feature specs
+description: Market domain — Zustand store, GBM engine, tick controller, live ticker + trading terminal + Recharts analytics UI, Vitest; state/persistence and controller/UI boundaries per AGENTS.md + feature specs
 globs:
   - "src/**/*.ts"
   - "src/**/*.tsx"
 alwaysApply: false
 ---
 
-# Feature: market store + GBM engine + tick controller + live ticker + trading terminal
+# Feature: market store + GBM engine + tick controller + live ticker + trading terminal + dynamic charts & analytics
 
 Target stack in this checkout: **TypeScript** (ESM), **React 18** (peer), **Zustand**, **Vitest** under `src/`. See root `AGENTS.md` for coordination vs. host-app merge.
 
@@ -17,6 +17,7 @@ Target stack in this checkout: **TypeScript** (ESM), **React 18** (peer), **Zust
 - Market tick controller (interval, hydration gate, single dashboard entry): `crew-orbit/feature-add-market-tick-controller/design/design-spec.md` (`src/market/marketTickController.ts`, `src/market/useMarketTickController.ts` — **no rendered UI** in those modules)
 - Live ticker / market dashboard panels (semantics, spacing, flash/motion, plain React styling — no new UI kits): `crew-orbit/feature-build-live-ticker-panel/design/design-spec.md` — **read before** changing `TickerPanel`, `LiveTickerPanel`, or related `marketDashboard/` UI
 - Trading terminal (semantic HTML, native controls, a11y, spacing/palette aligned with live ticker, store-driven orders): `crew-orbit/feature-build-trading-terminal/design/design-spec.md` — **read before** changing `TradingTerminal.tsx`, trade UX in `marketDashboard/`, or test ids / `aria-*` contracts
+- Dynamic charts & analytics (Recharts, chart constants, portfolio metrics helpers, panel semantics): `crew-orbit/feature-render-dynamic-charts-and-analytics/design/design-spec.md` — **read before** changing `*Chart*.tsx`, `AnalyticsPanel.tsx`, `chartConstants.ts`, or `src/analytics/*`
 
 ## Boundaries
 
@@ -42,6 +43,13 @@ Target stack in this checkout: **TypeScript** (ESM), **React 18** (peer), **Zust
 - Follow the trading-terminal design spec for layout tokens, native control patterns (`fieldset` / radios / `role="status"`), and **no** extra UI frameworks in this sandbox (same rule as live ticker).
 - **Store-only data** for quotes, cash, holdings, `selectedTicker` — align with **`simulateTradeExecution`** / market helpers in code + spec; no ad-hoc market state outside `useMarketStore`.
 - Preserve **semantic HTML**, **`data-testid="trading-terminal"`**, and **`aria-live` / `role="status"`** patterns from the design spec unless the spec is updated deliberately.
+
+## Dynamic charts & analytics (Recharts)
+
+- Use **Recharts** consistently for line and pie visuals in this checkout; do **not** add another charting library unless product explicitly requires it (see **dynamic charts** design spec).
+- Chart and analytics components are **selectors + render** only: **`useMarketStore`** on the read path; **no** timers, tick hooks, or `marketEngine` calls inside chart files (shell-only tick — same rule as other `marketDashboard/` panels).
+- Keep **pure portfolio / series math** in **`src/analytics/`** (and related helpers), **not** in the Zustand store module — the store holds observable state; presentation and derived metrics stay at the edges per spec.
+- Honor shared **`chartConstants.ts`** (e.g. price point cap vs. history) and spec guidance: neutral Ivory-adjacent palette, **`isAnimationActive={false}`** on series where updates should track ticks without decorative motion, plain empty states, and **`aria-label` / legend / `<dl>`** patterns for analytics density.
 
 ## Persistence and session
 

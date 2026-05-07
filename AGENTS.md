@@ -9,6 +9,7 @@ This repository is a **crew-orbit** coordination checkout: feature specs under `
 - **Market tick controller:** `crew-orbit/feature-add-market-tick-controller/design/design-spec.md` (single shell hook; bridge to store; panels do not own timers; no UI in tick modules).
 - **Live ticker panel:** `crew-orbit/feature-build-live-ticker-panel/design/design-spec.md` (list semantics, spacing, flash behavior; panels consume `useMarketStore` only; **no** per-panel timers — tick shell only; see spec for styling).
 - **Trading terminal:** `crew-orbit/feature-build-trading-terminal/design/design-spec.md` (semantic controls and a11y; Ivory Studio neutrals; `useMarketStore` + trade simulation; tick controller stays on the dashboard shell — **no** timers in the terminal).
+- **Dynamic charts & analytics:** `crew-orbit/feature-render-dynamic-charts-and-analytics/design/design-spec.md` (Recharts; metrics in `src/analytics/`; panels consume `useMarketStore` only; **no** per-panel timers).
 - Prefer **state-layer-only** changes in the store: no UI or presentation imports in the store module; consumers use `useMarketStore` (per requirements in `spec/` when present).
 
 **Cursor**
