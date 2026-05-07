@@ -11,9 +11,8 @@ import { useMarketTickController } from "../market/useMarketTickController";
 
 /**
  * Responsive three-column grid: Tickers | Chart/Trade | Portfolio (stacked on narrow viewports).
- * AC-4 column map: LiveTickerPanel (tickers-only) | SelectedTickerPriceChart above TradingTerminal,
- * then ChartStripPanel | portfolio analytics charts (no primary price chart in column 3).
- * Regions use scroll containers and semantic labels for stability and accessibility.
+ * Middle column: TradingTerminal → SelectedTickerPriceChart → ChartStripPanel (act → primary chart → strip).
+ * Portfolio column: AnalyticsPanel → HoldingsDiversificationChart → EquityCurveChart.
  */
 export function DashboardShell(): JSX.Element {
   // AC-10: persisted store rehydration completes, then tick controller starts, then subscribed UI updates.
@@ -46,8 +45,8 @@ export function DashboardShell(): JSX.Element {
           <h2 id="dashboard-region-chart-trade-heading" className="sr-only">
             Chart and trade
           </h2>
-          <SelectedTickerPriceChart />
           <TradingTerminal />
+          <SelectedTickerPriceChart />
           <ChartStripPanel />
         </section>
         <section
