@@ -1,5 +1,5 @@
 ---
-description: Market domain — Zustand store, GBM engine, tick controller, live ticker + trading terminal + Recharts analytics UI, Vitest; state/persistence and controller/UI boundaries per AGENTS.md + feature specs
+description: Market domain — Next.js App Router + Tailwind shell, Zustand store, GBM engine, tick controller, live ticker + trading terminal + Recharts analytics, Vitest; state/persistence and controller/UI boundaries per AGENTS.md + feature specs
 globs:
   - "src/**/*.ts"
   - "src/**/*.tsx"
@@ -8,7 +8,7 @@ alwaysApply: false
 
 # Feature: market store + GBM engine + tick controller + live ticker + trading terminal + dynamic charts & analytics
 
-Target stack in this checkout: **TypeScript** (ESM), **React 18** (peer), **Zustand**, **Vitest** under `src/`. See root `AGENTS.md` for coordination vs. host-app merge.
+Target stack in this checkout: **TypeScript** (ESM), **Next.js ~14** (App Router under `src/app/`), **React 18**, **Tailwind CSS** (layout shell), **Zustand**, **Recharts**, **Vitest** — see root `package.json`. See root `AGENTS.md` for crew-orbit coordination and spec links.
 
 **Specs (read before editing the matching area):**
 
@@ -18,10 +18,12 @@ Target stack in this checkout: **TypeScript** (ESM), **React 18** (peer), **Zust
 - Live ticker / market dashboard panels (semantics, spacing, flash/motion, plain React styling — no new UI kits): `crew-orbit/feature-build-live-ticker-panel/design/design-spec.md` — **read before** changing `TickerPanel`, `LiveTickerPanel`, or related `marketDashboard/` UI
 - Trading terminal (semantic HTML, native controls, a11y, spacing/palette aligned with live ticker, store-driven orders): `crew-orbit/feature-build-trading-terminal/design/design-spec.md` — **read before** changing `TradingTerminal.tsx`, trade UX in `marketDashboard/`, or test ids / `aria-*` contracts
 - Dynamic charts & analytics (Recharts, chart constants, portfolio metrics helpers, panel semantics): `crew-orbit/feature-render-dynamic-charts-and-analytics/design/design-spec.md` — **read before** changing `*Chart*.tsx`, `AnalyticsPanel.tsx`, `chartConstants.ts`, or `src/analytics/*`
+- Responsive dashboard layout (Next route → **`MarketDashboard`**, grid/gutters, `data-testid` stability, **Tailwind shell only** — no shadcn/Radix): `crew-orbit/feature-assemble-responsive-dashboard-layout/design/design-spec.md` — **read before** changing `src/app/dashboard/page.tsx`, `src/dashboard/*`, `MarketDashboard.tsx`, or responsive grid composition
 
 ## Boundaries
 
-- Treat the store as **state + persistence + domain rules** only. Dashboard code uses **React** as in root `package.json`; do **not** add Tailwind, Radix, shadcn/ui, or other component stacks unless the **host** app you merge into already uses them (then follow host tokens; see live ticker spec).
+- Treat the store as **state + persistence + domain rules** only. **Route/page files** compose the dashboard (`"use client"` where rehydration + tick apply); keep market math, persistence, and engine imports out of thin page wrappers — **composition only** per responsive-layout spec.
+- **Tailwind** is in use for the app shell and dashboard grid (`package.json`). Follow existing utility patterns; do **not** add Radix, shadcn/ui, or other component kits unless product explicitly adopts them (live ticker + responsive layout specs).
 - UI and hooks that render must **consume** the public store API (e.g. `useMarketStore`); keep presentation out of the store module.
 - **Tick controller:** one loop drives updates via **`applyMarketTick`**; do not add parallel `setInterval` / duplicate engine calls from panels. Mount the tick hook **once** at the shell that owns the market surface (not per cell/card). Start/stop timing must respect rehydration rules in the tick-controller spec when persistence is on.
 - After merge into a host app, **repeat discovery** on that repo for UI primitives and design tokens; until then, follow `crew-orbit/feature-set-up-persisted-market-store/design/design-spec.md` for non-code UX intent.
@@ -32,15 +34,20 @@ Target stack in this checkout: **TypeScript** (ESM), **React 18** (peer), **Zust
 - **Single entry:** invoke `useMarketTickController` (or equivalent) **once** at the dashboard shell — not in each panel.
 - **Panels stay passive:** no `setInterval`, per-panel polling, or duplicate tick sources in `TickerPanel`, `LiveTickerPanel`, `ChartStripPanel`, `AnalyticsPanel`, or **`TradingTerminal`** — selectors and markup only.
 
+## Responsive dashboard layout
+
+- **Single tick mount** at the dashboard shell (`useMarketTickController` once — same as tick-controller spec); page/grid layers do **not** own timers or engine calls.
+- Use **semantic layout** (`<main>`, column wrappers with `min-w-0` / `box-border` as needed) and **stable `data-testid`** hooks for grid regions; preserve **`max-w-[1920px]`** and spacing scale from the responsive-layout spec unless the spec is intentionally revised.
+
 ## Live ticker panel (UI)
 
-- Follow the **live ticker design spec** for spacing scale, flash timing (background-color only), typography, and **no** Tailwind/Radix/shadcn in this sandbox unless a future host repo already ships them.
+- Follow the **live ticker design spec** for spacing scale, flash timing (background-color only), typography, and **no** new UI kits beyond what this repo already ships (Tailwind on shell; **plain React** styling inside panels per sibling specs).
 - Keep panels **store-driven**: `useMarketStore` selectors for prices/state; do not introduce parallel data fetching or tick loops in panel files.
 
 ## Trading terminal (UI)
 
 - Same dashboard boundaries as other panels: **no** `setInterval`, tick hooks, or engine calls inside `TradingTerminal.tsx`; shell mounts `useMarketTickController` once (see **`feature-build-trading-terminal`** + `MarketDashboard.tsx`).
-- Follow the trading-terminal design spec for layout tokens, native control patterns (`fieldset` / radios / `role="status"`), and **no** extra UI frameworks in this sandbox (same rule as live ticker).
+- Follow the trading-terminal design spec for layout tokens, native control patterns (`fieldset` / radios / `role="status"`), and **no** Radix/shadcn or other new UI kits (same boundaries as live ticker + responsive shell specs).
 - **Store-only data** for quotes, cash, holdings, `selectedTicker` — align with **`simulateTradeExecution`** / market helpers in code + spec; no ad-hoc market state outside `useMarketStore`.
 - Preserve **semantic HTML**, **`data-testid="trading-terminal"`**, and **`aria-live` / `role="status"`** patterns from the design spec unless the spec is updated deliberately.
 
