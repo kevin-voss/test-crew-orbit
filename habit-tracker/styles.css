@@ -112,6 +112,43 @@ input:focus-visible {
   color: var(--danger);
 }
 
+.small {
+  font-size: 0.875rem;
+}
+
+.delete-pattern-note {
+  display: block;
+}
+
+.habits-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0;
+}
+
+.habit-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--bg) 55%, transparent);
+}
+
+.habit-card .habit-title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  word-break: break-word;
+}
+
+.habits-list .muted.empty-list {
+  margin: 0;
+}
+
 .week-range {
   margin-bottom: 0.85rem;
   font-size: 0.9rem;

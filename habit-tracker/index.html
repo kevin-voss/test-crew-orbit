@@ -25,11 +25,19 @@
         <form id="add-form" class="row">
           <label class="grow">
             <span class="sr-only">Habit name</span>
-            <input id="habit-name" name="name" type="text" maxlength="120" placeholder="Morning stretch…" autocomplete="off" />
+            <input id="habit-name" name="name" type="text" placeholder="Morning stretch…" autocomplete="off" />
           </label>
           <button type="submit">Save</button>
         </form>
         <p id="add-feedback" class="feedback" hidden></p>
+      </section>
+
+      <section class="card" aria-labelledby="habits-heading">
+        <h2 id="habits-heading">Your habits</h2>
+        <p class="muted small">
+          <span class="delete-pattern-note">Remove deletes immediately (no extra confirmation).</span>
+        </p>
+        <div id="habits-list" class="habits-list" role="list"></div>
       </section>
 
       <section class="card" aria-labelledby="weekly-heading">

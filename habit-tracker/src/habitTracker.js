@@ -1,3 +1,5 @@
+import { newHabitId, validateName } from "../habits.js";
+
 const STORAGE_KEYS = {
   habits: "habit-tracker:habits",
   completions: "habit-tracker:completions",
@@ -124,26 +126,14 @@ export function createHabitTracker({ storage, clock } = {}) {
      * @returns {{ ok: true, habit: { id: string, label: string } } | { ok: false, validationMessage: string }}
      */
     createHabit(input) {
-      const trimmed = String(input?.name ?? "").trim();
-      if (!trimmed) {
-        return {
-          ok: false,
-          validationMessage: "Enter a habit name.",
-        };
-      }
-      if (trimmed.length > 120) {
-        return {
-          ok: false,
-          validationMessage: "Habit name must be at most 120 characters.",
-        };
+      const check = validateName(input?.name ?? "");
+      if (!check.ok) {
+        return { ok: false, validationMessage: check.errorMessage };
       }
 
+      const trimmed = String(input?.name ?? "").trim();
       const habits = loadHabits();
-      const id =
-        typeof crypto !== "undefined" && crypto.randomUUID
-          ? crypto.randomUUID()
-          : `hb-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
-      const habit = { id, label: trimmed };
+      const habit = { id: newHabitId(), label: trimmed };
       habits.push(habit);
       saveHabits(habits);
       return { ok: true, habit };

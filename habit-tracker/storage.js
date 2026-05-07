@@ -3,7 +3,8 @@
  *
  * One versioned blob under STORAGE_KEY for atomic-ish replace when saving.
  *
- * Persisted JSON shape:
+ * Persisted JSON shape (habits match `habits.js` validation when created via the UI;
+ * tracker persistence uses the same `id` / `label` fields):
  * {
  *   "version": 1,
  *   "habits": Array<{ "id": string, "label": string }>,

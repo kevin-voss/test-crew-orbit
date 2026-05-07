@@ -1,6 +1,7 @@
 import { createHabitTracker } from "./src/habitTracker.js";
 import { loadAppState, saveAppState, STORAGE_KEY } from "./storage.js";
 import { createInitialInMemoryEnvelope, toPersistable } from "./state.js";
+import { validateName } from "./habits.js";
 
 /** Must align with STORAGE_KEYS inside `src/habitTracker.js`. */
 const TRACKER_KEYS = {
@@ -233,7 +234,44 @@ function renderCompletionToggles() {
   }
 }
 
+function renderHabitsList() {
+  const root = $("#habits-list");
+  root.replaceChildren();
+  const habits = tracker.listHabits();
+  if (habits.length === 0) {
+    const p = document.createElement("p");
+    p.className = "muted empty-list";
+    p.textContent = "No habits yet. Add one above.";
+    root.appendChild(p);
+    return;
+  }
+  for (const h of habits) {
+    const card = document.createElement("div");
+    card.className = "habit-card";
+    card.setAttribute("role", "listitem");
+
+    const text = document.createElement("div");
+    const title = document.createElement("p");
+    title.className = "habit-title";
+    title.textContent = h.label;
+    text.append(title);
+
+    const del = document.createElement("button");
+    del.type = "button";
+    del.className = "link-danger";
+    del.textContent = "Remove";
+    del.addEventListener("click", () => {
+      tracker.removeHabit(h.id);
+      rerender();
+    });
+
+    card.append(text, del);
+    root.appendChild(card);
+  }
+}
+
 function rerender() {
+  renderHabitsList();
   renderWeekly();
   renderCompletionToggles();
 }
@@ -242,8 +280,16 @@ $("#add-form").addEventListener("submit", (e) => {
   e.preventDefault();
   const input = /** @type {HTMLInputElement} */ ($("#habit-name"));
   const fb = $("#add-feedback");
-  const res = tracker.createHabit({ name: input.value });
   fb.hidden = false;
+
+  const validated = validateName(input.value);
+  if (!validated.ok) {
+    fb.textContent = validated.errorMessage;
+    fb.classList.add("err");
+    return;
+  }
+
+  const res = tracker.createHabit({ name: input.value });
   if (res.ok) {
     fb.textContent = "Saved.";
     fb.classList.remove("err");
