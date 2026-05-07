@@ -52,7 +52,7 @@ export type MarketStoreData = {
   selectedTicker: string | null;
   prices: Record<string, number>;
   /** Rolling equity samples for the equity curve (updated on ticks and fills). */
-  portfolioEquityHistory: EquityPoint[];
+  equityHistory: EquityPoint[];
   /** Baseline total portfolio value for ROI / total P&L (set at hydration if absent). */
   referenceEquity: number;
   /** Local calendar day key (`Date#toDateString`) for Day P&L anchoring. */

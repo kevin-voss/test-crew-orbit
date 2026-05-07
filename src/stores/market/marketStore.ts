@@ -79,7 +79,7 @@ const defaultData = (): MarketStoreData => ({
   marketHistory: {},
   selectedTicker: null,
   prices: {},
-  portfolioEquityHistory: [],
+  equityHistory: [],
   referenceEquity: DEFAULT_INITIAL_CASH,
   equityDayKey: null,
   dayOpenEquity: DEFAULT_INITIAL_CASH,
@@ -91,9 +91,17 @@ function clampHistory(series: MarketStoreData["marketHistory"][string]): typeof 
   return series.slice(-max);
 }
 
-function clampEquitySeries(series: EquityPoint[]): EquityPoint[] {
+function clampEquityHistory(series: EquityPoint[]): EquityPoint[] {
   if (series.length <= MARKET_ENGINE_HISTORY_MAX) return series;
   return series.slice(-MARKET_ENGINE_HISTORY_MAX);
+}
+
+/** Appends `{ t, equity }`, clamping length; duplicate `t` replaces the prior row (last-write-wins). */
+function appendEquityHistory(prev: EquityPoint[], point: EquityPoint): EquityPoint[] {
+  const last = prev.at(-1);
+  const base =
+    last && last.t === point.t ? [...prev.slice(0, -1), point] : [...prev, point];
+  return clampEquityHistory(base);
 }
 
 function createActions(
@@ -125,7 +133,7 @@ function createActions(
         if (payload.historySamples?.length) {
           tSample = Math.max(...payload.historySamples.map((h) => h.point.t));
         } else {
-          const lastPt = state.portfolioEquityHistory.at(-1);
+          const lastPt = state.equityHistory.at(-1);
           tSample = (lastPt?.t ?? 0) + 1;
         }
 
@@ -138,19 +146,15 @@ function createActions(
           dayOpenEquity = equity;
         } else if (equityDayKey !== dk) {
           equityDayKey = dk;
-          dayOpenEquity =
-            state.portfolioEquityHistory.at(-1)?.equity ?? state.dayOpenEquity ?? equity;
+          dayOpenEquity = state.equityHistory.at(-1)?.equity ?? state.dayOpenEquity ?? equity;
         }
 
-        const portfolioEquityHistory = clampEquitySeries([
-          ...state.portfolioEquityHistory,
-          { t: tSample, equity },
-        ]);
+        const equityHistory = appendEquityHistory(state.equityHistory, { t: tSample, equity });
 
         return {
           prices,
           marketHistory,
-          portfolioEquityHistory,
+          equityHistory,
           equityDayKey,
           dayOpenEquity,
         };
@@ -163,12 +167,9 @@ function createActions(
         const positions = { ...result.positions };
         const tradeHistory = [result.trade, ...state.tradeHistory];
         const equity = computeMarkToMarketEquity(cash, positions, state.prices);
-        const lastT = state.portfolioEquityHistory.at(-1)?.t ?? 0;
-        const portfolioEquityHistory = clampEquitySeries([
-          ...state.portfolioEquityHistory,
-          { t: lastT + 1, equity },
-        ]);
-        return { cash, positions, tradeHistory, portfolioEquityHistory };
+        const tTrade = result.trade.timestamp;
+        const equityHistory = appendEquityHistory(state.equityHistory, { t: tTrade, equity });
+        return { cash, positions, tradeHistory, equityHistory };
       });
     },
 
@@ -184,7 +185,7 @@ function buildPersistedSlice(state: MarketStoreState): Partial<MarketStoreData> 
     marketHistory: state.marketHistory,
     selectedTicker: state.selectedTicker,
     prices: state.prices,
-    portfolioEquityHistory: state.portfolioEquityHistory,
+    equityHistory: state.equityHistory,
     referenceEquity: state.referenceEquity,
     equityDayKey: state.equityDayKey,
     dayOpenEquity: state.dayOpenEquity,
@@ -219,9 +220,14 @@ export const useMarketStore = create<MarketStoreState>()(
           typeof p.referenceEquity === "number" && Number.isFinite(p.referenceEquity)
             ? p.referenceEquity
             : mtm;
-        const portfolioEquityHistory = Array.isArray(p.portfolioEquityHistory)
-          ? (p.portfolioEquityHistory as EquityPoint[])
-          : d.portfolioEquityHistory;
+        let equityHistory: EquityPoint[];
+        if (Array.isArray(p.equityHistory)) {
+          equityHistory = p.equityHistory as EquityPoint[];
+        } else if (Array.isArray((p as { portfolioEquityHistory?: unknown }).portfolioEquityHistory)) {
+          equityHistory = (p as { portfolioEquityHistory: EquityPoint[] }).portfolioEquityHistory;
+        } else {
+          equityHistory = d.equityHistory;
+        }
         const equityDayKey =
           typeof p.equityDayKey === "string" || p.equityDayKey === null ? p.equityDayKey : d.equityDayKey;
         const dayOpenEquity =
@@ -240,7 +246,7 @@ export const useMarketStore = create<MarketStoreState>()(
               ? p.selectedTicker
               : d.selectedTicker,
           prices,
-          portfolioEquityHistory,
+          equityHistory,
           referenceEquity,
           equityDayKey,
           dayOpenEquity,

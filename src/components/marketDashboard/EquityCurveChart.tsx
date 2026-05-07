@@ -20,7 +20,7 @@ const panelStyle: CSSProperties = {
 
 export function EquityCurveChart(): JSX.Element {
   const { ref, width } = useChartInnerWidth(320);
-  const portfolioEquityHistory = useMarketStore((s) => s.portfolioEquityHistory);
+  const equityHistory = useMarketStore((s) => s.equityHistory);
   const cash = useMarketStore((s) => s.cash);
   const positions = useMarketStore((s) => s.positions);
   const prices = useMarketStore((s) => s.prices);
@@ -30,15 +30,13 @@ export function EquityCurveChart(): JSX.Element {
     [cash, positions, prices],
   );
 
-  const chartData = useMemo(
-    () => portfolioEquityHistory.map((p) => ({ t: p.t, equity: p.equity })),
-    [portfolioEquityHistory],
-  );
+  const chartData = useMemo(() => {
+    return [...equityHistory]
+      .map((p) => ({ t: p.t, equity: p.equity }))
+      .sort((a, b) => a.t - b.t);
+  }, [equityHistory]);
 
-  const lastEquity =
-    portfolioEquityHistory.length > 0
-      ? portfolioEquityHistory[portfolioEquityHistory.length - 1]!.equity
-      : liveEquity;
+  const lastEquity = chartData.length > 0 ? chartData.at(-1)!.equity : liveEquity;
 
   const fmt = (n: number): string =>
     new Intl.NumberFormat(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 2 }).format(n);
@@ -49,7 +47,7 @@ export function EquityCurveChart(): JSX.Element {
         <span style={{ fontWeight: 600 }}>Portfolio equity</span>
         <span data-testid="equity-curve-last-equity">{fmt(lastEquity)}</span>
       </div>
-      {chartData.length > 0 ? (
+      {chartData.length >= 2 ? (
         <div ref={ref} style={{ width: "100%", height: 200, minWidth: 0, minHeight: 200 }}>
           <LineChart
             width={width}
@@ -85,7 +83,14 @@ export function EquityCurveChart(): JSX.Element {
           </LineChart>
         </div>
       ) : (
-        <div style={{ fontSize: 12, color: "rgba(0,0,0,0.55)", minHeight: 120 }}>Awaiting equity samples</div>
+        <div
+          data-testid="equity-curve-chart-empty-state"
+          style={{ fontSize: 12, color: "rgba(0,0,0,0.55)", minHeight: 120 }}
+        >
+          {chartData.length === 1
+            ? "Add another equity sample for a curve"
+            : "Awaiting equity samples"}
+        </div>
       )}
     </div>
   );
