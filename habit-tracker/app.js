@@ -1,8 +1,78 @@
 import { createHabitTracker } from "./src/habitTracker.js";
+import { loadAppState, saveAppState, STORAGE_KEY } from "./storage.js";
+import { createInitialInMemoryEnvelope, toPersistable } from "./state.js";
 
+/** Must align with STORAGE_KEYS inside `src/habitTracker.js`. */
+const TRACKER_KEYS = {
+  habits: "habit-tracker:habits",
+  completions: "habit-tracker:completions",
+};
+
+const ls =
+  typeof localStorage !== "undefined"
+    ? localStorage
+    : /** @type {Storage | null} */ (null);
+const initialLoad = loadAppState(ls);
+
+/** @type {HTMLDivElement | null} */
+const storageBanner = document.querySelector("#storage-banner");
+
+/**
+ * @param {string} message
+ */
+function showStorageBanner(message) {
+  if (!storageBanner || !message) return;
+  storageBanner.hidden = false;
+  storageBanner.textContent = message;
+}
+
+/** @type {{ version: number, habits: { id: string, label: string }[], completions: Record<string, string[]> }} */
+let mem;
+if (initialLoad.ok) {
+  mem = {
+    version: initialLoad.data.version,
+    habits: [...initialLoad.data.habits],
+    completions: { ...initialLoad.data.completions },
+  };
+} else {
+  if (initialLoad.reason === "corrupt" && ls) {
+    try {
+      ls.removeItem(STORAGE_KEY);
+    } catch {
+      /* ignore reset failure */
+    }
+  }
+  showStorageBanner(initialLoad.message);
+  const envelope = createInitialInMemoryEnvelope();
+  mem = { version: 1, habits: [...envelope.habits], completions: { ...envelope.completions } };
+}
+
+function persistMem() {
+  const res = saveAppState(toPersistable(mem), ls);
+  if (!res.ok) {
+    showStorageBanner(res.message);
+  }
+}
+
+/** Storage bridge: implements the tracker’s logical keys while persisting one versioned blob. */
 const storageAdapter = {
-  getItem: (k) => localStorage.getItem(k),
-  setItem: (k, v) => localStorage.setItem(k, v),
+  getItem: (k) => {
+    if (k === TRACKER_KEYS.habits) {
+      return mem.habits.length ? JSON.stringify(mem.habits) : null;
+    }
+    if (k === TRACKER_KEYS.completions) {
+      return JSON.stringify(mem.completions);
+    }
+    return null;
+  },
+  setItem: (k, v) => {
+    if (k === TRACKER_KEYS.habits) {
+      mem.habits = JSON.parse(v);
+    } else if (k === TRACKER_KEYS.completions) {
+      mem.completions = JSON.parse(v);
+    }
+    persistMem();
+  },
 };
 
 const tracker = createHabitTracker({ storage: storageAdapter });
