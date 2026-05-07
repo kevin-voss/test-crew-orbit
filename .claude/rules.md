@@ -1,5 +1,10 @@
 # Claude Code Rules – Monorepo
 
+## Working in This Monorepo
+- **Each project is independent**: Always `cd project-name` before starting tasks
+- **No root-level build** – each project manages its own dependencies and configuration
+- **Check `package.json`** before starting: see available scripts and understand the project's dependencies
+
 ## Project Structure
 - **Monorepo**: Multiple independent projects in root directories
   - `mini-expense-tracker/` – JS/TS app, vitest, no build step
@@ -11,11 +16,17 @@
 
 ## Testing & Builds
 - **Test runner**: vitest (config: `vitest.config.js` in each project)
-- **No root-level build** – each project is independent
-- **Do NOT run** `npm test`, `vitest run`, or other test/build commands during configuration tasks
+- **Do NOT run**: `npm test`, `vitest run`, `npm install`, or other test/build/install commands during any task
+- **Do NOT start**: servers, watchers, or long-lived processes
 
 ## File References
 - Use format: `path/to/file.js:line_number` when referencing code
+
+## Before Implementing
+- **Ask questions first**: Use AskUserQuestion for ambiguous requirements, multiple valid approaches, or architectural decisions
+- **No time estimates**: Avoid phrases like "this will take X minutes/hours" – focus on what needs to be done
+- **Plan complex tasks**: Use TodoWrite to track multi-step or multi-file work
+- **Read code first**: Always read files before proposing changes; don't suggest modifications to unseen code
 
 ## Code Changes
 - **Favor simplicity**: avoid over-engineering, premature abstractions, or gratuitous refactoring
