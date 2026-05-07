@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Personal Todo App</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script defer src="app.js"></script>
+  </head>
+  <body>
+    <div class="app">
+      <header class="app-header">
+        <h1>My Todos</h1>
+      </header>
+
+      <main class="main-content" aria-label="Todo management area">
+        <!-- Input area for adding new todos -->
+        <section class="input-section" aria-labelledby="input-heading">
+          <h2 id="input-heading" class="visually-hidden">Add new todo</h2>
+          <div class="input-group">
+            <label for="todo-input" class="visually-hidden">New todo text</label>
+            <input
+              type="text"
+              id="todo-input"
+              class="todo-input"
+              placeholder="Add a new todo..."
+              aria-label="Enter a new todo item"
+            />
+            <button
+              type="button"
+              id="add-todo-btn"
+              class="btn btn-primary"
+              aria-label="Add the todo item"
+            >
+              Add
+            </button>
+          </div>
+        </section>
+
+        <!-- Filter area for changing the active filter -->
+        <section class="filter-section" aria-labelledby="filter-heading">
+          <h2 id="filter-heading" class="visually-hidden">Filter todos</h2>
+          <div class="filter-group" role="group" aria-label="Filter options">
+            <button
+              type="button"
+              class="btn filter-btn active"
+              data-filter="all"
+              aria-pressed="true"
+            >
+              All
+            </button>
+            <button
+              type="button"
+              class="btn filter-btn"
+              data-filter="active"
+              aria-pressed="false"
+            >
+              Active
+            </button>
+            <button
+              type="button"
+              class="btn filter-btn"
+              data-filter="completed"
+              aria-pressed="false"
+            >
+              Completed
+            </button>
+          </div>
+        </section>
+
+        <!-- List area for viewing the todo list -->
+        <section class="list-section" aria-labelledby="list-heading">
+          <h2 id="list-heading" class="visually-hidden">Todo list</h2>
+          <ul id="todo-list" class="todo-list" aria-label="List of todos">
+            <!-- Todos will be rendered here -->
+          </ul>
+          <div id="empty-state" class="empty-state" role="status" aria-live="polite">
+            <p>No todos yet. Add one to get started!</p>
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>
