@@ -52,6 +52,18 @@ function portfolioEquity(
   return cash + m;
 }
 
+function appendEquityPoint(
+  state: BaseSlice,
+  cash: number,
+  positions: Record<string, number>,
+): EquityPoint[] {
+  const equity = portfolioEquity(cash, positions, state.lastPriceBySymbol);
+  return trimHistory(
+    [...state.equityHistory, { t: Date.now(), value: equity }],
+    EQUITY_HISTORY_CAP,
+  );
+}
+
 type BaseSlice = {
   cash: number;
   positionsBySymbol: Record<string, number>;
@@ -64,6 +76,8 @@ type BaseSlice = {
   version: number;
   dayKey: string;
   equityAtDayStart: number;
+  /** Equity at browser session start (after rehydrate); not persisted — drives session Day P&L. */
+  equityAtSessionStart: number;
   _hasHydrated: boolean;
 };
 
@@ -127,6 +141,7 @@ function buildFreshSlice(): BaseSlice {
     version: 1,
     dayKey: today,
     equityAtDayStart: INITIAL_CASH,
+    equityAtSessionStart: INITIAL_CASH,
     _hasHydrated: false,
   };
 }
@@ -159,19 +174,22 @@ export const useMarketStore = create<MarketStore>()(
         if (!Number.isInteger(quantity) || quantity <= 0) {
           throw new Error("invalid quantity");
         }
-        const price = get().lastPriceBySymbol[symbol];
+        const state = get();
+        const price = state.lastPriceBySymbol[symbol];
         if (price == null || price <= 0) throw new Error("unknown symbol");
         const max = get().maxBuyFor(symbol);
         if (quantity > max) throw new Error("insufficient cash");
         const cost = quantity * price;
+        const nextCash = state.cash - cost;
+        const nextPositions = {
+          ...state.positionsBySymbol,
+          [symbol]: (state.positionsBySymbol[symbol] ?? 0) + quantity,
+        };
         set({
-          cash: get().cash - cost,
-          positionsBySymbol: {
-            ...get().positionsBySymbol,
-            [symbol]: (get().positionsBySymbol[symbol] ?? 0) + quantity,
-          },
+          cash: nextCash,
+          positionsBySymbol: nextPositions,
           tradeLog: [
-            ...get().tradeLog,
+            ...state.tradeLog,
             {
               id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
               ts: Date.now(),
@@ -181,25 +199,28 @@ export const useMarketStore = create<MarketStore>()(
               price,
             },
           ],
+          equityHistory: appendEquityPoint(state, nextCash, nextPositions),
         });
       },
       sell: ({ symbol, quantity }) => {
         if (!Number.isInteger(quantity) || quantity <= 0) {
           throw new Error("invalid quantity");
         }
-        const held = get().positionsBySymbol[symbol] ?? 0;
+        const state = get();
+        const held = state.positionsBySymbol[symbol] ?? 0;
         if (quantity > held) throw new Error("insufficient shares");
-        const price = get().lastPriceBySymbol[symbol];
+        const price = state.lastPriceBySymbol[symbol];
         if (price == null || price <= 0) throw new Error("unknown symbol");
         const nextQty = held - quantity;
-        const nextPos = { ...get().positionsBySymbol };
+        const nextPos = { ...state.positionsBySymbol };
         if (nextQty === 0) delete nextPos[symbol];
         else nextPos[symbol] = nextQty;
+        const nextCash = state.cash + quantity * price;
         set({
-          cash: get().cash + quantity * price,
+          cash: nextCash,
           positionsBySymbol: nextPos,
           tradeLog: [
-            ...get().tradeLog,
+            ...state.tradeLog,
             {
               id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
               ts: Date.now(),
@@ -209,6 +230,7 @@ export const useMarketStore = create<MarketStore>()(
               price,
             },
           ],
+          equityHistory: appendEquityPoint(state, nextCash, nextPos),
         });
       },
       applyMarketTick: (snapshot?: TickSnapshot) => {
@@ -278,6 +300,15 @@ export const useMarketStore = create<MarketStore>()(
         dayKey: s.dayKey,
         equityAtDayStart: s.equityAtDayStart,
       }),
+      onRehydrateStorage: () => (state, error) => {
+        if (error || !state) return;
+        const equity = portfolioEquity(
+          state.cash,
+          state.positionsBySymbol,
+          state.lastPriceBySymbol,
+        );
+        useMarketStore.setState({ equityAtSessionStart: equity });
+      },
     },
   ),
 );
