@@ -2,6 +2,12 @@ import { createHabitTracker } from "./src/habitTracker.js";
 import { loadAppState, saveAppState, STORAGE_KEY } from "./storage.js";
 import { createInitialInMemoryEnvelope, toPersistable } from "./state.js";
 import { validateName } from "./habits.js";
+import {
+  compareISODate,
+  expandWeekDaysFromMonday,
+  isEligibleForToggle,
+  localDateKey,
+} from "./week.js";
 
 /** Must align with STORAGE_KEYS inside `src/habitTracker.js`. */
 const TRACKER_KEYS = {
@@ -82,18 +88,8 @@ const $ = (sel) => document.querySelector(sel);
 
 const dayLabels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
-function utcTodayISO() {
-  const now = new Date();
-  const y = now.getUTCFullYear();
-  const m = String(now.getUTCMonth() + 1).padStart(2, "0");
-  const d = String(now.getUTCDate()).padStart(2, "0");
-  return `${y}-${m}-${d}`;
-}
-
-function lex(a, b) {
-  if (a < b) return -1;
-  if (a > b) return 1;
-  return 0;
+function todayLocalKey() {
+  return localDateKey(new Date());
 }
 
 function renderWeekly() {
@@ -102,7 +98,7 @@ function renderWeekly() {
 
   const body = $("#weekly-body");
   body.replaceChildren();
-  const today = utcTodayISO();
+  const today = todayLocalKey();
 
   if (progress.rows.length === 0) {
     const p = document.createElement("p");
@@ -139,7 +135,7 @@ function renderWeekly() {
     for (const d of row.byDay) {
       const td = document.createElement("td");
       const marker = document.createElement("span");
-      const isFuture = lex(d.dateISO, today) > 0;
+      const isFuture = compareISODate(d.dateISO, today) > 0;
       marker.className = "pill";
       marker.dataset.state = d.completed ? "done" : isFuture ? "pending" : "open";
       marker.title = d.dateISO;
@@ -157,19 +153,7 @@ function weekDatesFromProgress(progress) {
   if (progress.rows.length > 0) {
     return progress.rows[0].byDay.map((d) => d.dateISO);
   }
-  const start = progress.weekRange.startISO;
-  const out = [];
-  const [y, m0, d0] = start.split("-").map(Number);
-  let t = Date.UTC(y, m0 - 1, d0);
-  for (let i = 0; i < 7; i++) {
-    const dt = new Date(t);
-    const ys = dt.getUTCFullYear();
-    const mo = String(dt.getUTCMonth() + 1).padStart(2, "0");
-    const day = String(dt.getUTCDate()).padStart(2, "0");
-    out.push(`${ys}-${mo}-${day}`);
-    t = Date.UTC(dt.getUTCFullYear(), dt.getUTCMonth(), dt.getUTCDate() + 1);
-  }
-  return out;
+  return expandWeekDaysFromMonday(progress.weekRange.startISO);
 }
 
 function renderCompletionToggles() {
@@ -185,7 +169,7 @@ function renderCompletionToggles() {
   }
 
   const progress = tracker.getWeeklyProgress();
-  const today = utcTodayISO();
+  const today = todayLocalKey();
   const weekDates = weekDatesFromProgress(progress);
 
   for (const h of habits) {
@@ -212,15 +196,21 @@ function renderCompletionToggles() {
     toggles.className = "toggles";
 
     for (const dateISO of weekDates) {
-      const isFuture = lex(dateISO, today) > 0;
+      const eligible = isEligibleForToggle(dateISO, today);
       const wrap = document.createElement("label");
-      wrap.className = "toggle";
+      wrap.className = "toggle" + (eligible ? "" : " toggle--locked");
       const cb = document.createElement("input");
       cb.type = "checkbox";
       cb.checked = tracker.isCompleted(h.id, dateISO);
-      cb.disabled = isFuture;
+      cb.disabled = !eligible;
+      cb.title = eligible ? dateISO : `${dateISO} (not yet available)`;
       cb.addEventListener("change", () => {
-        tracker.setCompletion(h.id, dateISO, cb.checked);
+        const want = cb.checked;
+        const res = tracker.setCompletion(h.id, dateISO, want);
+        if (!res.ok) {
+          cb.checked = !want;
+          return;
+        }
         rerender();
       });
       const cap = document.createElement("span");

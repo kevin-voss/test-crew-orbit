@@ -1,67 +1,15 @@
 import { newHabitId, validateName } from "../habits.js";
+import { setToggle, isCompleted as isCompletedInMap } from "../completions.js";
+import {
+  expandWeekDaysFromMonday,
+  getWeekRangeContainingDateKey,
+  localDateKey,
+} from "../week.js";
 
 const STORAGE_KEYS = {
   habits: "habit-tracker:habits",
   completions: "habit-tracker:completions",
 };
-
-/** @param {string} dateISO */
-function parseUTCDate(dateISO) {
-  const [y, m, d] = dateISO.split("-").map(Number);
-  return Date.UTC(y, (m ?? 1) - 1, d ?? 1);
-}
-
-/**
- * Monday = 0 .. Sunday = 6 for the UTC calendar date of `dateISO`.
- * @param {string} dateISO
- */
-function mondayOffsetUTC(dateISO) {
-  const t = parseUTCDate(dateISO);
-  const dow = new Date(t).getUTCDay(); // Sun=0..Sat=6
-  return dow === 0 ? 6 : dow - 1;
-}
-
-/** @param {string} dateISO */
-function weekRangeContainingUTC(dateISO) {
-  const off = mondayOffsetUTC(dateISO);
-  const t = parseUTCDate(dateISO);
-  const base = new Date(t);
-  const monMs = Date.UTC(
-    base.getUTCFullYear(),
-    base.getUTCMonth(),
-    base.getUTCDate() - off,
-  );
-  const mon = new Date(monMs);
-  const sunMs = Date.UTC(
-    mon.getUTCFullYear(),
-    mon.getUTCMonth(),
-    mon.getUTCDate() + 6,
-  );
-  const sun = new Date(sunMs);
-  return {
-    startISO: toISOUTC(mon),
-    endISO: toISOUTC(sun),
-  };
-}
-
-/** @param {Date} d */
-function toISOUTC(d) {
-  const y = d.getUTCFullYear();
-  const m = String(d.getUTCMonth() + 1).padStart(2, "0");
-  const day = String(d.getUTCDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
-}
-
-/**
- * Lexicographic order matches chronological order for YYYY-MM-DD.
- * @param {string} a
- * @param {string} b
- */
-function compareISODate(a, b) {
-  if (a < b) return -1;
-  if (a > b) return 1;
-  return 0;
-}
 
 /**
  * @param {{ storage: { getItem: (k: string) => string | null; setItem: (k: string, v: string) => void }; clock?: { todayISO: () => string } }} options
@@ -71,9 +19,7 @@ export function createHabitTracker({ storage, clock } = {}) {
     throw new TypeError("createHabitTracker requires { storage }");
   }
 
-  const todayISO = () =>
-    clock?.todayISO?.() ??
-    toISOUTC(new Date());
+  const todayKey = () => clock?.todayISO?.() ?? localDateKey(new Date());
 
   function loadHabits() {
     const raw = storage.getItem(STORAGE_KEYS.habits);
@@ -103,21 +49,6 @@ export function createHabitTracker({ storage, clock } = {}) {
 
   function saveCompletions(map) {
     storage.setItem(STORAGE_KEYS.completions, JSON.stringify(map));
-  }
-
-  function expandWeekDays(startISO) {
-    const out = [];
-    let t = parseUTCDate(startISO);
-    for (let i = 0; i < 7; i++) {
-      const dt = new Date(t);
-      out.push(toISOUTC(dt));
-      t = Date.UTC(
-        dt.getUTCFullYear(),
-        dt.getUTCMonth(),
-        dt.getUTCDate() + 1,
-      );
-    }
-    return out;
   }
 
   return {
@@ -161,9 +92,7 @@ export function createHabitTracker({ storage, clock } = {}) {
      * @param {string} dateISO
      */
     isCompleted(habitId, dateISO) {
-      const comps = loadCompletions();
-      const dates = comps[habitId] ?? [];
-      return dates.includes(dateISO);
+      return isCompletedInMap(loadCompletions(), habitId, dateISO);
     },
 
     /**
@@ -178,32 +107,22 @@ export function createHabitTracker({ storage, clock } = {}) {
         return { ok: false };
       }
 
-      const today = todayISO();
-      const range = weekRangeContainingUTC(today);
-
-      if (compareISODate(dateISO, range.startISO) < 0 || compareISODate(dateISO, range.endISO) > 0) {
-        return { ok: false };
-      }
-      if (compareISODate(dateISO, today) > 0) {
-        return { ok: false };
-      }
-
-      const comps = { ...loadCompletions() };
-      const set = new Set(comps[habitId] ?? []);
-      if (completed) {
-        set.add(dateISO);
-      } else {
-        set.delete(dateISO);
-      }
-      comps[habitId] = [...set].sort(compareISODate);
-      saveCompletions(comps);
+      const { ok, completions: next } = setToggle(
+        loadCompletions(),
+        habitId,
+        dateISO,
+        completed,
+        { todayKey: todayKey() },
+      );
+      if (!ok) return { ok: false };
+      saveCompletions(next);
       return { ok: true };
     },
 
     getWeeklyProgress() {
-      const today = todayISO();
-      const weekRange = weekRangeContainingUTC(today);
-      const weekDays = expandWeekDays(weekRange.startISO);
+      const today = todayKey();
+      const weekRange = getWeekRangeContainingDateKey(today);
+      const weekDays = expandWeekDaysFromMonday(weekRange.startISO);
       const habits = loadHabits();
       const comps = loadCompletions();
 
@@ -220,7 +139,7 @@ export function createHabitTracker({ storage, clock } = {}) {
         habitLabel: h.label,
         byDay: weekDays.map((dateISO) => ({
           dateISO,
-          completed: (comps[h.id] ?? []).includes(dateISO),
+          completed: isCompletedInMap(comps, h.id, dateISO),
         })),
       }));
 

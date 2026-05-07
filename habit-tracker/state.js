@@ -16,6 +16,7 @@ export function createInitialInMemoryEnvelope() {
 
 /**
  * @param {{ habits: unknown[], completions: Record<string, string[]> }} envelope
+ * `completions`: habitId → sorted unique YYYY-MM-DD keys (`localDateKey` semantics).
  */
 export function toPersistable(envelope) {
   return {

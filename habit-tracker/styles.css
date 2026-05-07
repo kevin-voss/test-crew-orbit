@@ -246,6 +246,15 @@ input:focus-visible {
   accent-color: var(--accent);
 }
 
+.toggle input:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.toggle--locked {
+  opacity: 0.75;
+}
+
 .sr-only {
   position: absolute;
   width: 1px;
