@@ -2,12 +2,31 @@ const STORAGE_KEY = "markdown-notes-app-notes";
 
 /** @typedef {{ id: string, title: string, content: string, updatedAt: number }} Note */
 
+/** @returns {Note[]} */
 function loadNotes() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
+    if (!Array.isArray(parsed)) return [];
+    /** @type {Note[]} */
+    const out = [];
+    for (const row of parsed) {
+      if (!row || typeof row !== "object") continue;
+      const id = row.id;
+      if (typeof id !== "string" || !id) continue;
+      const updatedAt =
+        typeof row.updatedAt === "number" && !Number.isNaN(row.updatedAt)
+          ? row.updatedAt
+          : 0;
+      const content = typeof row.content === "string" ? row.content : "";
+      const title =
+        typeof row.title === "string" && row.title
+          ? row.title
+          : titleFromContent(content);
+      out.push({ id, title, content, updatedAt });
+    }
+    return out;
   } catch {
     return [];
   }
@@ -68,16 +87,22 @@ function init() {
 
   function renderPreview() {
     const text = editorEl.value;
-    try {
-      if (typeof marked !== "undefined" && marked.parse) {
-        const html = marked.parse(text, { async: false });
-        previewEl.innerHTML = typeof html === "string" ? html : String(html);
-      } else {
+    void (async () => {
+      try {
+        if (typeof marked !== "undefined" && marked.parse) {
+          const result = marked.parse(text, { async: false });
+          const html =
+            result != null && typeof result.then === "function"
+              ? await result
+              : result;
+          previewEl.innerHTML = typeof html === "string" ? html : String(html);
+        } else {
+          previewEl.textContent = text;
+        }
+      } catch {
         previewEl.textContent = text;
       }
-    } catch {
-      previewEl.textContent = text;
-    }
+    })();
   }
 
   function sortNotes() {
