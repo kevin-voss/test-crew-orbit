@@ -179,7 +179,7 @@ export function TradingDashboard() {
           </LineChart>
         </div>
         <p className="sr-only" data-testid="chart-last-price">
-          {fmtMoney(chartPrice)}
+          {chartPrice.toFixed(6)}
         </p>
 
         <div className="rounded-md border border-slate-800 bg-slate-900 p-3">

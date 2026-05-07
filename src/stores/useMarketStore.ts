@@ -1,17 +1,22 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
+import type { TickSnapshot } from "@/types/market";
 import { simTradingPersistStorage } from "@/stores/storage";
 import {
   HISTORY_CAP_PER_SYMBOL,
   TICK_INTERVAL_MS,
-  advanceAllSymbolsGbm,
+  buildInitialHistories,
+  computeNextTick,
   defaultInstruments,
   trimHistory,
   type PricePoint,
 } from "@/utils/marketEngine";
 
 const INITIAL_CASH = 100_000;
+
+/** Practical cap for persisted equity curve (~2s ticks × 1440 ≈ 48 minutes). */
+const EQUITY_HISTORY_CAP = 1440;
 
 type TradeRecord = {
   id: string;
@@ -62,11 +67,44 @@ type BaseSlice = {
   _hasHydrated: boolean;
 };
 
+/** Merge bootstrap histories only where empty (preserves persisted buffers). */
+function historiesSeedPatch(state: BaseSlice): Partial<BaseSlice> | null {
+  const instruments = defaultInstruments();
+  const missing = instruments.some(
+    (i) => (state.priceHistoryBySymbol[i.symbol]?.length ?? 0) === 0,
+  );
+  if (!missing) return null;
+
+  const built = buildInitialHistories(instruments, Date.now());
+  const nextHistories = { ...state.priceHistoryBySymbol };
+  const nextLast = { ...state.lastPriceBySymbol };
+  const nextPrior = { ...state.priorTickPriceBySymbol };
+
+  for (const inst of instruments) {
+    const sym = inst.symbol;
+    if ((nextHistories[sym]?.length ?? 0) > 0) continue;
+    const series = built[sym];
+    if (!series?.length) continue;
+    nextHistories[sym] = series;
+    const tip = series[series.length - 1]!.price;
+    nextLast[sym] = tip;
+    nextPrior[sym] = tip;
+  }
+
+  return {
+    priceHistoryBySymbol: nextHistories,
+    lastPriceBySymbol: nextLast,
+    priorTickPriceBySymbol: nextPrior,
+  };
+}
+
 export type MarketActions = {
   buy: (args: { symbol: string; quantity: number }) => void;
   sell: (args: { symbol: string; quantity: number }) => void;
   setSelectedSymbol: (symbol: string) => void;
-  applyMarketTick: () => void;
+  /** Applies one coherent engine snapshot per tick (MarketController may omit argument). */
+  applyMarketTick: (snapshot?: TickSnapshot) => void;
+  ensurePriceHistoriesSeeded: () => void;
   resetToFirstRun: () => void;
   seedBroke: (args: { symbol: string; lastPrice: number }) => void;
   maxBuyFor: (symbol: string) => number;
@@ -107,7 +145,16 @@ export const useMarketStore = create<MarketStore>()(
         set({
           lastPriceBySymbol: { ...get().lastPriceBySymbol, [symbol]: lastPrice },
         }),
-      resetToFirstRun: () => set(buildFreshSlice()),
+      resetToFirstRun: () =>
+        set((prev) => ({
+          ...buildFreshSlice(),
+          _hasHydrated: prev._hasHydrated,
+        })),
+      ensurePriceHistoriesSeeded: () =>
+        set((state) => {
+          const patch = historiesSeedPatch(state);
+          return patch ?? {};
+        }),
       buy: ({ symbol, quantity }) => {
         if (!Number.isInteger(quantity) || quantity <= 0) {
           throw new Error("invalid quantity");
@@ -164,19 +211,25 @@ export const useMarketStore = create<MarketStore>()(
           ],
         });
       },
-      applyMarketTick: () => {
+      applyMarketTick: (snapshot?: TickSnapshot) => {
+        const seeded = historiesSeedPatch(get());
+        if (seeded) set(seeded);
+
         const state = get();
         const instruments = defaultInstruments().map((row) => ({
           ...row,
-          lastPrice:
-            state.lastPriceBySymbol[row.symbol] ?? row.lastPrice,
+          lastPrice: state.lastPriceBySymbol[row.symbol] ?? row.lastPrice,
         }));
+        const snap =
+          snapshot ??
+          computeNextTick({
+            pricesBySymbol: state.lastPriceBySymbol,
+            instruments,
+            dtSeconds: TICK_INTERVAL_MS / 1000,
+          });
+
         const prior = { ...state.lastPriceBySymbol };
-        const nextPrices = advanceAllSymbolsGbm({
-          pricesBySymbol: state.lastPriceBySymbol,
-          instruments,
-          dtSeconds: TICK_INTERVAL_MS / 1000,
-        });
+        const nextPrices = snap.prices;
         const now = Date.now();
         const nextHistories = { ...state.priceHistoryBySymbol };
         for (const [sym, px] of Object.entries(nextPrices)) {
@@ -197,7 +250,7 @@ export const useMarketStore = create<MarketStore>()(
         }
         const nextEquityHistory = trimHistory(
           [...state.equityHistory, { t: now, value: equity }],
-          800,
+          EQUITY_HISTORY_CAP,
         );
         set({
           priorTickPriceBySymbol: prior,
