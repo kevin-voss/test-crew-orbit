@@ -8,43 +8,46 @@ import { SelectedTickerPriceChart } from "./marketDashboard/SelectedTickerPriceC
 import { TradingTerminal } from "./marketDashboard/TradingTerminal";
 
 /**
- * Dashboard shell: one tick controller drives ticker, chart, and analytics from the same store snapshot.
+ * Dashboard shell: one tick controller drives ticker, chart, trade, and analytics from the same store snapshot.
+ * Responsive columns follow container width so narrow shells stack while wide shells show Tickers | Chart/Trade | Portfolio.
  */
 export function MarketDashboard(): JSX.Element {
   useMarketTickController();
 
   return (
-    <div
-      data-testid="market-dashboard"
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: 12,
-        width: "100%",
-        minWidth: 320,
-        boxSizing: "border-box",
-      }}
-    >
-      <LiveTickerPanel />
-      <TradingTerminal />
+    <div data-testid="market-dashboard" className="w-full min-w-0 box-border">
       <div
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          gap: 12,
-          minWidth: 0,
-          width: "100%",
-          alignItems: "flex-start",
-        }}
+        data-testid="responsive-dashboard-shell"
+        className="mx-auto box-border w-full max-w-[1920px] px-3 py-4 md:px-4 md:py-6"
       >
-        <SelectedTickerPriceChart />
-        <EquityCurveChart />
+        <div
+          data-testid="dashboard-layout-grid"
+          className="grid min-w-0 w-full grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-5"
+        >
+          <div
+            data-testid="dashboard-column-tickers"
+            className="flex min-w-0 flex-col gap-3 lg:min-h-0"
+          >
+            <LiveTickerPanel />
+          </div>
+          <div
+            data-testid="dashboard-column-chart-trade"
+            className="flex min-w-0 flex-col gap-3 lg:min-h-0"
+          >
+            <TradingTerminal />
+            <SelectedTickerPriceChart />
+            <ChartStripPanel />
+          </div>
+          <div
+            data-testid="dashboard-column-portfolio"
+            className="flex min-w-0 flex-col gap-3 lg:min-h-0"
+          >
+            <AnalyticsPanel />
+            <HoldingsDiversificationChart />
+            <EquityCurveChart />
+          </div>
+        </div>
       </div>
-      <div style={{ width: "100%", minWidth: 0 }}>
-        <HoldingsDiversificationChart />
-      </div>
-      <AnalyticsPanel />
-      <ChartStripPanel />
     </div>
   );
 }

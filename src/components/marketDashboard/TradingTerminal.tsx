@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState, type CSSProperties } from "react";
 
-import { maxWholeSharesAffordable, simulateTradeExecution } from "../../market/simulateTradeExecution";
+import { maxWholeSharesAffordable } from "../../market/maxBuyShares";
 import { useMarketStore } from "../../stores/market";
 
 function formatCash(n: number): string {
@@ -67,19 +67,6 @@ export function TradingTerminal(): JSX.Element {
     };
 
     setFeedback("");
-    const st = useMarketStore.getState();
-    const ticker = st.selectedTicker;
-    if (ticker == null) {
-      submitCoalesceRef.current = false;
-      setFeedback("Select a ticker from the market list before trading.");
-      return;
-    }
-    const livePrice = st.prices[ticker];
-    if (typeof livePrice !== "number" || !Number.isFinite(livePrice) || livePrice <= 0) {
-      submitCoalesceRef.current = false;
-      setFeedback("No simulated price is available for this symbol yet.");
-      return;
-    }
 
     const qty = parseWholeShares(qtyInput.trim());
     if (qty == null) {
@@ -88,13 +75,9 @@ export function TradingTerminal(): JSX.Element {
       return;
     }
 
-    const outcome = simulateTradeExecution({
-      cash: st.cash,
-      positions: st.positions,
-      ticker,
+    const outcome = useMarketStore.getState().submitSpotTrade({
       side,
       quantity: qty,
-      pricePerShare: livePrice,
     });
 
     if (!outcome.ok) {
@@ -103,7 +86,6 @@ export function TradingTerminal(): JSX.Element {
       return;
     }
 
-    useMarketStore.getState().applyTradeResult(outcome.result);
     setQtyInput("");
     releaseCoalesceSoon();
   }, [qtyInput, side]);

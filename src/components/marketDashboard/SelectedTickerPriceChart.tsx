@@ -99,18 +99,6 @@ export function SelectedTickerPriceChart({
   const chartRootTestId =
     variant === "strip" ? "chart-strip-price-chart" : "selected-ticker-price-chart";
 
-  if (empty) {
-    return (
-      <div
-        data-testid={emptyTestId}
-        style={variant === "strip" ? stripOuterStyle : panelStyle}
-        aria-label="Selected stock price chart"
-      >
-        <span style={{ fontSize: 12, color: "rgba(0,0,0,0.55)" }}>{emptyCopy}</span>
-      </div>
-    );
-  }
-
   const headerSymbolTestId =
     variant === "strip" ? "chart-strip-symbol" : "selected-ticker-price-chart-active-symbol";
 
@@ -126,7 +114,8 @@ export function SelectedTickerPriceChart({
 
   const chartHostTestId = variant === "strip" ? "chart-strip-svg" : undefined;
 
-  const inner = (
+  const filledChart =
+    empty ? null : (
     <>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 4 }}>
         <span data-testid={headerSymbolTestId} style={{ fontWeight: 600 }}>
@@ -194,7 +183,7 @@ export function SelectedTickerPriceChart({
         </div>
       ) : null}
     </>
-  );
+    );
 
   return (
     <div
@@ -202,7 +191,13 @@ export function SelectedTickerPriceChart({
       style={variant === "strip" ? stripOuterStyle : panelStyle}
       aria-label="Selected stock price chart"
     >
-      {inner}
+      {empty ? (
+        <span style={{ fontSize: 12, color: "rgba(0,0,0,0.55)" }} data-testid={emptyTestId}>
+          {emptyCopy}
+        </span>
+      ) : (
+        filledChart
+      )}
     </div>
   );
 }

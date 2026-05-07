@@ -2,6 +2,7 @@ import { create } from "zustand";
 import type { PersistStorage, StorageValue } from "zustand/middleware";
 import { persist } from "zustand/middleware";
 
+import { simulateTradeExecution } from "../../market/simulateTradeExecution";
 import { MARKET_ENGINE_HISTORY_MAX } from "../../utils/marketEngine";
 import { computeMarkToMarketEquity } from "../../utils/portfolioEquity";
 import type {
@@ -106,7 +107,7 @@ function appendEquityHistory(prev: EquityPoint[], point: EquityPoint): EquityPoi
 
 function createActions(
   set: (partial: Partial<MarketStoreState> | ((s: MarketStoreState) => Partial<MarketStoreState>)) => void,
-  _get: () => MarketStoreState,
+  get: () => MarketStoreState,
 ): MarketStoreActions {
   return {
     applyMarketTick: (payload: MarketTickPayload) => {
@@ -171,6 +172,41 @@ function createActions(
         const equityHistory = appendEquityHistory(state.equityHistory, { t: tTrade, equity });
         return { cash, positions, tradeHistory, equityHistory };
       });
+    },
+
+    submitSpotTrade: ({ side, quantity }) => {
+      const state = get();
+      const ticker = state.selectedTicker;
+      if (ticker == null) {
+        return {
+          ok: false as const,
+          error: {
+            code: "NO_TICKER",
+            message: "Select a ticker from the market list before trading.",
+          },
+        };
+      }
+      const livePrice = state.prices[ticker];
+      if (typeof livePrice !== "number" || !Number.isFinite(livePrice) || livePrice <= 0) {
+        return {
+          ok: false as const,
+          error: {
+            code: "NO_PRICE",
+            message: "No simulated price is available for this symbol yet.",
+          },
+        };
+      }
+      const outcome = simulateTradeExecution({
+        cash: state.cash,
+        positions: state.positions,
+        ticker,
+        side,
+        quantity,
+        pricePerShare: livePrice,
+      });
+      if (!outcome.ok) return outcome;
+      get().applyTradeResult(outcome.result);
+      return { ok: true as const, result: outcome.result };
     },
 
     setSelectedTicker: (ticker) => set({ selectedTicker: ticker }),

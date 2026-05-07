@@ -64,6 +64,13 @@ export type MarketStoreData = {
 export type MarketStoreActions = {
   applyMarketTick: (payload: MarketTickPayload) => void;
   applyTradeResult: (result: TradeExecutionResult) => void;
+  /** Runs simulated execution against the current snapshot and applies fills on success. */
+  submitSpotTrade: (input: {
+    side: "buy" | "sell";
+    quantity: number;
+  }) =>
+    | { ok: true; result: TradeExecutionResult }
+    | { ok: false; error: { code: string; message: string } };
   setSelectedTicker: (ticker: string | null) => void;
 };
 

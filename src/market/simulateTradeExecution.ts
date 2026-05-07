@@ -1,5 +1,7 @@
 import type { Holding, TradeExecutionResult, TradeRecord } from "../stores/market/types";
 
+import { maxWholeSharesAffordable } from "./maxBuyShares";
+
 /** User-facing validation failure for submit handlers (no store mutation). */
 export type TradeValidationError = {
   code: string;
@@ -15,12 +17,6 @@ function newTradeId(): string {
     return crypto.randomUUID();
   }
   return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-}
-
-/** Whole shares affordable at `price` using the same floor rule as Max Buy (AC-4, AC-14). */
-export function maxWholeSharesAffordable(cash: number, price: number): number {
-  if (!Number.isFinite(cash) || !Number.isFinite(price) || price <= 0) return 0;
-  return Math.floor(cash / price);
 }
 
 /** Positive finite integer share count. */
@@ -142,3 +138,5 @@ export function simulateTradeExecution(input: {
     },
   };
 }
+
+export { maxWholeSharesAffordable } from "./maxBuyShares";
