@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Weather Dashboard</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script defer src="app.js"></script>
+  </head>
+  <body>
+    <div class="dashboard">
+      <header class="dashboard-header">
+        <h1>Weather Dashboard</h1>
+      </header>
+
+      <main class="main-content" aria-label="Weather information area">
+        <!-- Search section for entering city -->
+        <section class="search-section" aria-labelledby="search-heading">
+          <h2 id="search-heading" class="visually-hidden">Search for a city</h2>
+          <div class="search-group">
+            <label for="city-input" class="visually-hidden">City name</label>
+            <input
+              type="text"
+              id="city-input"
+              class="city-input"
+              placeholder="Enter city name..."
+              aria-label="Enter a city name to search for weather"
+            />
+            <button
+              type="button"
+              id="search-btn"
+              class="btn btn-primary"
+              aria-label="Search for the city's weather"
+            >
+              Search
+            </button>
+          </div>
+        </section>
+
+        <!-- Loading state section -->
+        <section class="loading-section" aria-labelledby="loading-heading">
+          <h2 id="loading-heading" class="visually-hidden">Loading</h2>
+          <div id="loading-state" class="loading-state" role="status" aria-live="polite">
+            <p>Loading weather data...</p>
+          </div>
+        </section>
+
+        <!-- Error state section -->
+        <section class="error-section" aria-labelledby="error-heading">
+          <h2 id="error-heading" class="visually-hidden">Error</h2>
+          <div id="error-state" class="error-state" role="alert" aria-live="assertive">
+            <!-- Error message will be displayed here -->
+          </div>
+        </section>
+
+        <!-- Current weather display section -->
+        <section class="weather-section" aria-labelledby="weather-heading">
+          <h2 id="weather-heading" class="visually-hidden">Current weather</h2>
+          <div id="current-weather" class="current-weather">
+            <!-- Current weather will be displayed here -->
+          </div>
+        </section>
+
+        <!-- Forecast cards section -->
+        <section class="forecast-section" aria-labelledby="forecast-heading">
+          <h2 id="forecast-heading" class="visually-hidden">Weather forecast</h2>
+          <div id="forecast-cards" class="forecast-cards">
+            <!-- Forecast cards will be displayed here -->
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>
