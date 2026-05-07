@@ -1,7 +1,16 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 
-import { useMarketStore } from "../../stores/market";
-import { computeMarkToMarketEquity } from "../../utils/portfolioEquity";
+import {
+  computeDayPnl,
+  computeRoiPercent,
+  computeTotalPnl,
+  markToMarketEquity,
+} from "../../analytics/portfolioMetrics";
+import {
+  marketStoreHasHydrated,
+  onMarketStoreHydrationComplete,
+  useMarketStore,
+} from "../../stores/market";
 
 function fmtUsd(n: number): string {
   return new Intl.NumberFormat(undefined, {
@@ -15,21 +24,32 @@ function fmtPct(n: number): string {
   return `${n.toFixed(2)}%`;
 }
 
+/**
+ * Baseline **R** from `useMarketStore` after persistence merge. Subscribes to hydration so the
+ * panel re-renders once storage has finished loading (single source of truth; no mixed baselines).
+ */
+function useReferenceEquity(): number {
+  const [, setHydrationTick] = useState(0);
+  useEffect(() => {
+    if (marketStoreHasHydrated()) return undefined;
+    return onMarketStoreHydrationComplete(() => setHydrationTick((n) => n + 1));
+  }, []);
+  return useMarketStore((s) => s.referenceEquity);
+}
+
 export function AnalyticsPanel(): JSX.Element {
   const cash = useMarketStore((s) => s.cash);
   const positions = useMarketStore((s) => s.positions);
   const prices = useMarketStore((s) => s.prices);
-  const referenceEquity = useMarketStore((s) => s.referenceEquity);
-  const dayOpenEquity = useMarketStore((s) => s.dayOpenEquity);
-
+  const referenceEquity = useReferenceEquity();
   const equity = useMemo(
-    () => computeMarkToMarketEquity(cash, positions, prices),
+    () => markToMarketEquity(cash, positions, prices),
     [cash, positions, prices],
   );
 
-  const roi = referenceEquity > 0 ? (equity / referenceEquity - 1) * 100 : 0;
-  const totalPnl = equity - referenceEquity;
-  const dayPnl = equity - dayOpenEquity;
+  const roi = computeRoiPercent(equity, referenceEquity);
+  const totalPnl = computeTotalPnl(equity, referenceEquity);
+  const dayPnl = useMemo(() => computeDayPnl(positions, prices), [positions, prices]);
 
   return (
     <section data-testid="analytics-panel" aria-label="Analytics">
@@ -51,19 +71,28 @@ export function AnalyticsPanel(): JSX.Element {
         <dl style={{ margin: 0, display: "grid", gap: 10 }}>
           <div>
             <dt style={{ fontSize: 12, fontWeight: 600 }}>ROI (%)</dt>
-            <dd data-testid="portfolio-analytics-roi-value" style={{ margin: "4px 0 0", fontSize: 14 }}>
+            <dd
+              data-testid="portfolio-analytics-roi-value"
+              style={{ margin: "4px 0 0", fontSize: 14, fontVariantNumeric: "tabular-nums" }}
+            >
               {fmtPct(roi)}
             </dd>
           </div>
           <div>
             <dt style={{ fontSize: 12, fontWeight: 600 }}>Day P&L</dt>
-            <dd data-testid="portfolio-analytics-day-pnl-value" style={{ margin: "4px 0 0", fontSize: 14 }}>
+            <dd
+              data-testid="portfolio-analytics-day-pnl-value"
+              style={{ margin: "4px 0 0", fontSize: 14, fontVariantNumeric: "tabular-nums" }}
+            >
               {fmtUsd(dayPnl)}
             </dd>
           </div>
           <div>
             <dt style={{ fontSize: 12, fontWeight: 600 }}>Total P&L</dt>
-            <dd data-testid="portfolio-analytics-total-pnl-value" style={{ margin: "4px 0 0", fontSize: 14 }}>
+            <dd
+              data-testid="portfolio-analytics-total-pnl-value"
+              style={{ margin: "4px 0 0", fontSize: 14, fontVariantNumeric: "tabular-nums" }}
+            >
               {fmtUsd(totalPnl)}
             </dd>
           </div>
