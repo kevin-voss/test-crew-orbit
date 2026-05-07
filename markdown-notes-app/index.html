@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Markdown Notes</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script defer src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script defer src="app.js"></script>
+  </head>
+  <body>
+    <div class="app">
+      <aside class="sidebar" aria-label="Notes list">
+        <header class="sidebar-header">
+          <h1>Notes</h1>
+          <button type="button" id="new-note-btn" class="btn primary">New note</button>
+        </header>
+        <ul id="note-list" class="note-list"></ul>
+      </aside>
+
+      <main class="main" aria-label="Editor and preview">
+        <div class="toolbar">
+          <p id="active-title" class="active-title">No note selected</p>
+        </div>
+        <div class="panes">
+          <section class="pane editor-pane" aria-labelledby="editor-heading">
+            <h2 id="editor-heading" class="visually-hidden">Markdown editor</h2>
+            <label for="markdown-editor" class="visually-hidden">Note content</label>
+            <textarea
+              id="markdown-editor"
+              class="markdown-editor"
+              placeholder="Write Markdown here…"
+              spellcheck="true"
+              disabled
+            ></textarea>
+          </section>
+          <section class="pane preview-pane" aria-labelledby="preview-heading">
+            <h2 id="preview-heading" class="pane-title">Preview</h2>
+            <div id="markdown-preview" class="markdown-preview" aria-live="polite"></div>
+          </section>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>
