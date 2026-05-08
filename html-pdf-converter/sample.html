@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML to PDF Converter - Sample Document</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            color: #34495e;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+
+        h3 {
+            color: #5d6d7b;
+            margin-top: 15px;
+        }
+
+        p {
+            margin: 10px 0;
+            text-align: justify;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 20px;
+        }
+
+        .section {
+            margin: 20px 0;
+            padding: 15px;
+            border-left: 4px solid #3498db;
+            background-color: #ecf0f1;
+        }
+
+        code {
+            background-color: #f4f4f4;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+
+        pre {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+
+        ul, ol {
+            margin: 15px 0;
+            padding-left: 30px;
+        }
+
+        li {
+            margin: 8px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid #bdc3c7;
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #3498db;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 15px;
+            border-top: 2px solid #ecf0f1;
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+
+        .highlight {
+            background-color: #fff3cd;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>HTML to PDF Converter</h1>
+            <p>Sample Document Demonstrating HTML to PDF Conversion</p>
+        </div>
+
+        <h2>Introduction</h2>
+        <p>
+            This is a sample HTML document that demonstrates the capabilities of the HTML to PDF converter.
+            This document showcases various HTML elements and styling that can be converted to PDF format,
+            maintaining the visual appearance and layout of the original HTML.
+        </p>
+
+        <div class="section">
+            <h3>Key Features</h3>
+            <ul>
+                <li>Converts HTML files to PDF format</li>
+                <li>Supports custom CSS styling</li>
+                <li>Handles complex layouts and formatting</li>
+                <li>Preserves fonts, colors, and images</li>
+                <li>Simple command-line interface</li>
+            </ul>
+        </div>
+
+        <h2>Document Structure</h2>
+        <p>
+            HTML documents can contain various elements that are rendered beautifully in PDF format.
+            Below are some examples of different content types that can be converted:
+        </p>
+
+        <h3>Text Formatting</h3>
+        <p>
+            This paragraph demonstrates <strong>bold text</strong>, <em>italic text</em>,
+            and <span class="highlight">highlighted text</span>. The converter preserves all
+            these formatting options in the output PDF.
+        </p>
+
+        <h3>Code Examples</h3>
+        <p>Code blocks are formatted with a monospace font:</p>
+        <pre>def hello_world():
+    print("Hello, PDF!")
+    return True</pre>
+
+        <h3>Lists</h3>
+        <p>Both ordered and unordered lists are supported:</p>
+        <ol>
+            <li>First item</li>
+            <li>Second item
+                <ul>
+                    <li>Nested item A</li>
+                    <li>Nested item B</li>
+                </ul>
+            </li>
+            <li>Third item</li>
+        </ol>
+
+        <h3>Tables</h3>
+        <p>Tables are rendered with proper formatting:</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Feature</th>
+                    <th>Status</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>File conversion</td>
+                    <td>✓ Supported</td>
+                    <td>Convert HTML files to PDF</td>
+                </tr>
+                <tr>
+                    <td>String conversion</td>
+                    <td>✓ Supported</td>
+                    <td>Convert HTML strings to PDF</td>
+                </tr>
+                <tr>
+                    <td>URL conversion</td>
+                    <td>✓ Supported</td>
+                    <td>Convert web pages to PDF</td>
+                </tr>
+                <tr>
+                    <td>Custom styling</td>
+                    <td>✓ Supported</td>
+                    <td>Apply CSS styles to PDF output</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>Usage Examples</h2>
+
+        <h3>Basic Command Line Usage</h3>
+        <p>Convert an HTML file to PDF:</p>
+        <pre>python convert.py input.html output.pdf</pre>
+
+        <h3>Python API Usage</h3>
+        <p>Use the converter in your Python code:</p>
+        <pre>from convert import HtmlToPdfConverter
+
+converter = HtmlToPdfConverter()
+converter.convert_file('sample.html', 'output.pdf')</pre>
+
+        <h2>Installation Requirements</h2>
+        <p>To use the HTML to PDF converter, you need:</p>
+        <ul>
+            <li><strong>Python 3.6+</strong> - The programming language</li>
+            <li><strong>pdfkit</strong> - Python wrapper for wkhtmltopdf</li>
+            <li><strong>wkhtmltopdf</strong> - Command-line tool for HTML to PDF conversion</li>
+        </ul>
+
+        <h2>Benefits</h2>
+        <p>
+            The HTML to PDF converter offers several advantages:
+        </p>
+        <ul>
+            <li>Preserves complex layouts and styling</li>
+            <li>Maintains high-quality output</li>
+            <li>Easy integration into existing workflows</li>
+            <li>Supports batch processing</li>
+            <li>Open-source and freely available</li>
+        </ul>
+
+        <h2>Conclusion</h2>
+        <p>
+            This HTML to PDF converter provides a reliable and efficient solution for converting
+            HTML documents to PDF format. Whether you need to convert single files or batch process
+            multiple documents, this tool can handle your requirements with ease.
+        </p>
+
+        <div class="footer">
+            <p>Generated: 2025 | HTML to PDF Converter Sample Document</p>
+        </div>
+    </div>
+</body>
+</html>
