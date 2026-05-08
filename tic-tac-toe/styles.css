@@ -1,0 +1,140 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: linear-gradient(160deg, #1a1f2e 0%, #0f1219 100%);
+  color: #e8eaef;
+  line-height: 1.5;
+}
+
+.app {
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 2rem 1.25rem;
+}
+
+.app-header {
+  text-align: center;
+  margin-bottom: 1.75rem;
+}
+
+.app-header h1 {
+  margin: 0 0 0.35rem;
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.tagline {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #8b93a6;
+}
+
+.main-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.status {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  min-height: 1.5em;
+  text-align: center;
+}
+
+.status.winner {
+  color: #7dd3a8;
+}
+
+.status.draw {
+  color: #e6b84d;
+}
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 10px;
+  width: min(100%, 300px);
+  aspect-ratio: 1;
+  padding: 12px;
+  background: #252b3a;
+  border-radius: 12px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+}
+
+.cell {
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  background: #32394a;
+  color: #f0f2f7;
+  font-size: clamp(1.75rem, 8vw, 2.5rem);
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.cell:hover:not(:disabled) {
+  background: #3d4558;
+}
+
+.cell:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.cell:disabled {
+  cursor: default;
+  opacity: 0.95;
+}
+
+.cell.mark-x {
+  color: #7eb8ff;
+}
+
+.cell.mark-o {
+  color: #f0a8a8;
+}
+
+.actions {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.btn-reset {
+  padding: 0.65rem 1.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  background: #3d6ee0;
+  color: #fff;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.btn-reset:hover {
+  background: #5280e8;
+}
+
+.btn-reset:active {
+  transform: scale(0.98);
+}
+
+.btn-reset:focus-visible,
+.cell:focus-visible {
+  outline: 2px solid #7ec8ff;
+  outline-offset: 2px;
+}
