@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat App Demo</title>
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <div class="chat-app">
+    <header class="app-header">
+      <h1>Chat App Demo</h1>
+    </header>
+
+    <div class="chat-container">
+      <!-- Sidebar with chat list -->
+      <aside class="chat-sidebar">
+        <div class="chat-list">
+          <button class="chat-item active" data-chat="general">
+            <span class="chat-name"># general</span>
+          </button>
+          <button class="chat-item" data-chat="support">
+            <span class="chat-name"># support</span>
+          </button>
+        </div>
+      </aside>
+
+      <!-- Main chat window -->
+      <main class="chat-main">
+        <!-- Chat header -->
+        <div class="chat-header">
+          <h2 id="chat-title">general</h2>
+        </div>
+
+        <!-- Messages area -->
+        <div class="messages-area" id="messages-area">
+          <!-- Messages will be rendered here -->
+        </div>
+
+        <!-- Message input -->
+        <div class="message-input-area">
+          <form class="message-form" id="message-form">
+            <input
+              type="text"
+              id="message-input"
+              class="message-input"
+              placeholder="Type a message..."
+              autocomplete="off"
+            />
+            <button type="submit" class="send-btn">Send</button>
+          </form>
+        </div>
+      </main>
+    </div>
+  </div>
+</body>
+</html>
