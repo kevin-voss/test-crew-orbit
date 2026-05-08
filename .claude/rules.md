@@ -7,21 +7,23 @@
 
 ## Project Structure
 - **Monorepo**: Multiple independent projects (mixed languages)
-  - **JS/TS projects** (vitest, no build step):
-    - `chat-app-demo/` – Chat application demo
+  - **NPM + Vitest projects** (Node.js, vitest test runner):
     - `email-builder/` – Email builder with live preview
-    - `flashcard-quiz-app/` – Quiz flashcard application
     - `habit-tracker/` – Habit tracking app
     - `markdown-notes-app/` – Markdown-based notes
     - `mini-expense-tracker/` – Expense tracking app
     - `personal-todo-app/` – Personal todo list
-    - `tic-tac-toe/` – Tic Tac Toe game
     - `weather-dashboard/` – Weather information display
+  - **HTML/CSS/JS (no build system)**:
+    - `chat-app-demo/` – Chat application demo (plain HTML/CSS/JS)
+    - `flashcard-quiz-app/` – Quiz flashcard application
+    - `tic-tac-toe/` – Tic Tac Toe game (plain HTML/CSS/JS)
   - **Python projects**:
     - `html-pdf-converter/` – HTML to PDF converter
 
 ## Testing & Builds
-- **Test runner**: vitest (config: `vitest.config.js` in each project)
+- **NPM projects**: Test with vitest (config in `vitest.config.js`)
+- **HTML/CSS/JS projects**: No build system or tests
 - **Do NOT run**: `npm test`, `vitest run`, `npm install`, or other test/build/install commands during any task
 - **Do NOT start**: servers, watchers, or long-lived processes
 
