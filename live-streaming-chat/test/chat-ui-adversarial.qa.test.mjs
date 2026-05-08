@@ -14,16 +14,23 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const CHAT_ROOT = path.resolve(__dirname, '..');
 const CHAT_JSX = path.join(CHAT_ROOT, 'frontend', 'src', 'components', 'Chat.jsx');
 
-/** Mirrors `mergeMessages` in Chat.jsx — keep aligned when production algorithm changes. */
+/** Mirrors `mergeMessages` + sort helpers in Chat.jsx — keep aligned when production algorithm changes. */
+function createdAtMs(value) {
+  const t = new Date(value).getTime();
+  return Number.isFinite(t) ? t : 0;
+}
+
+function compareMessagesByTimeThenId(a, b) {
+  const ta = createdAtMs(a.createdAt);
+  const tb = createdAtMs(b.createdAt);
+  if (ta !== tb) return ta - tb;
+  return a.id - b.id;
+}
+
 function mergeMessages(prev, incoming) {
   const map = new Map(prev.map((m) => [m.id, m]));
   map.set(incoming.id, incoming);
-  return Array.from(map.values()).sort((a, b) => {
-    const ta = new Date(a.createdAt).getTime();
-    const tb = new Date(b.createdAt).getTime();
-    if (ta !== tb) return ta - tb;
-    return a.id - b.id;
-  });
+  return Array.from(map.values()).sort(compareMessagesByTimeThenId);
 }
 
 /** Slice inner statements of a `{...}` block starting at `openIdx` (must point at `{`). */
