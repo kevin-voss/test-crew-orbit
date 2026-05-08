@@ -11,15 +11,22 @@ function apiRoot() {
   return ''
 }
 
+function createdAtMs(value) {
+  const t = new Date(value).getTime()
+  return Number.isFinite(t) ? t : 0
+}
+
+function compareMessagesByTimeThenId(a, b) {
+  const ta = createdAtMs(a.createdAt)
+  const tb = createdAtMs(b.createdAt)
+  if (ta !== tb) return ta - tb
+  return a.id - b.id
+}
+
 function mergeMessages(prev, incoming) {
   const map = new Map(prev.map((m) => [m.id, m]))
   map.set(incoming.id, incoming)
-  return Array.from(map.values()).sort((a, b) => {
-    const ta = new Date(a.createdAt).getTime()
-    const tb = new Date(b.createdAt).getTime()
-    if (ta !== tb) return ta - tb
-    return a.id - b.id
-  })
+  return Array.from(map.values()).sort(compareMessagesByTimeThenId)
 }
 
 export default function Chat() {
@@ -34,14 +41,7 @@ export default function Chat() {
       if (!res.ok) return
       const list = await res.json()
       if (!Array.isArray(list)) return
-      setMessages(
-        [...list].sort((a, b) => {
-          const ta = new Date(a.createdAt).getTime()
-          const tb = new Date(b.createdAt).getTime()
-          if (ta !== tb) return ta - tb
-          return a.id - b.id
-        }),
-      )
+      setMessages([...list].sort(compareMessagesByTimeThenId))
     } catch {
       /* ignore network / parse errors */
     }
