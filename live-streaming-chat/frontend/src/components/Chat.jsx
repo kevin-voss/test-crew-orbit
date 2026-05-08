@@ -29,18 +29,22 @@ export default function Chat() {
   const base = useMemo(() => apiRoot(), [])
 
   const loadHistory = useCallback(async () => {
-    const res = await fetch(`${base}/api/chat/messages`)
-    if (!res.ok) return
-    const list = await res.json()
-    if (!Array.isArray(list)) return
-    setMessages(
-      [...list].sort((a, b) => {
-        const ta = new Date(a.createdAt).getTime()
-        const tb = new Date(b.createdAt).getTime()
-        if (ta !== tb) return ta - tb
-        return a.id - b.id
-      }),
-    )
+    try {
+      const res = await fetch(`${base}/api/chat/messages`)
+      if (!res.ok) return
+      const list = await res.json()
+      if (!Array.isArray(list)) return
+      setMessages(
+        [...list].sort((a, b) => {
+          const ta = new Date(a.createdAt).getTime()
+          const tb = new Date(b.createdAt).getTime()
+          if (ta !== tb) return ta - tb
+          return a.id - b.id
+        }),
+      )
+    } catch {
+      /* ignore network / parse errors */
+    }
   }, [base])
 
   useEffect(() => {
@@ -80,20 +84,24 @@ export default function Chat() {
     const content = draft.trim()
     if (!content) return
 
-    const res = await fetch(`${base}/api/chat/messages`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ content }),
-    })
+    try {
+      const res = await fetch(`${base}/api/chat/messages`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content }),
+      })
 
-    if (res.ok) {
-      try {
-        const msg = await res.json()
-        setMessages((prev) => mergeMessages(prev, msg))
-      } catch {
-        /* fall back to SSE / refresh */
+      if (res.ok) {
+        try {
+          const msg = await res.json()
+          setMessages((prev) => mergeMessages(prev, msg))
+        } catch {
+          /* fall back to SSE / refresh */
+        }
+        setDraft('')
       }
-      setDraft('')
+    } catch {
+      /* connection errors */
     }
   }
 
