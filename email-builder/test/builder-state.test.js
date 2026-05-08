@@ -47,6 +47,35 @@ describe("createEmailBuilder", () => {
     expect(html).toMatch(/email-component-header/);
   });
 
+  it("uses a default paragraph when text is empty", () => {
+    const b = createEmailBuilder();
+    const added = b.addParagraph("   ");
+    expect(added.type).toBe("paragraph");
+    expect(added.text).toBe("Add your message here.");
+  });
+
+  it("addParagraph persists and previews", () => {
+    const b = createEmailBuilder();
+    b.addParagraph("Line one");
+    expect(b.getBlocks()).toHaveLength(1);
+    expect(b.getBlocks()[0].type).toBe("paragraph");
+    const html = b.getPreviewHtml();
+    expect(html).toMatch(/email-component-paragraph/);
+    expect(html).toMatch(/Line one/);
+    expect(html).toMatch(/data-component-type="paragraph"/);
+  });
+
+  it("header and paragraph order is preserved in preview", () => {
+    const b = createEmailBuilder();
+    b.addHeader("Hi");
+    b.addParagraph("Body");
+    const html = b.getPreviewHtml();
+    const hiIdx = html.indexOf("Hi");
+    const bodyIdx = html.indexOf("Body");
+    expect(hiIdx).toBeGreaterThan(-1);
+    expect(bodyIdx).toBeGreaterThan(hiIdx);
+  });
+
   it("updateHeaderTitle mutates the matching block", () => {
     const b = createEmailBuilder();
     const { id } = b.addHeader("A");
@@ -54,7 +83,15 @@ describe("createEmailBuilder", () => {
     expect(b.getBlocks()[0].title).toBe("B");
   });
 
+  it("updateParagraphText updates the matching block", () => {
+    const b = createEmailBuilder();
+    const { id } = b.addParagraph("X");
+    b.updateParagraphText(id, "Y");
+    expect(b.getBlocks()[0].text).toBe("Y");
+  });
+
   it("removeBlock deletes by id", () => {
+
     const b = createEmailBuilder();
     const { id } = b.addHeader("x");
     b.removeBlock(id);

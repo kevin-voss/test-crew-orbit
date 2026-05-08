@@ -93,12 +93,22 @@ body {
   color: #475569;
 }
 
-#header-title-input {
+#header-title-input,
+.paragraph-draft-input {
   flex: 1 1 140px;
   padding: 0.5rem 0.65rem;
   border: 1px solid #cbd5e1;
   border-radius: 6px;
   font-size: 0.95rem;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 4.5rem;
+}
+
+.component-toolbar--secondary {
+  margin-top: 0.25rem;
+  padding-top: 1rem;
+  border-top: 1px dashed #e2e8f0;
 }
 
 .btn {
@@ -158,12 +168,16 @@ body {
   color: #64748b;
 }
 
-.block-title-input {
+.block-title-input,
+.block-body-input {
   width: 100%;
   padding: 0.45rem 0.55rem;
   border: 1px solid #cbd5e1;
   border-radius: 6px;
   font-size: 0.9rem;
+  font-family: inherit;
+  resize: vertical;
+  line-height: 1.45;
 }
 
 .email-preview {
@@ -191,6 +205,13 @@ body {
   font-size: 1.5rem;
   font-weight: 700;
   color: #0f172a;
+}
+
+.email-component-paragraph p {
+  margin: 0 0 1rem;
+  font-size: 1rem;
+  line-height: 1.55;
+  color: #334155;
 }
 
 .email-preview-empty {

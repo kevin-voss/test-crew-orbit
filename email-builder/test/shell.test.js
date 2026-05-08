@@ -44,9 +44,11 @@ describe("Email Builder Shell", () => {
       expect(html).toMatch(/id="composition-list"/);
     });
 
-    it("exposes header component controls", () => {
+    it("exposes header and paragraph controls", () => {
       expect(html).toMatch(/id="header-title-input"/);
       expect(html).toMatch(/id="add-header-btn"/);
+      expect(html).toMatch(/id="paragraph-text-input"/);
+      expect(html).toMatch(/id="add-paragraph-btn"/);
     });
 
     it("has an email preview region", () => {
@@ -105,9 +107,11 @@ describe("Email Builder Shell", () => {
       html = readFileSync(APP_JS_PATH, "utf8");
     });
 
-    it("preview renderer marks header components", () => {
+    it("preview renderer marks header and paragraph components", () => {
       expect(html).toMatch(/data-component-type=\s*["']header["']/);
+      expect(html).toMatch(/data-component-type=\s*["']paragraph["']/);
       expect(html).toMatch(/email-component-header/);
+      expect(html).toMatch(/email-component-paragraph/);
     });
 
     it("escapes HTML when rendering header titles", () => {
