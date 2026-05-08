@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Email Builder</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script defer type="module" src="app.js"></script>
+  </head>
+  <body>
+    <div class="email-builder">
+      <header class="builder-page-header">
+        <h1>Email Builder</h1>
+      </header>
+
+      <main class="builder-layout" aria-label="Email composition and preview">
+        <section class="builder-panel" aria-labelledby="builder-heading">
+          <h2 id="builder-heading">Compose</h2>
+
+          <div class="component-toolbar">
+            <label for="header-title-input">Header title</label>
+            <input
+              type="text"
+              id="header-title-input"
+              placeholder="e.g. Weekly newsletter"
+              aria-label="Header title for new component"
+            />
+            <button type="button" id="add-header-btn" class="btn btn-primary" aria-label="Add header component">
+              Add header
+            </button>
+          </div>
+
+          <ul id="composition-list" class="composition-list" aria-label="Email components"></ul>
+        </section>
+
+        <section class="preview-section" aria-labelledby="preview-heading">
+          <h2 id="preview-heading">Preview</h2>
+          <div id="email-preview" class="email-preview" aria-live="polite"></div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>
