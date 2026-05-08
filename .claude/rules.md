@@ -6,13 +6,16 @@
 - **Check `package.json`** before starting: see available scripts and understand the project's dependencies
 
 ## Project Structure
-- **Monorepo**: Multiple independent projects in root directories
-  - `mini-expense-tracker/` – JS/TS app, vitest, no build step
-  - `habit-tracker/` – JS/TS app, vitest, no build step
-  - `personal-todo-app/` – JS/TS app, vitest, no build step
-  - `markdown-notes-app/` – JS/TS app, vitest, no build step
-  - `weather-dashboard/` – JS/TS app, vitest, no build step
-  - `flashcard-quiz-app/` – JS/TS app, vitest, no build step
+- **Monorepo**: Multiple independent projects (mixed languages)
+  - **JS/TS projects** (vitest, no build step):
+    - `mini-expense-tracker/`
+    - `habit-tracker/`
+    - `personal-todo-app/`
+    - `markdown-notes-app/`
+    - `weather-dashboard/`
+    - `flashcard-quiz-app/`
+  - **Python projects**:
+    - `html-pdf-converter/` – HTML to PDF converter
 
 ## Testing & Builds
 - **Test runner**: vitest (config: `vitest.config.js` in each project)
