@@ -8,12 +8,15 @@
 ## Project Structure
 - **Monorepo**: Multiple independent projects (mixed languages)
   - **JS/TS projects** (vitest, no build step):
-    - `mini-expense-tracker/`
-    - `habit-tracker/`
-    - `personal-todo-app/`
-    - `markdown-notes-app/`
-    - `weather-dashboard/`
-    - `flashcard-quiz-app/`
+    - `chat-app-demo/` – Chat application demo
+    - `email-builder/` – Email builder with live preview
+    - `flashcard-quiz-app/` – Quiz flashcard application
+    - `habit-tracker/` – Habit tracking app
+    - `markdown-notes-app/` – Markdown-based notes
+    - `mini-expense-tracker/` – Expense tracking app
+    - `personal-todo-app/` – Personal todo list
+    - `tic-tac-toe/` – Tic Tac Toe game
+    - `weather-dashboard/` – Weather information display
   - **Python projects**:
     - `html-pdf-converter/` – HTML to PDF converter
 
