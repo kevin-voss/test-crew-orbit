@@ -13,31 +13,52 @@ function formatFedAt(iso) {
 
 export function FeedingHistory({ entries = [] }) {
   return (
-    <Card>
+    <Card role="region" aria-labelledby="feeding-history-title">
       <CardHeader>
-        <CardTitle>History</CardTitle>
-        <CardDescription>Recent feedings from this session. Persistence can be added later.</CardDescription>
+        <CardTitle id="feeding-history-title">Feeding history</CardTitle>
+        <CardDescription>Saved feedings from this visit appear below.</CardDescription>
       </CardHeader>
       <CardContent>
         {entries.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No entries yet.</p>
+          <div
+            className="flex flex-col items-center justify-center rounded-md border border-dashed border-border bg-muted/30 px-4 py-10 text-center"
+            aria-live="polite"
+          >
+            <p className="text-sm font-medium text-foreground">No feeding records yet</p>
+            <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+              After you save a feeding, it will show up in this list.
+            </p>
+          </div>
         ) : (
           <ul className="flex flex-col gap-3">
             {entries.map((entry) => (
               <li
                 key={entry.id}
-                className="rounded-md border border-border bg-card px-3 py-2 text-sm"
+                className="rounded-md border border-border bg-card px-3 py-3 text-sm shadow-sm"
               >
                 <p className="font-medium text-foreground">{formatFedAt(entry.fedAt)}</p>
-                <p className="text-muted-foreground">
-                  Given: <span className="text-foreground">{entry.foodGiven}</span>
-                </p>
-                <p className="text-muted-foreground">
-                  Got: <span className="text-foreground">{entry.foodReceived}</span>
-                </p>
-                <p className="text-muted-foreground">
-                  Liked: <span className="text-foreground">{entry.likedAmount}/5</span>
-                </p>
+                <dl className="mt-2 space-y-1.5">
+                  <div>
+                    <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                      Food given
+                    </dt>
+                    <dd className="text-foreground">{entry.foodGiven}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                      Food the cat got
+                    </dt>
+                    <dd className="text-foreground">{entry.foodReceived}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                      How much she liked it
+                    </dt>
+                    <dd className="text-foreground">
+                      {entry.likedAmount}/5
+                    </dd>
+                  </div>
+                </dl>
               </li>
             ))}
           </ul>
