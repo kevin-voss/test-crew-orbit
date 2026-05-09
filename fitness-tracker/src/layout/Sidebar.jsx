@@ -7,7 +7,7 @@ export default function Sidebar({ currentView, onViewChange }) {
   ]
 
   return (
-    <aside className="w-64 border-r border-border bg-card">
+    <aside className="relative w-64 border-r border-border bg-card">
       <div className="p-6">
         <h2 className="text-lg font-semibold text-foreground mb-6">Menu</h2>
         <nav className="space-y-2">
