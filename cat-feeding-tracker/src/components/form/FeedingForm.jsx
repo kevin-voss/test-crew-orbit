@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { createFeedingRecord } from "@/state/feedingRecords";
 
 const selectTriggerClass = cn(
   "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background",
@@ -42,13 +43,7 @@ export function FeedingForm({ onSubmit }) {
   });
 
   function handleValidSubmit(values) {
-    const entry = {
-      fedAt: new Date(values.fedAt).toISOString(),
-      foodGiven: values.foodGiven,
-      foodReceived: values.foodReceived,
-      likedAmount: Number(values.likedAmount),
-    };
-    onSubmit?.(entry);
+    onSubmit?.(createFeedingRecord(values));
     form.reset();
   }
 
