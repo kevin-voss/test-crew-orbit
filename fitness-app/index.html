@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Log workouts and run simple interval timers in the browser">
+  <title>Orbit Fitness</title>
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <div class="app">
+    <header class="app-header">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">◎</span>
+        <div>
+          <h1>Orbit Fitness</h1>
+          <p class="tagline">Log sessions and keep interval work on track</p>
+        </div>
+      </div>
+      <nav class="tabs" role="tablist" aria-label="Main sections">
+        <button type="button" role="tab" id="tab-log" aria-selected="true" aria-controls="panel-log" data-panel="panel-log">Log</button>
+        <button type="button" role="tab" id="tab-timer" aria-selected="false" aria-controls="panel-timer" data-panel="panel-timer">Timer</button>
+      </nav>
+    </header>
+
+    <main class="panels">
+      <section id="panel-log" role="tabpanel" aria-labelledby="tab-log" class="panel panel--active">
+        <div class="grid">
+          <article class="card card--accent">
+            <h2 class="card-title">Today</h2>
+            <dl class="stats">
+              <div>
+                <dt>Total minutes</dt>
+                <dd id="stat-minutes">0</dd>
+              </div>
+              <div>
+                <dt>Sessions</dt>
+                <dd id="stat-sessions">0</dd>
+              </div>
+            </dl>
+            <form id="workout-form" class="workout-form" autocomplete="off">
+              <label class="field">
+                <span>Type</span>
+                <select id="workout-type" name="type">
+                  <option value="Strength">Strength</option>
+                  <option value="Cardio">Cardio</option>
+                  <option value="Mobility">Mobility</option>
+                  <option value="Walk">Walk</option>
+                  <option value="Other">Other</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>Minutes</span>
+                <input id="workout-duration" name="duration" type="number" min="1" max="720" step="1" value="25" required>
+              </label>
+              <label class="field field--full">
+                <span>Notes</span>
+                <input id="workout-notes" name="notes" type="text" maxlength="140" placeholder="Optional">
+              </label>
+              <button type="submit" class="btn btn--primary">Add session</button>
+            </form>
+          </article>
+
+          <article class="card">
+            <div class="card-head">
+              <h2 class="card-title">Recent activity</h2>
+              <button type="button" id="clear-all" class="btn btn--ghost">Clear history</button>
+            </div>
+            <ul id="activity-list" class="activity-list"></ul>
+            <p id="empty-state" class="empty-state hidden">Nothing logged yet. Add your first session.</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="panel-timer" role="tabpanel" aria-labelledby="tab-timer" class="panel" hidden>
+        <article class="card card--timer">
+          <h2 class="card-title">Interval timer</h2>
+          <p class="hint">Customize work and rest, then run rounds in the browser.</p>
+          <div class="timer-display" aria-live="polite">
+            <span id="timer-phase" class="timer-phase">Ready</span>
+            <span id="timer-clock" class="timer-clock">00:00</span>
+          </div>
+          <form id="timer-form" class="timer-form">
+            <label class="field">
+              <span>Work (sec)</span>
+              <input id="timer-work" type="number" min="10" max="3600" value="45" required>
+            </label>
+            <label class="field">
+              <span>Rest (sec)</span>
+              <input id="timer-rest" type="number" min="5" max="600" value="15" required>
+            </label>
+            <label class="field">
+              <span>Rounds</span>
+              <input id="timer-rounds" type="number" min="1" max="99" value="8" required>
+            </label>
+          </form>
+          <div class="timer-actions">
+            <button type="button" id="timer-start" class="btn btn--primary">Start</button>
+            <button type="button" id="timer-pause" class="btn" disabled>Pause</button>
+            <button type="button" id="timer-reset" class="btn btn--ghost">Reset</button>
+          </div>
+        </article>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <p>Stored locally on this device only.</p>
+    </footer>
+  </div>
+</body>
+</html>
