@@ -50,7 +50,7 @@ export function FeedingForm({ onSubmit }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Log a feeding</CardTitle>
+        <CardTitle className="text-xl font-semibold tracking-tight">Log a feeding</CardTitle>
         <CardDescription>Record when your cat was fed, what was offered, what she ate, and how she liked it.</CardDescription>
       </CardHeader>
       <CardContent>

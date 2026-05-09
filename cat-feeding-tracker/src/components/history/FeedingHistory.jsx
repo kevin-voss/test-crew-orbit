@@ -15,10 +15,18 @@ export function FeedingHistory({ entries = [] }) {
   return (
     <Card role="region" aria-labelledby="feeding-history-title">
       <CardHeader>
-        <CardTitle id="feeding-history-title">Feeding history</CardTitle>
-        <CardDescription>Saved feedings from this visit appear below.</CardDescription>
+        <CardTitle id="feeding-history-title" className="text-xl font-semibold tracking-tight">
+          Feeding history
+        </CardTitle>
+        <CardDescription>Saved feedings from this session appear here as you add them.</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent
+        className={
+          entries.length > 0
+            ? "max-h-[min(60vh,32rem)] overflow-y-auto [scrollbar-gutter:stable]"
+            : undefined
+        }
+      >
         {entries.length === 0 ? (
           <div
             className="flex flex-col items-center justify-center rounded-md border border-dashed border-border bg-muted/30 px-4 py-10 text-center"
