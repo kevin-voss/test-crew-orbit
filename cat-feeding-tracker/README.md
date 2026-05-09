@@ -1,10 +1,10 @@
 # Cat feeding tracker
 
-Frontend-only React app (Vite + Tailwind + shadcn-style UI). No backend.
+Frontend-only React app (Bun + Vite + Tailwind + shadcn/ui primitives). No backend or server-side data fetching.
 
 ## Prerequisites
 
-- [Bun](https://bun.sh) (recommended) or Node + npm
+- [Bun](https://bun.sh) (install globally). Lockfile is `bun.lock`; use Bun for installs so dependency graphs stay aligned.
 
 ## Setup
 
@@ -15,15 +15,13 @@ bun install
 
 ## Commands
 
-- `bun run dev` — local dev server (Vite)
+- `bun run dev` — local dev server (Vite SPA)
 - `bun run build` — production build to `dist/`
 - `bun run preview` — preview the production build
-
-With **npm**, ensure devDependencies install (e.g. default shell `NODE_ENV`, or `npm install --include=dev`), then `npm run build`.
 
 ## Layout
 
 - `src/components/form/` — feeding form (scaffold)
 - `src/components/history/` — history list (scaffold)
 - `src/components/shared/` — shared chrome
-- `src/components/ui/` — shadcn-style primitives
+- `src/components/ui/` — shadcn/ui primitives (`components.json`)
