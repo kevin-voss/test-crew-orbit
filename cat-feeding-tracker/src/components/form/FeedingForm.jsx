@@ -1,6 +1,9 @@
-import * as React from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
@@ -10,57 +13,43 @@ const selectTriggerClass = cn(
   "disabled:cursor-not-allowed disabled:opacity-50",
 );
 
-const emptyErrors = {
-  fedAt: "",
-  foodGiven: "",
-  foodReceived: "",
-  likedAmount: "",
-};
+const feedingFormSchema = z.object({
+  fedAt: z.string().min(1, "Feeding date and time is required."),
+  foodGiven: z
+    .string()
+    .transform((v) => v.trim())
+    .pipe(z.string().min(1, "Food given is required.")),
+  foodReceived: z
+    .string()
+    .transform((v) => v.trim())
+    .pipe(z.string().min(1, "Food the cat got is required.")),
+  likedAmount: z
+    .string()
+    .min(1, "How much she liked it is required.")
+    .regex(/^[1-5]$/, "Choose a level from 1 to 5."),
+});
 
 export function FeedingForm({ onSubmit }) {
-  const [fedAt, setFedAt] = React.useState("");
-  const [foodGiven, setFoodGiven] = React.useState("");
-  const [foodReceived, setFoodReceived] = React.useState("");
-  const [likedAmount, setLikedAmount] = React.useState("");
-  const [errors, setErrors] = React.useState(emptyErrors);
+  const form = useForm({
+    resolver: zodResolver(feedingFormSchema),
+    defaultValues: {
+      fedAt: "",
+      foodGiven: "",
+      foodReceived: "",
+      likedAmount: "",
+    },
+    mode: "onSubmit",
+  });
 
-  function validate() {
-    const next = { ...emptyErrors };
-    let valid = true;
-
-    if (!fedAt.trim()) {
-      next.fedAt = "Feeding date and time is required.";
-      valid = false;
-    }
-    if (!foodGiven.trim()) {
-      next.foodGiven = "Food given is required.";
-      valid = false;
-    }
-    if (!foodReceived.trim()) {
-      next.foodReceived = "Food the cat got is required.";
-      valid = false;
-    }
-    if (!likedAmount) {
-      next.likedAmount = "How much she liked it is required.";
-      valid = false;
-    }
-
-    setErrors(next);
-    return valid;
-  }
-
-  function handleSubmit(event) {
-    event.preventDefault();
-    if (!validate()) return;
-
+  function handleValidSubmit(values) {
     const entry = {
-      fedAt: new Date(fedAt).toISOString(),
-      foodGiven: foodGiven.trim(),
-      foodReceived: foodReceived.trim(),
-      likedAmount: Number(likedAmount),
+      fedAt: new Date(values.fedAt).toISOString(),
+      foodGiven: values.foodGiven,
+      foodReceived: values.foodReceived,
+      likedAmount: Number(values.likedAmount),
     };
-
     onSubmit?.(entry);
+    form.reset();
   }
 
   return (
@@ -70,96 +59,74 @@ export function FeedingForm({ onSubmit }) {
         <CardDescription>Record when your cat was fed, what was offered, what she ate, and how she liked it.</CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
-          <div className="grid gap-2">
-            <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" htmlFor="feeding-datetime">
-              Feeding date &amp; time
-            </label>
-            <Input
-              id="feeding-datetime"
-              type="datetime-local"
-              value={fedAt}
-              onChange={(e) => setFedAt(e.target.value)}
-              aria-invalid={Boolean(errors.fedAt)}
-              aria-describedby={errors.fedAt ? "feeding-datetime-error" : undefined}
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(handleValidSubmit)} noValidate className="flex flex-col gap-4">
+            <FormField
+              control={form.control}
+              name="fedAt"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Feeding date &amp; time</FormLabel>
+                  <FormControl>
+                    <Input type="datetime-local" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-            {errors.fedAt ? (
-              <p id="feeding-datetime-error" className="text-sm font-medium text-destructive" role="alert">
-                {errors.fedAt}
-              </p>
-            ) : null}
-          </div>
 
-          <div className="grid gap-2">
-            <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" htmlFor="feeding-food-given">
-              Food given
-            </label>
-            <Input
-              id="feeding-food-given"
-              type="text"
-              autoComplete="off"
-              placeholder="e.g. wet food, kibble brand"
-              value={foodGiven}
-              onChange={(e) => setFoodGiven(e.target.value)}
-              aria-invalid={Boolean(errors.foodGiven)}
-              aria-describedby={errors.foodGiven ? "feeding-food-given-error" : undefined}
+            <FormField
+              control={form.control}
+              name="foodGiven"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Food given</FormLabel>
+                  <FormControl>
+                    <Input type="text" autoComplete="off" placeholder="e.g. wet food, kibble brand" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-            {errors.foodGiven ? (
-              <p id="feeding-food-given-error" className="text-sm font-medium text-destructive" role="alert">
-                {errors.foodGiven}
-              </p>
-            ) : null}
-          </div>
 
-          <div className="grid gap-2">
-            <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" htmlFor="feeding-food-received">
-              Food the cat got
-            </label>
-            <Input
-              id="feeding-food-received"
-              type="text"
-              autoComplete="off"
-              placeholder="What she actually ate"
-              value={foodReceived}
-              onChange={(e) => setFoodReceived(e.target.value)}
-              aria-invalid={Boolean(errors.foodReceived)}
-              aria-describedby={errors.foodReceived ? "feeding-food-received-error" : undefined}
+            <FormField
+              control={form.control}
+              name="foodReceived"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Food the cat got</FormLabel>
+                  <FormControl>
+                    <Input type="text" autoComplete="off" placeholder="What she actually ate" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-            {errors.foodReceived ? (
-              <p id="feeding-food-received-error" className="text-sm font-medium text-destructive" role="alert">
-                {errors.foodReceived}
-              </p>
-            ) : null}
-          </div>
 
-          <div className="grid gap-2">
-            <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" htmlFor="feeding-liked">
-              How much she liked it
-            </label>
-            <select
-              id="feeding-liked"
-              className={selectTriggerClass}
-              value={likedAmount}
-              onChange={(e) => setLikedAmount(e.target.value)}
-              aria-invalid={Boolean(errors.likedAmount)}
-              aria-describedby={errors.likedAmount ? "feeding-liked-error" : undefined}
-            >
-              <option value="">Choose a level</option>
-              <option value="1">1 — Refused / disliked</option>
-              <option value="2">2 — Picked at it</option>
-              <option value="3">3 — Ate some</option>
-              <option value="4">4 — Enjoyed it</option>
-              <option value="5">5 — Loved it</option>
-            </select>
-            {errors.likedAmount ? (
-              <p id="feeding-liked-error" className="text-sm font-medium text-destructive" role="alert">
-                {errors.likedAmount}
-              </p>
-            ) : null}
-          </div>
+            <FormField
+              control={form.control}
+              name="likedAmount"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>How much she liked it</FormLabel>
+                  <FormControl>
+                    <select className={selectTriggerClass} {...field}>
+                      <option value="">Choose a level</option>
+                      <option value="1">1 — Refused / disliked</option>
+                      <option value="2">2 — Picked at it</option>
+                      <option value="3">3 — Ate some</option>
+                      <option value="4">4 — Enjoyed it</option>
+                      <option value="5">5 — Loved it</option>
+                    </select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <Button type="submit">Save</Button>
-        </form>
+            <Button type="submit">Save</Button>
+          </form>
+        </Form>
       </CardContent>
     </Card>
   );
