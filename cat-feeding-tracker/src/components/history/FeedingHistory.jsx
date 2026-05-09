@@ -46,13 +46,13 @@ export function FeedingHistory({ entries = [] }) {
                   </div>
                   <div>
                     <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                      Food the cat got
+                      Food received
                     </dt>
                     <dd className="text-foreground">{entry.foodReceived}</dd>
                   </div>
                   <div>
                     <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                      How much she liked it
+                      How much the cat liked it
                     </dt>
                     <dd className="text-foreground">
                       {entry.likedAmount}/5
