@@ -31,6 +31,6 @@
     "postcss": "^8.4.32",
     "tailwindcss": "^3.4.1",
     "vite": "^5.0.11",
-    "vitest": "file:../../../tmp/vitest-324.tgz"
+    "vitest": "^2.1.0"
   }
 }

@@ -7,16 +7,23 @@ import { create } from 'zustand'
  * Example usage:
  * const { workouts, addWorkout } = useAppStore()
  */
+function uniqueSuffix() {
+  const c = globalThis.crypto
+  if (c?.randomUUID) return c.randomUUID()
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`
+}
+
 export const useAppStore = create((set) => ({
   // Workout state
   workouts: [],
   addWorkout: (workout) => set((state) => {
-    // Enforce ID deduplication: filter out existing entry with same id
-    const filtered = state.workouts.filter(w => w.id !== workout.id)
-    return { workouts: [...filtered, workout] }
+    const id = workout.id
+    const idTaken = id !== undefined && state.workouts.some((w) => w.id === id)
+    const next = idTaken ? { ...workout, id: `${String(id)}:${uniqueSuffix()}` } : workout
+    return { workouts: [...state.workouts, next] }
   }),
   removeWorkout: (id) => set((state) => ({
-    workouts: state.workouts.filter(w => w.id !== id)
+    workouts: state.workouts.filter((w) => w.id !== id),
   })),
   updateWorkout: (id, updates) => set((state) => {
     // Protect id field from mutation: strip it from updates
