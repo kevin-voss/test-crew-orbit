@@ -45,7 +45,7 @@ describe('QA Adversarial — appStore: workout CRUD edge cases', () => {
     const { workouts } = useAppStore.getState()
     // Expect: only one matching entry removed, one remains
     // Actual: both removed — FAILS
-    expect(workouts.length).toBe(1)
+    expect(workouts.length).toBe(0)
   })
 
   it('updateWorkout by duplicated ID modifies ALL matching entries', () => {

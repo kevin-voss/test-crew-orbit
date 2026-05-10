@@ -17,10 +17,13 @@ export const useAppStore = create((set) => ({
   // Workout state
   workouts: [],
   addWorkout: (workout) => set((state) => {
+    // Guard against raw primitives
+    if (typeof workout !== 'object' || workout === null) return state
     const id = workout.id
+    // Reject if ID already exists (deduplication by rejection)
     const idTaken = id !== undefined && state.workouts.some((w) => w.id === id)
-    const next = idTaken ? { ...workout, id: `${String(id)}:${uniqueSuffix()}` } : workout
-    return { workouts: [...state.workouts, next] }
+    if (idTaken) return state
+    return { workouts: [...state.workouts, workout] }
   }),
   removeWorkout: (id) => set((state) => ({
     workouts: state.workouts.filter((w) => w.id !== id),
@@ -36,8 +39,8 @@ export const useAppStore = create((set) => ({
   // Analytics state
   analyticsData: {},
   setAnalyticsData: (data) => set((state) => {
-    // Validate that data is a non-null object
-    if (typeof data !== 'object' || data === null) {
+    // Validate that data is a non-null object (reject arrays)
+    if (typeof data !== 'object' || data === null || Array.isArray(data)) {
       return { analyticsData: {} }
     }
     return { analyticsData: data }
@@ -49,6 +52,8 @@ export const useAppStore = create((set) => ({
     units: 'metric',
   },
   setPreferences: (prefs) => set((state) => {
+    // Guard against arrays and non-objects
+    if (Array.isArray(prefs) || (typeof prefs !== 'object' && prefs !== null)) return state
     // Filter out null/undefined values to prevent corrupting preference state
     const filtered = {}
     for (const [key, value] of Object.entries(prefs || {})) {
