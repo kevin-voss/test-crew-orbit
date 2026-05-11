@@ -99,4 +99,56 @@ export const useWeeklyGymStore = create((set, get) => ({
     const plansSet = new Set(sessions.map((s) => s.plan))
     return Array.from(plansSet)
   },
+
+  // Analytics selectors (derived)
+  analyticsChartData: () => {
+    const sessions = get().selectedWeekSessions()
+    const weekStart = new Date(get().selectedWeekStart)
+
+    // Daily visits data for bar chart
+    const dailyData = []
+    const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(weekStart)
+      date.setDate(weekStart.getDate() + i)
+      const dateStr = date.toISOString().split('T')[0]
+      const dayVisits = sessions.filter((s) => s.date === dateStr).length
+
+      dailyData.push({
+        day: dayNames[i],
+        visits: dayVisits,
+        date: dateStr,
+      })
+    }
+
+    return dailyData
+  },
+
+  planUsageChartData: () => {
+    const sessions = get().selectedWeekSessions()
+    const planCounts = {}
+
+    sessions.forEach((session) => {
+      planCounts[session.plan] = (planCounts[session.plan] || 0) + 1
+    })
+
+    return Object.entries(planCounts).map(([plan, count]) => ({
+      name: plan,
+      value: count,
+    }))
+  },
+
+  analyticsMetrics: () => {
+    const sessions = get().selectedWeekSessions()
+    const plans = get().weeklyPlanUsage()
+    const totalDuration = sessions.reduce((sum, s) => sum + (s.duration || 0), 0)
+
+    return {
+      totalSessions: sessions.length,
+      uniquePlans: plans.length,
+      totalDuration,
+      averageSessionDuration: sessions.length > 0 ? Math.round(totalDuration / sessions.length) : 0,
+    }
+  },
 }))
