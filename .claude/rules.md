@@ -35,10 +35,13 @@
 
 ## State Management & Input Guards
 - **fitness-tracker** uses **Zustand** for state management (see `src/store/`)
-  - Pattern: Input guards protect store mutations (type validation, null checks, deduplication)
-  - Example: `addWorkout()` rejects non-objects and duplicate IDs; `updateWorkout()` strips `id` field
+  - **Mutations:** Input guards protect all store mutations (type validation, null checks, required field checks)
+    - Example: `addSession()` rejects non-objects and validates required fields; `updateSession()` rejects non-object updates
+    - When adding store methods, validate inputs before mutating state
+  - **Derived state:** Selector functions compute filtered/derived data from raw state
+    - Example: `selectedWeekSessions()` filters sessions by selected week; `weeklyVisitCount()` counts visits
+    - Use selectors (via `get()`) to avoid duplicate logic and keep state minimal
   - Tests validate robustness against invalid inputs (adversarial cases)
-  - When adding store methods, include guards at boundaries (reject invalid state before mutating)
 
 ## File References
 - Use format: `path/to/file.js:line_number` when referencing code
