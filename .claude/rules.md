@@ -14,10 +14,16 @@
     - `mini-expense-tracker/` – Expense tracking app
     - `personal-todo-app/` – Personal todo list
     - `weather-dashboard/` – Weather information display
+  - **NPM + Vite projects** (React, Tailwind, no vitest):
+    - `fitness-tracker/` – Fitness tracking app (Zustand store with hardened input guards)
+    - `cat-feeding-tracker/` – Cat feeding tracker (bun package manager)
   - **HTML/CSS/JS (no build system)**:
     - `chat-app-demo/` – Chat application demo (plain HTML/CSS/JS)
     - `flashcard-quiz-app/` – Quiz flashcard application
     - `tic-tac-toe/` – Tic Tac Toe game (plain HTML/CSS/JS)
+    - `fitness-app/` – Fitness app with logger and timer (plain HTML/CSS/JS)
+  - **Polyglot projects**:
+    - `live-streaming-chat/` – Java backend (Maven) + Node.js frontend (Vite)
   - **Python projects**:
     - `html-pdf-converter/` – HTML to PDF converter
 
@@ -26,6 +32,13 @@
 - **HTML/CSS/JS projects**: No build system or tests
 - **Do NOT run**: `npm test`, `vitest run`, `npm install`, or other test/build/install commands during any task
 - **Do NOT start**: servers, watchers, or long-lived processes
+
+## State Management & Input Guards
+- **fitness-tracker** uses **Zustand** for state management (see `src/store/`)
+  - Pattern: Input guards protect store mutations (type validation, null checks, deduplication)
+  - Example: `addWorkout()` rejects non-objects and duplicate IDs; `updateWorkout()` strips `id` field
+  - Tests validate robustness against invalid inputs (adversarial cases)
+  - When adding store methods, include guards at boundaries (reject invalid state before mutating)
 
 ## File References
 - Use format: `path/to/file.js:line_number` when referencing code
