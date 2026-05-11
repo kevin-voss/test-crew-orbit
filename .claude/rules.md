@@ -43,6 +43,8 @@
     - Use selectors (via `get()`) to avoid duplicate logic and keep state minimal
   - Tests validate robustness against invalid inputs (adversarial cases)
 
+**Note:** Zustand is specific to fitness-tracker. Other projects use different approaches (React Context, plain props, no state management). Match the pattern already in use for each project—do not introduce new state libraries without confirming with the project's existing approach.
+
 ## File References
 - Use format: `path/to/file.js:line_number` when referencing code
 

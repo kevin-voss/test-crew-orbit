@@ -309,6 +309,90 @@ describe('Weekly Gym Store', () => {
     })
   })
 
+  describe('Analytics Selectors', () => {
+    it('analyticsChartData returns 7 days with correct visit counts', () => {
+      const { addSession, setSelectedWeek } = useWeeklyGymStore.getState()
+      const weekStart = '2026-05-11' // Monday
+      setSelectedWeek(weekStart)
+
+      addSession({ id: 's1', date: '2026-05-11', plan: 'Push Day' }) // Mon
+      addSession({ id: 's2', date: '2026-05-11', plan: 'Cardio' })   // Mon again
+      addSession({ id: 's3', date: '2026-05-13', plan: 'Pull Day' }) // Wed
+
+      const data = useWeeklyGymStore.getState().analyticsChartData()
+      expect(data).toHaveLength(7)
+      expect(data[0]).toMatchObject({ day: 'Mon', visits: 2 })
+      expect(data[1]).toMatchObject({ day: 'Tue', visits: 0 })
+      expect(data[2]).toMatchObject({ day: 'Wed', visits: 1 })
+      expect(data[6]).toMatchObject({ day: 'Sun', visits: 0 })
+    })
+
+    it('analyticsChartData returns all zeros when no sessions in selected week', () => {
+      const { setSelectedWeek } = useWeeklyGymStore.getState()
+      setSelectedWeek('2026-05-11')
+
+      const data = useWeeklyGymStore.getState().analyticsChartData()
+      expect(data).toHaveLength(7)
+      expect(data.every((d) => d.visits === 0)).toBe(true)
+    })
+
+    it('planUsageChartData returns name/value pairs per plan', () => {
+      const { addSession, setSelectedWeek } = useWeeklyGymStore.getState()
+      setSelectedWeek('2026-05-11')
+
+      addSession({ id: 's1', date: '2026-05-11', plan: 'Push Day' })
+      addSession({ id: 's2', date: '2026-05-12', plan: 'Push Day' })
+      addSession({ id: 's3', date: '2026-05-13', plan: 'Leg Day' })
+
+      const data = useWeeklyGymStore.getState().planUsageChartData()
+      expect(data).toHaveLength(2)
+      const push = data.find((d) => d.name === 'Push Day')
+      const leg = data.find((d) => d.name === 'Leg Day')
+      expect(push).toEqual({ name: 'Push Day', value: 2 })
+      expect(leg).toEqual({ name: 'Leg Day', value: 1 })
+    })
+
+    it('planUsageChartData returns empty array when no sessions', () => {
+      useWeeklyGymStore.getState().setSelectedWeek('2026-05-11')
+      const data = useWeeklyGymStore.getState().planUsageChartData()
+      expect(data).toEqual([])
+    })
+
+    it('analyticsMetrics returns correct totals', () => {
+      const { addSession, setSelectedWeek } = useWeeklyGymStore.getState()
+      setSelectedWeek('2026-05-11')
+
+      addSession({ id: 's1', date: '2026-05-11', plan: 'Push Day', duration: 60 })
+      addSession({ id: 's2', date: '2026-05-12', plan: 'Leg Day', duration: 90 })
+      addSession({ id: 's3', date: '2026-05-13', plan: 'Leg Day', duration: 30 })
+
+      const metrics = useWeeklyGymStore.getState().analyticsMetrics()
+      expect(metrics.totalSessions).toBe(3)
+      expect(metrics.uniquePlans).toBe(2)
+      expect(metrics.totalDuration).toBe(180)
+      expect(metrics.averageSessionDuration).toBe(60)
+    })
+
+    it('analyticsMetrics returns zero averageSessionDuration when no sessions', () => {
+      useWeeklyGymStore.getState().setSelectedWeek('2026-05-11')
+      const metrics = useWeeklyGymStore.getState().analyticsMetrics()
+      expect(metrics.totalSessions).toBe(0)
+      expect(metrics.averageSessionDuration).toBe(0)
+    })
+
+    it('analyticsMetrics handles sessions without duration', () => {
+      const { addSession, setSelectedWeek } = useWeeklyGymStore.getState()
+      setSelectedWeek('2026-05-11')
+
+      addSession({ id: 's1', date: '2026-05-11', plan: 'Push Day' })
+      addSession({ id: 's2', date: '2026-05-12', plan: 'Leg Day', duration: 60 })
+
+      const metrics = useWeeklyGymStore.getState().analyticsMetrics()
+      expect(metrics.totalDuration).toBe(60)
+      expect(metrics.averageSessionDuration).toBe(30)
+    })
+  })
+
   describe('User Flow: View and Update Sessions', () => {
     it('supports user opening app and viewing current week sessions', () => {
       const { addSession, setSelectedWeek, selectedWeekSessions } =
