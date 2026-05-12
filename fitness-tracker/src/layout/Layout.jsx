@@ -1,19 +1,14 @@
 import Header from './Header'
-import Sidebar from './Sidebar'
 
-export default function Layout({ children, currentView, onViewChange }) {
+export default function Layout({ children }) {
   return (
-    <div className="flex h-screen bg-background">
-      {/* Sidebar */}
-      <Sidebar currentView={currentView} onViewChange={onViewChange} />
-
-      {/* Main content */}
-      <div className="flex flex-col flex-1">
-        <Header />
-        <main className="flex-1 overflow-auto p-6 bg-background">
+    <div className="flex h-screen flex-col bg-background">
+      <Header />
+      <main className="flex-1 overflow-auto p-6 bg-background">
+        <div className="mx-auto max-w-screen-xl">
           {children}
-        </main>
-      </div>
+        </div>
+      </main>
     </div>
   )
 }
