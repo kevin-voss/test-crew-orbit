@@ -40,8 +40,14 @@ function isInWeek(sessionDate, weekStartDate) {
 }
 
 export const useWeeklyGymStore = create((set, get) => ({
-  // State
-  sessions: [],
+  // State — seeded with sample sessions for demo purposes
+  sessions: [
+    { id: 'seed-1', date: '2026-05-11', plan: 'Push Day', duration: 65 },
+    { id: 'seed-2', date: '2026-05-12', plan: 'Pull Day', duration: 70 },
+    { id: 'seed-3', date: '2026-05-14', plan: 'Leg Day', duration: 55 },
+    { id: 'seed-4', date: '2026-05-06', plan: 'Upper Body', duration: 80 },
+    { id: 'seed-5', date: '2026-05-08', plan: 'Push Day', duration: 60 },
+  ],
   selectedWeekStart: getWeekStartDate(new Date()),
 
   // Actions
