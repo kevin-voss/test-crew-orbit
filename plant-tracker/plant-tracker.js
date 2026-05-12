@@ -1,0 +1,183 @@
+// Plant data management
+const STORAGE_KEY = 'plant-tracker-data';
+let plants = [];
+
+// Initialize app
+function init() {
+  loadPlants();
+  setupTabNavigation();
+  setupFormHandlers();
+  renderPlants();
+}
+
+// Storage functions
+function loadPlants() {
+  const stored = localStorage.getItem(STORAGE_KEY);
+  plants = stored ? JSON.parse(stored) : [];
+}
+
+function savePlants() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(plants));
+}
+
+// Tab navigation
+function setupTabNavigation() {
+  const tabs = document.querySelectorAll('.tab');
+  const panels = document.querySelectorAll('.view-panel');
+
+  tabs.forEach((tab) => {
+    tab.addEventListener('click', () => {
+      // Update tab states
+      tabs.forEach((t) => {
+        t.setAttribute('aria-selected', 'false');
+        t.setAttribute('tabindex', '-1');
+      });
+      tab.setAttribute('aria-selected', 'true');
+      tab.setAttribute('tabindex', '0');
+
+      // Update panel visibility
+      const panelId = tab.getAttribute('aria-controls');
+      panels.forEach((panel) => {
+        if (panel.id === panelId) {
+          panel.setAttribute('data-active', 'true');
+          panel.removeAttribute('hidden');
+        } else {
+          panel.removeAttribute('data-active');
+          panel.setAttribute('hidden', '');
+        }
+      });
+    });
+  });
+}
+
+// Form handlers
+function setupFormHandlers() {
+  document.getElementById('add-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const input = document.getElementById('plant-name');
+    const name = input.value.trim();
+
+    if (!name) {
+      showFeedback('add-feedback', 'Please enter a plant name.', 'error');
+      return;
+    }
+
+    const newPlant = {
+      id: Date.now(),
+      name: name,
+      addedDate: new Date().toISOString(),
+      lastWatered: new Date().toISOString(),
+      wateringFrequency: 3, // days
+    };
+
+    plants.push(newPlant);
+    savePlants();
+    input.value = '';
+    showFeedback('add-feedback', `${name} added successfully!`, 'success');
+    renderPlants();
+  });
+}
+
+// Render functions
+function renderPlants() {
+  const list = document.getElementById('plants-list');
+  const wateringBody = document.getElementById('watering-body');
+
+  list.innerHTML = '';
+  wateringBody.innerHTML = '';
+
+  if (plants.length === 0) {
+    list.innerHTML = '<p class="muted">No plants yet. Add one to get started!</p>';
+    wateringBody.innerHTML = '<p class="muted">No plants to water yet.</p>';
+    return;
+  }
+
+  plants.forEach((plant) => {
+    // Render in plants list
+    const item = document.createElement('div');
+    item.className = 'plant-item';
+    item.setAttribute('role', 'listitem');
+
+    const lastWatered = new Date(plant.lastWatered);
+    const daysAgo = Math.floor((Date.now() - lastWatered.getTime()) / (1000 * 60 * 60 * 24));
+    const needsWater = daysAgo >= plant.wateringFrequency;
+
+    item.innerHTML = `
+            <div class="plant-info">
+              <h3>${escapeHtml(plant.name)}</h3>
+              <p>Added: ${lastWatered.toLocaleDateString()}</p>
+              <p>Last watered: ${daysAgo} day${daysAgo !== 1 ? 's' : ''} ago</p>
+              <p>Water every ${plant.wateringFrequency} day${plant.wateringFrequency !== 1 ? 's' : ''}</p>
+            </div>
+            <div class="plant-actions">
+              <button class="secondary" onclick="waterPlant(${plant.id})">
+                💧 Water
+              </button>
+              <button class="danger" onclick="deletePlant(${plant.id})">
+                Delete
+              </button>
+            </div>
+          `;
+    list.appendChild(item);
+
+    // Render in watering schedule
+    const card = document.createElement('div');
+    card.className = 'watering-card';
+    const status = needsWater ? 'needs-water' : 'watered';
+    const statusText = needsWater ? 'Needs watering' : 'Recently watered';
+
+    card.innerHTML = `
+            <h3>${escapeHtml(plant.name)}</h3>
+            <div class="watering-status">
+              <div class="status-indicator ${status}"></div>
+              <span>${statusText}</span>
+            </div>
+            <p>Last watered: ${daysAgo} day${daysAgo !== 1 ? 's' : ''} ago</p>
+            <p>Water every ${plant.wateringFrequency} days</p>
+            <button class="secondary" onclick="waterPlant(${plant.id})">
+              💧 Water Now
+            </button>
+          `;
+    wateringBody.appendChild(card);
+  });
+}
+
+// Plant actions
+function waterPlant(id) {
+  const plant = plants.find((p) => p.id === id);
+  if (plant) {
+    plant.lastWatered = new Date().toISOString();
+    savePlants();
+    renderPlants();
+    showFeedback('add-feedback', `${plant.name} watered! 💧`, 'success');
+  }
+}
+
+function deletePlant(id) {
+  const plant = plants.find((p) => p.id === id);
+  if (plant && confirm(`Delete ${plant.name}?`)) {
+    plants = plants.filter((p) => p.id !== id);
+    savePlants();
+    renderPlants();
+  }
+}
+
+// Utility functions
+function showFeedback(elementId, message, type) {
+  const element = document.getElementById(elementId);
+  element.textContent = message;
+  element.className = `feedback ${type}`;
+  element.removeAttribute('hidden');
+  setTimeout(() => {
+    element.setAttribute('hidden', '');
+  }, 3000);
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// Start app
+document.addEventListener('DOMContentLoaded', init);
