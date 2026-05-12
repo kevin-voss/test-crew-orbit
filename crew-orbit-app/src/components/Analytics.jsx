@@ -51,38 +51,16 @@ function PieTooltip({ active, payload }) {
 }
 
 export default function Analytics() {
-  const analyticsChartData = useWeeklyGymStore(
-    (state) => state.analyticsChartData()
-  )
-  const planUsageChartData = useWeeklyGymStore(
-    (state) => state.planUsageChartData()
-  )
-  const analyticsMetrics = useWeeklyGymStore(
-    (state) => state.analyticsMetrics()
-  )
-  const selectedWeekStart = useWeeklyGymStore((state) => state.selectedWeekStart)
-
-  const weekStart = new Date(selectedWeekStart + 'T00:00:00')
-  const weekEnd = new Date(selectedWeekStart + 'T00:00:00')
-  weekEnd.setDate(weekEnd.getDate() + 6)
-
-  const formatDate = (date) =>
-    date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  const analyticsChartData = useWeeklyGymStore((state) => state.analyticsChartData())
+  const planUsageChartData = useWeeklyGymStore((state) => state.planUsageChartData())
+  const analyticsMetrics = useWeeklyGymStore((state) => state.analyticsMetrics())
 
   const hasData = analyticsChartData.some((d) => d.visits > 0)
   const hasPlanData = planUsageChartData.length > 0
   const planChartConfig = buildPlanChartConfig(planUsageChartData)
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 p-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-foreground">Weekly Analytics</h1>
-        <p className="text-muted-foreground mt-1">
-          {formatDate(weekStart)} — {formatDate(weekEnd)}
-        </p>
-      </div>
-
+    <div className="space-y-6">
       {/* Summary Metrics */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card>
@@ -136,7 +114,6 @@ export default function Analytics() {
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Daily Gym Visits — Bar Chart */}
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Daily Gym Visits</CardTitle>
@@ -160,7 +137,6 @@ export default function Analytics() {
           </CardContent>
         </Card>
 
-        {/* Training Plan Usage — Pie Chart */}
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Training Plan Usage</CardTitle>
