@@ -16,7 +16,8 @@
     - `weather-dashboard/` – Weather information display
   - **NPM + Vite projects** (React, Tailwind, no vitest):
     - `fitness-tracker/` – Fitness tracking app (Zustand store with hardened input guards)
-    - `cat-feeding-tracker/` – Cat feeding tracker (bun package manager)
+    - `crew-orbit-app/` – Pure frontend React scaffold (Bun package manager; Vite, React 18)
+    - `cat-feeding-tracker/` – Cat feeding tracker (Bun package manager)
   - **HTML/CSS/JS (no build system)**:
     - `chat-app-demo/` – Chat application demo (plain HTML/CSS/JS)
     - `flashcard-quiz-app/` – Quiz flashcard application
@@ -30,7 +31,8 @@
 ## Testing & Builds
 - **NPM projects**: Test with vitest (config in `vitest.config.js`)
 - **HTML/CSS/JS projects**: No build system or tests
-- **Do NOT run**: `npm test`, `vitest run`, `npm install`, or other test/build/install commands during any task
+- **Bun projects** (`crew-orbit-app/`, `cat-feeding-tracker/`): Use Bun as package manager instead of npm; same Vite build system
+- **Do NOT run**: `npm test`, `vitest run`, `npm install`, `bun install`, or other test/build/install commands during any task
 - **Do NOT start**: servers, watchers, or long-lived processes
 
 ## State Management & Input Guards
