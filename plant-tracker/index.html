@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Plant Tracker</title>
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="plant-tracker.css" />
   </head>
   <body>
     <div class="app">
@@ -233,7 +233,7 @@
             </div>
             <p>Last watered: ${daysAgo} day${daysAgo !== 1 ? 's' : ''} ago</p>
             <p>Water every ${plant.wateringFrequency} days</p>
-            <button class="secondary" onclick="waterPlant(${plant.id})" style="margin-top: 10px; width: 100%;">
+            <button class="secondary" onclick="waterPlant(${plant.id})">
               💧 Water Now
             </button>
           `;
