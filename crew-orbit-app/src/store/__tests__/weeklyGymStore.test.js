@@ -126,6 +126,26 @@ describe('weeklyGymStore', () => {
     })
   })
 
+  describe('planUsageChartData selector', () => {
+    it('returns empty array when no sessions', () => {
+      const data = getStore().planUsageChartData()
+      expect(data).toEqual([])
+    })
+
+    it('returns plan usage counts for the selected week', () => {
+      useWeeklyGymStore.setState({ selectedWeekStart: '2026-05-11' })
+      getStore().addSession({ id: '1', date: '2026-05-12', plan: 'Push Day' })
+      getStore().addSession({ id: '2', date: '2026-05-13', plan: 'Push Day' })
+      getStore().addSession({ id: '3', date: '2026-05-14', plan: 'Pull Day' })
+      const data = getStore().planUsageChartData()
+      expect(data).toHaveLength(2)
+      const pushDay = data.find((d) => d.name === 'Push Day')
+      const pullDay = data.find((d) => d.name === 'Pull Day')
+      expect(pushDay.value).toBe(2)
+      expect(pullDay.value).toBe(1)
+    })
+  })
+
   describe('analyticsMetrics selector', () => {
     it('returns zero metrics when no sessions', () => {
       const metrics = getStore().analyticsMetrics()
