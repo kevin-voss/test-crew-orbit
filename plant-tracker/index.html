@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Plant Tracker</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        background-color: #f5f5f5;
+        color: #333;
+        line-height: 1.6;
+      }
+
+      .app {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      .hero {
+        background: linear-gradient(135deg, #2d5016 0%, #4a7c2c 100%);
+        color: white;
+        padding: 40px;
+        border-radius: 8px;
+        margin-bottom: 30px;
+        text-align: center;
+      }
+
+      .hero h1 {
+        font-size: 2.5em;
+        margin-bottom: 10px;
+      }
+
+      .hero p {
+        font-size: 1.1em;
+        opacity: 0.95;
+      }
+
+      .card {
+        background: white;
+        padding: 25px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 25px;
+      }
+
+      .card h2 {
+        color: #2d5016;
+        margin-bottom: 15px;
+        font-size: 1.5em;
+      }
+
+      .muted {
+        color: #666;
+        font-size: 0.95em;
+      }
+
+      .muted.small {
+        font-size: 0.85em;
+      }
+
+      .row {
+        display: flex;
+        gap: 10px;
+      }
+
+      .grow {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .grow input {
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 1em;
+      }
+
+      .grow input:focus {
+        outline: none;
+        border-color: #4a7c2c;
+        box-shadow: 0 0 0 3px rgba(74, 124, 44, 0.1);
+      }
+
+      button {
+        background-color: #4a7c2c;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 1em;
+        font-weight: 600;
+        transition: background-color 0.3s;
+      }
+
+      button:hover {
+        background-color: #3a6620;
+      }
+
+      button.secondary {
+        background-color: #999;
+        padding: 8px 12px;
+        font-size: 0.9em;
+      }
+
+      button.secondary:hover {
+        background-color: #777;
+      }
+
+      button.danger {
+        background-color: #d9534f;
+      }
+
+      button.danger:hover {
+        background-color: #c9423f;
+      }
+
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        border: 0;
+      }
+
+      .feedback {
+        margin-top: 10px;
+        padding: 10px;
+        border-radius: 4px;
+      }
+
+      .feedback.success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+      }
+
+      .feedback.error {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+      }
+
+      .plants-list {
+        display: grid;
+        gap: 15px;
+      }
+
+      .plant-item {
+        background-color: #f9f9f9;
+        border-left: 4px solid #4a7c2c;
+        padding: 15px;
+        border-radius: 4px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+      }
+
+      .plant-info h3 {
+        color: #2d5016;
+        margin-bottom: 5px;
+      }
+
+      .plant-info p {
+        font-size: 0.9em;
+        color: #666;
+        margin: 3px 0;
+      }
+
+      .plant-actions {
+        display: flex;
+        gap: 8px;
+        flex-shrink: 0;
+      }
+
+      .plant-actions button {
+        padding: 8px 12px;
+        font-size: 0.85em;
+      }
+
+      .app-nav {
+        margin-bottom: 20px;
+      }
+
+      .tablist {
+        display: flex;
+        gap: 10px;
+        border-bottom: 2px solid #ddd;
+      }
+
+      .tab {
+        background-color: transparent;
+        color: #666;
+        border: none;
+        padding: 12px 20px;
+        cursor: pointer;
+        font-size: 1em;
+        border-bottom: 3px solid transparent;
+        margin-bottom: -2px;
+        transition: all 0.3s;
+      }
+
+      .tab[aria-selected="true"] {
+        color: #2d5016;
+        border-bottom-color: #4a7c2c;
+      }
+
+      .tab:hover {
+        color: #2d5016;
+      }
+
+      .view-panel {
+        display: none;
+      }
+
+      .view-panel[data-active="true"] {
+        display: block;
+      }
+
+      .watering-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 15px;
+      }
+
+      .watering-card {
+        background-color: #f0f7f0;
+        border: 2px solid #4a7c2c;
+        border-radius: 4px;
+        padding: 15px;
+      }
+
+      .watering-card h3 {
+        color: #2d5016;
+        margin-bottom: 10px;
+      }
+
+      .watering-status {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 10px 0;
+      }
+
+      .status-indicator {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+      }
+
+      .status-indicator.watered {
+        background-color: #5cb85c;
+      }
+
+      .status-indicator.needs-water {
+        background-color: #f0ad4e;
+      }
+
+      .status-indicator.overdue {
+        background-color: #d9534f;
+      }
+
+      [hidden] {
+        display: none !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <header class="hero">
+        <h1>🌱 Plant Tracker</h1>
+        <p class="muted">Keep your plants healthy and thriving.</p>
+      </header>
+
+      <nav class="app-nav" aria-label="Primary views">
+        <div class="tablist" role="tablist">
+          <button
+            type="button"
+            class="tab"
+            id="tab-tracker"
+            role="tab"
+            aria-selected="true"
+            aria-controls="panel-tracker"
+          >
+            My Plants
+          </button>
+          <button
+            type="button"
+            class="tab"
+            id="tab-watering"
+            role="tab"
+            aria-selected="false"
+            aria-controls="panel-watering"
+            tabindex="-1"
+          >
+            Watering Schedule
+          </button>
+          <button
+            type="button"
+            class="tab"
+            id="tab-notes"
+            role="tab"
+            aria-selected="false"
+            aria-controls="panel-notes"
+            tabindex="-1"
+          >
+            Care Notes
+          </button>
+        </div>
+      </nav>
+
+      <div id="panel-tracker" class="view-panel" data-active="true" role="tabpanel" aria-labelledby="tab-tracker">
+        <section class="card" aria-labelledby="add-heading">
+          <h2 id="add-heading">Add a Plant</h2>
+          <form id="add-form" class="row">
+            <label class="grow">
+              <span class="sr-only">Plant name</span>
+              <input
+                id="plant-name"
+                name="name"
+                type="text"
+                placeholder="e.g., Monstera Deliciosa…"
+                autocomplete="off"
+              />
+            </label>
+            <button type="submit">Add Plant</button>
+          </form>
+          <p id="add-feedback" class="feedback" hidden></p>
+        </section>
+
+        <section class="card" aria-labelledby="plants-heading">
+          <h2 id="plants-heading">Your Plants</h2>
+          <p class="muted small">
+            <span class="delete-pattern-note">Delete immediately removes the plant (no confirmation).</span>
+          </p>
+          <div id="plants-list" class="plants-list" role="list"></div>
+        </section>
+      </div>
+
+      <div id="panel-watering" class="view-panel" role="tabpanel" aria-labelledby="tab-watering" hidden>
+        <section class="card" aria-labelledby="watering-heading">
+          <h2 id="watering-heading">Watering Schedule</h2>
+          <p class="muted">Track your plant watering schedule and stay on top of care.</p>
+          <div id="watering-body" class="watering-grid"></div>
+        </section>
+      </div>
+
+      <div id="panel-notes" class="view-panel" role="tabpanel" aria-labelledby="tab-notes" hidden>
+        <section class="card" aria-labelledby="notes-heading">
+          <h2 id="notes-heading">Care Notes</h2>
+          <p class="muted">Quick reference guide for common plants.</p>
+          <div id="notes-body"></div>
+        </section>
+      </div>
+    </div>
+
+    <script>
+      // Plant data management
+      const STORAGE_KEY = 'plant-tracker-data';
+      let plants = [];
+
+      // Initialize app
+      function init() {
+        loadPlants();
+        setupTabNavigation();
+        setupFormHandlers();
+        renderPlants();
+      }
+
+      // Storage functions
+      function loadPlants() {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        plants = stored ? JSON.parse(stored) : [];
+      }
+
+      function savePlants() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(plants));
+      }
+
+      // Tab navigation
+      function setupTabNavigation() {
+        const tabs = document.querySelectorAll('.tab');
+        const panels = document.querySelectorAll('.view-panel');
+
+        tabs.forEach((tab) => {
+          tab.addEventListener('click', () => {
+            // Update tab states
+            tabs.forEach((t) => {
+              t.setAttribute('aria-selected', 'false');
+              t.setAttribute('tabindex', '-1');
+            });
+            tab.setAttribute('aria-selected', 'true');
+            tab.setAttribute('tabindex', '0');
+
+            // Update panel visibility
+            const panelId = tab.getAttribute('aria-controls');
+            panels.forEach((panel) => {
+              if (panel.id === panelId) {
+                panel.setAttribute('data-active', 'true');
+                panel.removeAttribute('hidden');
+              } else {
+                panel.removeAttribute('data-active');
+                panel.setAttribute('hidden', '');
+              }
+            });
+          });
+        });
+      }
+
+      // Form handlers
+      function setupFormHandlers() {
+        document.getElementById('add-form').addEventListener('submit', (e) => {
+          e.preventDefault();
+          const input = document.getElementById('plant-name');
+          const name = input.value.trim();
+
+          if (!name) {
+            showFeedback('add-feedback', 'Please enter a plant name.', 'error');
+            return;
+          }
+
+          const newPlant = {
+            id: Date.now(),
+            name: name,
+            addedDate: new Date().toISOString(),
+            lastWatered: new Date().toISOString(),
+            wateringFrequency: 3, // days
+          };
+
+          plants.push(newPlant);
+          savePlants();
+          input.value = '';
+          showFeedback('add-feedback', `${name} added successfully!`, 'success');
+          renderPlants();
+        });
+      }
+
+      // Render functions
+      function renderPlants() {
+        const list = document.getElementById('plants-list');
+        const wateringBody = document.getElementById('watering-body');
+
+        list.innerHTML = '';
+        wateringBody.innerHTML = '';
+
+        if (plants.length === 0) {
+          list.innerHTML = '<p class="muted">No plants yet. Add one to get started!</p>';
+          wateringBody.innerHTML = '<p class="muted">No plants to water yet.</p>';
+          return;
+        }
+
+        plants.forEach((plant) => {
+          // Render in plants list
+          const item = document.createElement('div');
+          item.className = 'plant-item';
+          item.setAttribute('role', 'listitem');
+
+          const lastWatered = new Date(plant.lastWatered);
+          const daysAgo = Math.floor((Date.now() - lastWatered.getTime()) / (1000 * 60 * 60 * 24));
+          const needsWater = daysAgo >= plant.wateringFrequency;
+
+          item.innerHTML = `
+            <div class="plant-info">
+              <h3>${escapeHtml(plant.name)}</h3>
+              <p>Added: ${lastWatered.toLocaleDateString()}</p>
+              <p>Last watered: ${daysAgo} day${daysAgo !== 1 ? 's' : ''} ago</p>
+              <p>Water every ${plant.wateringFrequency} day${plant.wateringFrequency !== 1 ? 's' : ''}</p>
+            </div>
+            <div class="plant-actions">
+              <button class="secondary" onclick="waterPlant(${plant.id})">
+                💧 Water
+              </button>
+              <button class="danger" onclick="deletePlant(${plant.id})">
+                Delete
+              </button>
+            </div>
+          `;
+          list.appendChild(item);
+
+          // Render in watering schedule
+          const card = document.createElement('div');
+          card.className = 'watering-card';
+          const status = needsWater ? 'needs-water' : 'watered';
+          const statusText = needsWater ? 'Needs watering' : 'Recently watered';
+          const statusColor = needsWater ? '#f0ad4e' : '#5cb85c';
+
+          card.innerHTML = `
+            <h3>${escapeHtml(plant.name)}</h3>
+            <div class="watering-status">
+              <div class="status-indicator ${status}"></div>
+              <span>${statusText}</span>
+            </div>
+            <p>Last watered: ${daysAgo} day${daysAgo !== 1 ? 's' : ''} ago</p>
+            <p>Water every ${plant.wateringFrequency} days</p>
+            <button class="secondary" onclick="waterPlant(${plant.id})" style="margin-top: 10px; width: 100%;">
+              💧 Water Now
+            </button>
+          `;
+          wateringBody.appendChild(card);
+        });
+      }
+
+      // Plant actions
+      function waterPlant(id) {
+        const plant = plants.find((p) => p.id === id);
+        if (plant) {
+          plant.lastWatered = new Date().toISOString();
+          savePlants();
+          renderPlants();
+          showFeedback('add-feedback', `${plant.name} watered! 💧`, 'success');
+        }
+      }
+
+      function deletePlant(id) {
+        const plant = plants.find((p) => p.id === id);
+        if (plant && confirm(`Delete ${plant.name}?`)) {
+          plants = plants.filter((p) => p.id !== id);
+          savePlants();
+          renderPlants();
+        }
+      }
+
+      // Utility functions
+      function showFeedback(elementId, message, type) {
+        const element = document.getElementById(elementId);
+        element.textContent = message;
+        element.className = `feedback ${type}`;
+        element.removeAttribute('hidden');
+        setTimeout(() => {
+          element.setAttribute('hidden', '');
+        }, 3000);
+      }
+
+      function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+      }
+
+      // Start app
+      document.addEventListener('DOMContentLoaded', init);
+    </script>
+  </body>
+</html>
