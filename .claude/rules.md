@@ -20,9 +20,12 @@
     - `cat-feeding-tracker/` – Cat feeding tracker (Bun package manager)
   - **HTML/CSS/JS (no build system)**:
     - `chat-app-demo/` – Chat application demo (plain HTML/CSS/JS)
+    - `cpp-memory-visualizer/` – C++ memory layout visualization (plain HTML/CSS/JS)
     - `flashcard-quiz-app/` – Quiz flashcard application
-    - `tic-tac-toe/` – Tic Tac Toe game (plain HTML/CSS/JS)
     - `fitness-app/` – Fitness app with logger and timer (plain HTML/CSS/JS)
+    - `heap-stack-visualizer/` – Heap and stack memory visualizer (plain HTML/CSS/JS)
+    - `plant-tracker/` – Plant care tracking app (plain HTML/CSS/JS)
+    - `tic-tac-toe/` – Tic Tac Toe game (plain HTML/CSS/JS)
   - **Polyglot projects**:
     - `live-streaming-chat/` – Java backend (Maven) + Node.js frontend (Vite)
   - **Python projects**:
