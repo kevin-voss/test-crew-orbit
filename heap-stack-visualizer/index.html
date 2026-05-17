@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stack and Heap Visualizer</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Stack and Heap Memory Visualizer</h1>
+            <p class="subtitle">Step through C++ code execution and visualize memory</p>
+        </header>
+
+        <main>
+            <!-- Code Snippet Display -->
+            <section class="code-section">
+                <h2>C++ Code</h2>
+                <div class="code-container">
+                    <pre><code id="codeDisplay"></code></pre>
+                </div>
+            </section>
+
+            <!-- Controls -->
+            <section class="controls-section">
+                <button id="prevBtn" class="btn btn-prev" disabled>← Previous Step</button>
+                <div class="step-info">
+                    <span id="stepCounter">Step 0/0</span>
+                </div>
+                <button id="nextBtn" class="btn btn-next">Next Step →</button>
+            </section>
+
+            <!-- Execution Step Info -->
+            <section class="info-section">
+                <div class="current-line">
+                    <h3>Current Line Being Executed:</h3>
+                    <div id="currentLine" class="current-line-display">-</div>
+                </div>
+            </section>
+
+            <!-- Explanation -->
+            <section class="explanation-section">
+                <h3>What's Happening:</h3>
+                <div id="explanation" class="explanation-text">-</div>
+            </section>
+
+            <!-- Memory Visualization -->
+            <div class="visualization-container">
+                <!-- Stack Visualization -->
+                <section class="memory-section stack-section">
+                    <h3>Stack Memory</h3>
+                    <div class="memory-content">
+                        <div id="stackDisplay" class="stack-display">
+                            <div class="empty-state">No variables on stack</div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Heap Visualization -->
+                <section class="memory-section heap-section">
+                    <h3>Heap Memory</h3>
+                    <div class="memory-content">
+                        <div id="heapDisplay" class="heap-display">
+                            <div class="empty-state">No variables on heap</div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Pointers and Addresses -->
+            <section class="pointers-section">
+                <h3>Pointers and Memory Addresses</h3>
+                <div id="pointersDisplay" class="pointers-content">
+                    <div class="empty-state">No pointers in current step</div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
