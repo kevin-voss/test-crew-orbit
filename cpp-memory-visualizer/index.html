@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C++ Stack & Heap Memory Visualizer</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>C++ Stack & Heap Memory Visualizer</h1>
+            <p class="subtitle">Learn how memory works during C++ execution</p>
+        </header>
+
+        <main>
+            <!-- Code Section -->
+            <section class="code-section">
+                <h2>C++ Code Snippet</h2>
+                <div class="code-display">
+                    <pre><code id="codeDisplay"></code></pre>
+                </div>
+            </section>
+
+            <!-- Navigation Controls -->
+            <section class="controls-section">
+                <div class="controls">
+                    <button id="backBtn" class="btn btn-prev" disabled>← Previous Step</button>
+                    <div class="step-indicator">
+                        <span id="currentStep">Step 1</span> of <span id="totalSteps">5</span>
+                    </div>
+                    <button id="nextBtn" class="btn btn-next">Next Step →</button>
+                </div>
+            </section>
+
+            <!-- Main Visualization Area -->
+            <section class="visualization-section">
+                <div class="visualization-grid">
+                    <!-- Stack Visualization -->
+                    <div class="memory-block stack-block">
+                        <h3>Stack Memory</h3>
+                        <div class="memory-content" id="stackDisplay">
+                            <!-- Stack frames will be rendered here -->
+                        </div>
+                    </div>
+
+                    <!-- Heap Visualization -->
+                    <div class="memory-block heap-block">
+                        <h3>Heap Memory</h3>
+                        <div class="memory-content" id="heapDisplay">
+                            <!-- Heap allocations will be rendered here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pointer Relationships -->
+                <div class="memory-block pointer-block">
+                    <h3>Pointer Relationships & Memory Addresses</h3>
+                    <div class="memory-content" id="pointerDisplay">
+                        <!-- Pointer info will be rendered here -->
+                    </div>
+                </div>
+
+                <!-- Explanation -->
+                <div class="memory-block explanation-block">
+                    <h3>What's Happening</h3>
+                    <div class="explanation-content" id="explanationDisplay">
+                        <!-- Explanation will be rendered here -->
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>Educational tool for learning C++ memory management basics</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
