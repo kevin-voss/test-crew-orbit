@@ -13,14 +13,8 @@ export function createLessonProgress() {
 
   return {
     canAccessLesson(lesson, allLessons) {
-      const sorted = [...allLessons].sort(
-        (a, b) =>
-          allLessons.findIndex((l) => l.id === a.id) -
-          allLessons.findIndex((l) => l.id === b.id),
-      );
-      const index = sorted.findIndex((l) => l.id === lesson.id);
-      if (index <= 0) return true;
-      return completed.has(sorted[index - 1].id);
+      const prior = allLessons.filter((l) => l.order < lesson.order);
+      return prior.every((l) => completed.has(l.id));
     },
 
     markComplete(lessonId) {
