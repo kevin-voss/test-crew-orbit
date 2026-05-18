@@ -1,4 +1,5 @@
 {
+  "passThreshold": 1,
   "units": [
     {
       "id": "concept-intro",

@@ -46,13 +46,42 @@ export function resultSetsEqual(a, b) {
 
 /**
  * @param {import("./curriculum.js").CurriculumUnit} exercise
+ * @param {ReturnType<typeof import("./pathController.js").createPathController>} path
+ */
+export function isExerciseBlockedByPath(exercise, path) {
+  if (!path.isUnlocked(exercise.id)) {
+    return {
+      blocked: true,
+      message:
+        "Diese Übung ist noch gesperrt. Schließe zuerst die vorherige Einheit ab.",
+    };
+  }
+  if (!path.canStartExercise(exercise.id)) {
+    return {
+      blocked: true,
+      message: "Schließe zuerst die verknüpften Lektionen ab.",
+    };
+  }
+  return null;
+}
+
+/**
+ * @param {import("./curriculum.js").CurriculumUnit} exercise
  * @param {{ optionId?: string; sql?: string }} answer
  * @param {{
  *   lessonsComplete: (ids: string[]) => boolean;
+ *   path?: ReturnType<typeof import("./pathController.js").createPathController>;
  *   runSql?: (sql: string) => Promise<{ ok: boolean; rows?: unknown[] }>;
  * }} ctx
  */
 export function gradeExercise(exercise, answer, ctx) {
+  if (ctx.path) {
+    const pathBlock = isExerciseBlockedByPath(exercise, ctx.path);
+    if (pathBlock) {
+      return { ok: false, blocked: true, message: pathBlock.message };
+    }
+  }
+
   const lessonIds = exercise.lessonIds ?? [];
   if (!ctx.lessonsComplete(lessonIds)) {
     return {
@@ -117,6 +146,13 @@ function gradeSqlExerciseSync(exercise, answer) {
  * }} ctx
  */
 export async function gradeSqlExerciseAsync(exercise, answer, ctx) {
+  if (ctx.path) {
+    const pathBlock = isExerciseBlockedByPath(exercise, ctx.path);
+    if (pathBlock) {
+      return { ok: false, blocked: true, message: pathBlock.message };
+    }
+  }
+
   const lessonIds = exercise.lessonIds ?? [];
   if (!ctx.lessonsComplete(lessonIds)) {
     return {

@@ -20,7 +20,7 @@ import { CATALOG_TOPIC_IDS } from "./catalogTopics.js";
  * @property {string} [feedbackCorrect]
  * @property {string} [expectedSql]
  *
- * @typedef {{ units: CurriculumUnit[] }} Curriculum
+ * @typedef {{ passThreshold?: number; units: CurriculumUnit[] }} Curriculum
  */
 
 const UNIT_TYPES = new Set(["concept", "lesson", "exercise"]);

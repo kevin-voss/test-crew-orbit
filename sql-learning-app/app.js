@@ -165,17 +165,33 @@ async function bootstrapApp(root) {
   }
 
   function isPathUnitLocked(unit) {
+    if (!path.isUnlocked(unit.id)) return true;
+    if (unit.type === "exercise") {
+      return !path.canStartExercise(unit.id);
+    }
     if (unit.type === "lesson") {
       return isLessonLocked(unit);
     }
-    if (unit.type === "concept") {
-      return false;
-    }
-    if (unit.type === "exercise") {
-      if (!path.isUnlocked(unit.id)) return true;
-      return !path.canStartExercise(unit.id);
-    }
-    return !path.isUnlocked(unit.id);
+    return false;
+  }
+
+  /**
+   * @param {string} unitId
+   * @returns {boolean}
+   */
+  function guardNavigation(unitId) {
+    const nav = path.tryNavigate(unitId);
+    if (nav.allowed) return true;
+    root.innerHTML =
+      progressMarkup() +
+      `<article class="card"><h2 tabindex="-1">Einheit gesperrt</h2>
+<p class="locked-hint">${nav.reason ?? "Diese Einheit ist noch nicht verfügbar."}</p>
+<div class="unit-nav">
+<button type="button" class="btn btn-secondary" id="btn-pathmap">Zum Lernpfad</button>
+</div></article>`;
+    root.querySelector("#btn-pathmap")?.addEventListener("click", showPathMap);
+    focusCardHeading();
+    return false;
   }
 
   async function ensureSqlRunner() {
@@ -190,6 +206,7 @@ async function bootstrapApp(root) {
   function exerciseGradingContext() {
     return {
       lessonsComplete: (ids) => lessonProgress.lessonsComplete(ids),
+      path,
     };
   }
 
@@ -229,6 +246,7 @@ async function bootstrapApp(root) {
   function showConcept(unitId) {
     const unit = curriculum.units.find((u) => u.id === unitId && u.type === "concept");
     if (!unit) return;
+    if (!guardNavigation(unitId)) return;
     screen = "concept";
     activeUnitId = unit.id;
     const done = isUnitComplete(unit.id);
@@ -278,6 +296,8 @@ async function bootstrapApp(root) {
       showConcept(concept.id);
       return;
     }
+
+    if (!guardNavigation(unitId)) return;
 
     if (isLessonLocked(unit)) {
       root.innerHTML =
@@ -346,32 +366,7 @@ async function bootstrapApp(root) {
   function showExercise(unitId) {
     const unit = curriculum.units.find((u) => u.id === unitId && u.type === "exercise");
     if (!unit) return;
-
-    if (!path.isUnlocked(unit.id)) {
-      root.innerHTML =
-        progressMarkup() +
-        `<article class="card"><h2 tabindex="-1">Übung gesperrt</h2>
-<p class="locked-hint">Diese Übung ist noch gesperrt. Schließe zuerst die vorherige Einheit ab.</p>
-<div class="unit-nav">
-<button type="button" class="btn btn-secondary" id="btn-pathmap">Zum Lernpfad</button>
-</div></article>`;
-      root.querySelector("#btn-pathmap")?.addEventListener("click", showPathMap);
-      focusCardHeading();
-      return;
-    }
-
-    if (!path.canStartExercise(unit.id)) {
-      root.innerHTML =
-        progressMarkup() +
-        `<article class="card"><h2 tabindex="-1">Übung gesperrt</h2>
-<p class="locked-hint">Schließe zuerst die verknüpften Lektionen ab.</p>
-<div class="unit-nav">
-<button type="button" class="btn btn-secondary" id="btn-pathmap">Zum Lernpfad</button>
-</div></article>`;
-      root.querySelector("#btn-pathmap")?.addEventListener("click", showPathMap);
-      focusCardHeading();
-      return;
-    }
+    if (!guardNavigation(unitId)) return;
 
     screen = "exercise";
     activeUnitId = unit.id;

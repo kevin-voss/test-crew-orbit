@@ -1,6 +1,6 @@
 /**
  * @returns {{
- *   canAccessLesson: (lesson: { id: string }, allLessons: { id: string }[]) => boolean;
+ *   canAccessLesson: (lesson: { id: string; order?: number }, allLessons: { id: string; order?: number }[]) => boolean;
  *   markComplete: (lessonId: string) => void;
  *   isComplete: (lessonId: string) => boolean;
  *   getCompletedIds: () => string[];
@@ -13,7 +13,8 @@ export function createLessonProgress() {
 
   return {
     canAccessLesson(lesson, allLessons) {
-      const prior = allLessons.filter((l) => l.order < lesson.order);
+      const lessonOrder = lesson.order ?? 0;
+      const prior = allLessons.filter((l) => (l.order ?? 0) < lessonOrder);
       return prior.every((l) => completed.has(l.id));
     },
 
