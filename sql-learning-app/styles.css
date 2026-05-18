@@ -142,6 +142,33 @@ textarea:focus-visible {
   background: #f8fbff;
 }
 
+.options label:has(input:checked) {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.exercise-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.exercise-view .schema-hint {
+  margin-bottom: 0.5rem;
+}
+
+.sql-label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 0.35rem;
+}
+
+.feedback-region:empty {
+  display: none;
+}
+
 .feedback {
   margin-top: 0.75rem;
   padding: 0.65rem 0.75rem;

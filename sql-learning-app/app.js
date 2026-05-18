@@ -6,6 +6,15 @@ import { renderConcept } from "./src/views/renderConcept.js";
 import { renderLesson } from "./src/views/renderLesson.js";
 import { renderPathMap } from "./src/views/renderPathMap.js";
 import { renderProgressBar } from "./src/views/renderProgressBar.js";
+import {
+  renderExercise,
+  renderExerciseFeedback,
+} from "./src/views/renderExercise.js";
+import {
+  gradeExercise,
+  gradeSqlExerciseAsync,
+  getExerciseInputType,
+} from "./src/exerciseEngine.js";
 
 /**
  * @param {import("./src/curriculum.js").Curriculum} curriculum
@@ -105,8 +114,10 @@ async function bootstrapApp(root) {
   let path;
   /** @type {Set<string>} */
   const completedUnits = new Set();
-  /** @type {"start" | "concept" | "lesson" | "pathmap"} */
+  /** @type {"start" | "concept" | "lesson" | "exercise" | "pathmap"} */
   let screen = "start";
+  /** @type {Awaited<ReturnType<typeof import("./src/sqlRunner.js").createSqlRunner>> | null} */
+  let sqlRunner = null;
   /** @type {string | null} */
   let activeUnitId = null;
 
@@ -160,7 +171,26 @@ async function bootstrapApp(root) {
     if (unit.type === "concept") {
       return false;
     }
+    if (unit.type === "exercise") {
+      if (!path.isUnlocked(unit.id)) return true;
+      return !path.canStartExercise(unit.id);
+    }
     return !path.isUnlocked(unit.id);
+  }
+
+  async function ensureSqlRunner() {
+    if (sqlRunner) return sqlRunner;
+    const response = await fetch("./data/seed.sql");
+    const seedSql = await response.text();
+    const { createSqlRunner } = await import("./src/sqlRunner.js");
+    sqlRunner = await createSqlRunner({ seedSql });
+    return sqlRunner;
+  }
+
+  function exerciseGradingContext() {
+    return {
+      lessonsComplete: (ids) => lessonProgress.lessonsComplete(ids),
+    };
   }
 
   function progressMarkup() {
@@ -310,6 +340,149 @@ async function bootstrapApp(root) {
     focusCardHeading();
   }
 
+  /**
+   * @param {string} unitId
+   */
+  function showExercise(unitId) {
+    const unit = curriculum.units.find((u) => u.id === unitId && u.type === "exercise");
+    if (!unit) return;
+
+    if (!path.isUnlocked(unit.id)) {
+      root.innerHTML =
+        progressMarkup() +
+        `<article class="card"><h2 tabindex="-1">Übung gesperrt</h2>
+<p class="locked-hint">Diese Übung ist noch gesperrt. Schließe zuerst die vorherige Einheit ab.</p>
+<div class="unit-nav">
+<button type="button" class="btn btn-secondary" id="btn-pathmap">Zum Lernpfad</button>
+</div></article>`;
+      root.querySelector("#btn-pathmap")?.addEventListener("click", showPathMap);
+      focusCardHeading();
+      return;
+    }
+
+    if (!path.canStartExercise(unit.id)) {
+      root.innerHTML =
+        progressMarkup() +
+        `<article class="card"><h2 tabindex="-1">Übung gesperrt</h2>
+<p class="locked-hint">Schließe zuerst die verknüpften Lektionen ab.</p>
+<div class="unit-nav">
+<button type="button" class="btn btn-secondary" id="btn-pathmap">Zum Lernpfad</button>
+</div></article>`;
+      root.querySelector("#btn-pathmap")?.addEventListener("click", showPathMap);
+      focusCardHeading();
+      return;
+    }
+
+    screen = "exercise";
+    activeUnitId = unit.id;
+    const inputType = getExerciseInputType(unit);
+    let canContinue = isUnitComplete(unit.id);
+
+    function paintExerciseView(feedbackHtml = "") {
+      const nav = [
+        '<button type="button" class="btn btn-secondary" id="btn-pathmap">Lernpfad</button>',
+      ];
+      if (canContinue) {
+        nav.push('<button type="button" class="btn" id="btn-next">Weiter</button>');
+      }
+
+      root.innerHTML =
+        progressMarkup() +
+        renderExercise(unit, inputType) +
+        `<div class="unit-nav">${nav.join("")}</div>`;
+
+      const feedbackRegion = root.querySelector("#exercise-feedback-region");
+      if (feedbackHtml && feedbackRegion) {
+        feedbackRegion.innerHTML = feedbackHtml;
+      }
+
+      root.querySelector("#btn-pathmap")?.addEventListener("click", showPathMap);
+      root.querySelector("#btn-next")?.addEventListener("click", () => {
+        if (!isUnitComplete(unit.id)) {
+          markUnitComplete(unit.id);
+        }
+        const index = ordered.findIndex((u) => u.id === unit.id);
+        const next = ordered[index + 1];
+        if (next?.type === "lesson") showLesson(next.id);
+        else if (next?.type === "exercise" && !isPathUnitLocked(next)) showExercise(next.id);
+        else showPathMap();
+      });
+
+      root.querySelector("#btn-check")?.addEventListener("click", () => {
+        void submitExercise();
+      });
+
+      root.querySelector("#btn-run-sql")?.addEventListener("click", () => {
+        void runSqlPreview();
+      });
+
+      focusCardHeading();
+    }
+
+    async function runSqlPreview() {
+      const textarea = root.querySelector("#sql-query");
+      if (!(textarea instanceof HTMLTextAreaElement)) return;
+      const runner = await ensureSqlRunner();
+      const result = await runner.runQuery(textarea.value);
+      const region = root.querySelector("#exercise-feedback-region");
+      if (!region) return;
+      if (!result.ok) {
+        region.innerHTML = renderExerciseFeedback(
+          result.error ?? "Die Abfrage konnte nicht ausgeführt werden.",
+          false,
+        );
+        return;
+      }
+      const preview = result.rows
+        .slice(0, 5)
+        .map((row) => JSON.stringify(row))
+        .join("<br>");
+      region.innerHTML = `<p class="feedback ok" role="status">Vorschau (${result.rows.length} Zeile(n)):<br>${preview}</p>`;
+    }
+
+    async function submitExercise() {
+      const ctx = exerciseGradingContext();
+      let result;
+
+      if (inputType === "sql") {
+        const textarea = root.querySelector("#sql-query");
+        const sql = textarea instanceof HTMLTextAreaElement ? textarea.value : "";
+        const runner = await ensureSqlRunner();
+        result = await gradeSqlExerciseAsync(
+          unit,
+          { sql },
+          {
+            ...ctx,
+            runSql: (query) => runner.runQuery(query),
+          },
+        );
+      } else {
+        const selected = root.querySelector('input[name="exercise-option"]:checked');
+        const optionId =
+          selected instanceof HTMLInputElement ? selected.value : undefined;
+        result = gradeExercise(unit, { optionId }, ctx);
+      }
+
+      if (result.blocked) {
+        paintExerciseView(
+          renderExerciseFeedback(result.message ?? "Übung gesperrt.", false),
+        );
+        return;
+      }
+
+      const feedbackHtml = renderExerciseFeedback(
+        result.feedback ?? "",
+        Boolean(result.ok),
+      );
+      if (result.ok) {
+        canContinue = true;
+      }
+      paintExerciseView(feedbackHtml);
+    }
+
+    paintExerciseView();
+  }
+
   function showPathMap() {
     screen = "pathmap";
     const map = renderPathMap(curriculum, {
@@ -331,6 +504,7 @@ async function bootstrapApp(root) {
       el.addEventListener("click", () => {
         if (unit.type === "concept") showConcept(unit.id);
         else if (unit.type === "lesson") showLesson(unit.id);
+        else if (unit.type === "exercise") showExercise(unit.id);
       });
     });
 

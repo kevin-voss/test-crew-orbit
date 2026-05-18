@@ -1,4 +1,8 @@
 import initSqlJs from "sql.js";
+import {
+  normalizeResultRows,
+  resultSetsEqual as compareResultSets,
+} from "./exerciseEngine.js";
 
 /**
  * @param {{ seedSql: string }} options
@@ -53,22 +57,9 @@ export async function createSqlRunner({ seedSql }) {
      * @param {unknown[] | undefined} b
      */
     resultSetsEqual(a, b) {
-      return (
-        JSON.stringify(normalizeRows(a)) === JSON.stringify(normalizeRows(b))
-      );
+      return compareResultSets(a, b);
     },
   };
 }
 
-/** @param {unknown[] | undefined} rows */
-function normalizeRows(rows) {
-  if (!Array.isArray(rows)) return [];
-  return rows.map((row) => {
-    if (row && typeof row === "object") {
-      return Object.fromEntries(
-        Object.entries(row).map(([k, v]) => [k.toLowerCase(), v]),
-      );
-    }
-    return row;
-  });
-}
+export { normalizeResultRows };

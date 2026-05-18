@@ -3,15 +3,54 @@
  * @returns {"mc" | "match" | "sql"}
  */
 export function getExerciseInputType(exercise) {
+  const difficulty = exercise.difficulty ?? 1;
+  if (difficulty <= 2) {
+    return exercise.format === "match" ? "match" : "mc";
+  }
   if (exercise.format === "sql") return "sql";
   if (exercise.format === "match") return "match";
   return "mc";
 }
 
 /**
+ * @param {unknown[] | undefined} rows
+ */
+export function normalizeResultRows(rows) {
+  if (!Array.isArray(rows)) return [];
+  const normalized = rows.map((row) => {
+    if (row && typeof row === "object" && !Array.isArray(row)) {
+      return Object.fromEntries(
+        Object.entries(row).map(([k, v]) => [
+          k.toLowerCase(),
+          typeof v === "string" ? v.trim() : v,
+        ]),
+      );
+    }
+    return row;
+  });
+  return normalized.sort((a, b) =>
+    JSON.stringify(a).localeCompare(JSON.stringify(b)),
+  );
+}
+
+/**
+ * @param {unknown[] | undefined} a
+ * @param {unknown[] | undefined} b
+ */
+export function resultSetsEqual(a, b) {
+  return (
+    JSON.stringify(normalizeResultRows(a)) ===
+    JSON.stringify(normalizeResultRows(b))
+  );
+}
+
+/**
  * @param {import("./curriculum.js").CurriculumUnit} exercise
  * @param {{ optionId?: string; sql?: string }} answer
- * @param {{ lessonsComplete: (ids: string[]) => boolean; runSql?: (sql: string) => Promise<{ ok: boolean; rows?: unknown[] }> }} ctx
+ * @param {{
+ *   lessonsComplete: (ids: string[]) => boolean;
+ *   runSql?: (sql: string) => Promise<{ ok: boolean; rows?: unknown[] }>;
+ * }} ctx
  */
 export function gradeExercise(exercise, answer, ctx) {
   const lessonIds = exercise.lessonIds ?? [];
@@ -26,7 +65,7 @@ export function gradeExercise(exercise, answer, ctx) {
   const inputType = getExerciseInputType(exercise);
 
   if (inputType === "sql") {
-    return gradeSqlExercise(exercise, answer, ctx);
+    return gradeSqlExerciseSync(exercise, answer);
   }
 
   const correct = answer.optionId === exercise.correctOptionId;
@@ -47,14 +86,48 @@ export function gradeExercise(exercise, answer, ctx) {
 /**
  * @param {import("./curriculum.js").CurriculumUnit} exercise
  * @param {{ sql?: string }} answer
- * @param {{ runSql?: (sql: string) => Promise<{ ok: boolean; rows?: unknown[] }> }} ctx
  */
-async function gradeSqlExerciseAsync(exercise, answer, ctx) {
-  if (!ctx.runSql || !answer.sql?.trim()) {
+function gradeSqlExerciseSync(exercise, answer) {
+  if (!answer.sql?.trim()) {
+    return { ok: false, feedback: exercise.feedbackWrong };
+  }
+
+  const normalized = answer.sql.trim().replace(/\s+/g, " ").toLowerCase();
+  const expected = (exercise.expectedSql ?? "")
+    .trim()
+    .replace(/\s+/g, " ")
+    .toLowerCase();
+  if (normalized === expected) {
+    return {
+      ok: true,
+      feedback: exercise.feedbackCorrect,
+      canContinue: true,
+    };
+  }
+
+  return { ok: false, feedback: exercise.feedbackWrong };
+}
+
+/**
+ * @param {import("./curriculum.js").CurriculumUnit} exercise
+ * @param {{ sql?: string }} answer
+ * @param {{
+ *   lessonsComplete: (ids: string[]) => boolean;
+ *   runSql?: (sql: string) => Promise<{ ok: boolean; rows?: unknown[] }>;
+ * }} ctx
+ */
+export async function gradeSqlExerciseAsync(exercise, answer, ctx) {
+  const lessonIds = exercise.lessonIds ?? [];
+  if (!ctx.lessonsComplete(lessonIds)) {
     return {
       ok: false,
-      feedback: exercise.feedbackWrong,
+      blocked: true,
+      message: "Schließe zuerst die verknüpften Lektionen ab.",
     };
+  }
+
+  if (!ctx.runSql || !answer.sql?.trim()) {
+    return { ok: false, feedback: exercise.feedbackWrong };
   }
 
   const learner = await ctx.runSql(answer.sql.trim());
@@ -67,8 +140,7 @@ async function gradeSqlExerciseAsync(exercise, answer, ctx) {
     return { ok: false, feedback: exercise.feedbackWrong };
   }
 
-  const equal = JSON.stringify(normalizeRows(learner.rows)) === JSON.stringify(normalizeRows(expected.rows));
-  if (equal) {
+  if (resultSetsEqual(learner.rows, expected.rows)) {
     return {
       ok: true,
       feedback: exercise.feedbackCorrect,
@@ -78,37 +150,3 @@ async function gradeSqlExerciseAsync(exercise, answer, ctx) {
 
   return { ok: false, feedback: exercise.feedbackWrong };
 }
-
-/** @param {unknown[] | undefined} rows */
-function normalizeRows(rows) {
-  if (!Array.isArray(rows)) return [];
-  return rows.map((row) => {
-    if (row && typeof row === "object") {
-      return Object.fromEntries(
-        Object.entries(row).map(([k, v]) => [k.toLowerCase(), v]),
-      );
-    }
-    return row;
-  });
-}
-
-function gradeSqlExercise(exercise, answer, ctx) {
-  if (answer.sql?.trim() && exercise.expectedSql) {
-    const normalized = answer.sql.trim().replace(/\s+/g, " ").toLowerCase();
-    const expected = exercise.expectedSql.trim().replace(/\s+/g, " ").toLowerCase();
-    if (normalized === expected) {
-      return {
-        ok: true,
-        feedback: exercise.feedbackCorrect,
-        canContinue: true,
-      };
-    }
-  }
-
-  return {
-    ok: false,
-    feedback: exercise.feedbackWrong,
-  };
-}
-
-export { gradeSqlExerciseAsync };
