@@ -1,0 +1,14 @@
+{
+  "name": "sql-learning-app",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "sql.js": "^1.13.0"
+  },
+  "devDependencies": {
+    "vitest": "^3.2.4"
+  }
+}
