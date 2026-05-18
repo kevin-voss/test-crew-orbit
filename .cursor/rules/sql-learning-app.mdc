@@ -1,0 +1,17 @@
+---
+description: sql-learning-app — vanilla JS, sql.js, Vitest, German UI
+globs: sql-learning-app/**
+alwaysApply: false
+---
+
+# sql-learning-app
+
+See [AGENTS.md](../../AGENTS.md) for stack summary.
+
+- **Entry**: `app.js` wires `src/pathController.js` and views under `src/views/`.
+- **SQL**: Use `src/sqlRunner.js` and existing exercise patterns in `src/exerciseEngine.js`; keep learner SQL in-browser via `sql.js`.
+- **Curriculum**: Extend `data/` and `src/curriculum.js` consistently; progression/unlock logic lives in `src/pathController.js` and `src/lessonProgress.js`.
+- **Copy**: User-facing strings are **German**; keep tone aligned with existing lessons.
+- **Progress**: Respect `sql-lern-app-progress-v1` in `src/progressStore.js`; no server sync or accounts.
+- **Tests**: Co-locate Vitest specs in `test/`; follow patterns in existing test files.
+- **Not in scope**: React, shadcn, TypeScript migration, or a bundler unless the user explicitly requests it.
