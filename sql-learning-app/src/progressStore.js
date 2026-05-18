@@ -11,9 +11,15 @@ export function createProgressStore(storage) {
   return {
     /**
      * @param {ProgressState} state
+     * @returns {{ ok: boolean }}
      */
     save(state) {
-      storage.setItem(STORAGE_KEY, JSON.stringify(state));
+      try {
+        storage.setItem(STORAGE_KEY, JSON.stringify(state));
+        return { ok: true };
+      } catch {
+        return { ok: false };
+      }
     },
 
     /**

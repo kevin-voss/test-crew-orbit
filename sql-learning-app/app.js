@@ -1,6 +1,6 @@
 import { createPathController } from "./src/pathController.js";
 import { createLessonProgress } from "./src/lessonProgress.js";
-import { createProgressStore } from "./src/progressStore.js";
+import { createProgressStore, STORAGE_KEY } from "./src/progressStore.js";
 import { loadCurriculum } from "./src/curriculum.js";
 import { renderConcept } from "./src/views/renderConcept.js";
 import { renderLesson } from "./src/views/renderLesson.js";
@@ -35,6 +35,23 @@ export function getFirstLearningView(curriculum, state) {
   return { view: "lesson", unitId: firstLesson?.id ?? "" };
 }
 
+export const PERSISTENCE_HINT_KEY = "sql-lern-app-hint-dismissed-v1";
+
+export function renderPersistenceHint() {
+  return `<aside class="storage-banner" role="note">
+  <p>Dein Fortschritt wird nur auf diesem Gerät gespeichert — kein Konto nötig. Wenn du Browserdaten löschst, startest du von vorn.</p>
+  <button type="button" class="btn btn-secondary storage-banner__dismiss" id="btn-dismiss-storage-hint">Verstanden</button>
+</aside>`;
+}
+
+export function renderStorageCorruptNotice() {
+  return `<p class="storage-banner storage-banner--warn" role="alert">Dein gespeicherter Fortschritt konnte nicht gelesen werden und wurde zurückgesetzt.</p>`;
+}
+
+export function renderStorageQuotaWarning() {
+  return `<p class="storage-banner storage-banner--warn" role="alert">Der Fortschritt konnte nicht gespeichert werden. Du kannst weiterlernen, aber nach dem Schließen des Tabs gehen Änderungen verloren.</p>`;
+}
+
 export function renderStartView() {
   return `<section class="start-overview" aria-label="Lernpfad">
   <h1>Willkommen zur SQL-Lern-App</h1>
@@ -52,30 +69,34 @@ export function renderStartView() {
  * @param {import("./src/curriculum.js").Curriculum} curriculum
  * @param {{ getItem: (k: string) => string | null; setItem: (k: string, v: string) => void }} storage
  */
-export function resumeFromStorage(curriculum, storage) {
-  const saved = createProgressStore(storage).load();
+/**
+ * @param {ReturnType<typeof createPathController>} path
+ * @param {import("./src/curriculum.js").Curriculum} curriculum
+ * @param {string | undefined} lastUnitId
+ */
+export function resolveResumeUnitId(path, curriculum, lastUnitId) {
   const ordered = [...curriculum.units].sort((a, b) => a.order - b.order);
-  const lessonProgress = createLessonProgress();
-  const path = createPathController(curriculum, lessonProgress);
-
-  if (saved?.completedUnits) {
-    for (const id of saved.completedUnits) {
-      path.recordSuccess(id);
-    }
-  }
-
-  const targetId = saved?.lastUnitId ?? ordered[0]?.id ?? "";
-  const unlocked = path.isUnlocked(targetId);
-
-  if (unlocked) {
+  const targetId = lastUnitId ?? ordered[0]?.id ?? "";
+  if (path.isUnlocked(targetId)) {
     return { unitId: targetId, locked: false };
   }
-
   const fallback = ordered.find((u) => path.isUnlocked(u.id));
   return {
     unitId: fallback?.id ?? ordered[0]?.id ?? "",
     locked: true,
   };
+}
+
+export function resumeFromStorage(curriculum, storage) {
+  const saved = createProgressStore(storage).load();
+  const lessonProgress = createLessonProgress();
+  const path = createPathController(curriculum, lessonProgress);
+
+  if (saved?.completedUnits?.length) {
+    path.hydratePassed(saved.completedUnits);
+  }
+
+  return resolveResumeUnitId(path, curriculum, saved?.lastUnitId);
 }
 
 /**
@@ -130,6 +151,15 @@ async function bootstrapApp(root) {
     return;
   }
 
+  const browserStorage =
+    typeof localStorage !== "undefined" ? localStorage : null;
+  const progressStore = browserStorage
+    ? createProgressStore(browserStorage)
+    : null;
+  const rawProgress = browserStorage?.getItem(STORAGE_KEY) ?? null;
+  const savedProgress = progressStore?.load() ?? null;
+  const storageCorrupt = Boolean(rawProgress && !savedProgress);
+
   lessonProgress = createLessonProgress();
   path = createPathController(curriculum, lessonProgress);
   const lessons = getLessons(curriculum);
@@ -137,6 +167,60 @@ async function bootstrapApp(root) {
   const learnableUnits = ordered.filter(
     (u) => u.type === "concept" || u.type === "lesson",
   );
+
+  /** @type {string} */
+  let lastUnitId = savedProgress?.lastUnitId ?? "";
+  let storageQuotaWarning = false;
+  let persistenceHintHtml = "";
+
+  if (savedProgress?.completedUnits?.length) {
+    for (const id of savedProgress.completedUnits) {
+      completedUnits.add(id);
+    }
+    path.hydratePassed(savedProgress.completedUnits);
+  }
+
+  if (storageCorrupt) {
+    persistenceHintHtml = renderStorageCorruptNotice();
+  } else if (
+    browserStorage &&
+    !savedProgress &&
+    browserStorage.getItem(PERSISTENCE_HINT_KEY) !== "1"
+  ) {
+    persistenceHintHtml = renderPersistenceHint();
+  }
+
+  function persistProgress() {
+    if (!progressStore) return;
+    const result = progressStore.save({
+      version: 1,
+      completedUnits: [...completedUnits],
+      lastUnitId: activeUnitId ?? lastUnitId,
+    });
+    if (!result.ok) {
+      storageQuotaWarning = true;
+    } else {
+      storageQuotaWarning = false;
+    }
+    lastUnitId = activeUnitId ?? lastUnitId;
+  }
+
+  function storageBannerMarkup() {
+    const parts = [];
+    if (persistenceHintHtml) parts.push(persistenceHintHtml);
+    if (storageQuotaWarning) parts.push(renderStorageQuotaWarning());
+    return parts.join("");
+  }
+
+  function bindStorageBanner() {
+    root
+      .querySelector("#btn-dismiss-storage-hint")
+      ?.addEventListener("click", () => {
+        browserStorage?.setItem(PERSISTENCE_HINT_KEY, "1");
+        persistenceHintHtml = "";
+        root.querySelectorAll(".storage-banner").forEach((el) => el.remove());
+      });
+  }
 
   function syncLessonProgressFromCompleted() {
     for (const id of completedUnits) {
@@ -154,6 +238,7 @@ async function bootstrapApp(root) {
     if (unit?.type === "lesson") {
       lessonProgress.markComplete(unitId);
     }
+    persistProgress();
   }
 
   function isUnitComplete(unitId) {
@@ -183,13 +268,13 @@ async function bootstrapApp(root) {
     const nav = path.tryNavigate(unitId);
     if (nav.allowed) return true;
     root.innerHTML =
-      progressMarkup() +
-      `<article class="card"><h2 tabindex="-1">Einheit gesperrt</h2>
+      pageMarkup(`<article class="card"><h2 tabindex="-1">Einheit gesperrt</h2>
 <p class="locked-hint">${nav.reason ?? "Diese Einheit ist noch nicht verfügbar."}</p>
 <div class="unit-nav">
 <button type="button" class="btn btn-secondary" id="btn-pathmap">Zum Lernpfad</button>
-</div></article>`;
+</div></article>`);
     root.querySelector("#btn-pathmap")?.addEventListener("click", showPathMap);
+    bindStorageBanner();
     focusCardHeading();
     return false;
   }
@@ -216,6 +301,16 @@ async function bootstrapApp(root) {
     return renderProgressBar({ completed, total });
   }
 
+  function pageMarkup(body) {
+    return storageBannerMarkup() + progressMarkup() + body;
+  }
+
+  function trackActiveUnit(unitId) {
+    activeUnitId = unitId;
+    lastUnitId = unitId;
+    persistProgress();
+  }
+
   function focusCardHeading() {
     const heading = root.querySelector(".card h2, .start-overview h1");
     if (heading instanceof HTMLElement) {
@@ -226,7 +321,8 @@ async function bootstrapApp(root) {
   function renderStart() {
     screen = "start";
     activeUnitId = null;
-    root.innerHTML = progressMarkup() + renderStartView();
+    root.innerHTML = pageMarkup(renderStartView());
+    bindStorageBanner();
     root.querySelector("#btn-start-learning")?.addEventListener("click", () => {
       const next = getFirstLearningView(curriculum, {
         completedUnits: [...completedUnits],
@@ -248,7 +344,7 @@ async function bootstrapApp(root) {
     if (!unit) return;
     if (!guardNavigation(unitId)) return;
     screen = "concept";
-    activeUnitId = unit.id;
+    trackActiveUnit(unit.id);
     const done = isUnitComplete(unit.id);
     const nav = [
       '<button type="button" class="btn btn-secondary" id="btn-back-start">Zurück</button>',
@@ -257,9 +353,11 @@ async function bootstrapApp(root) {
         ? '<button type="button" class="btn" id="btn-next">Weiter</button>'
         : '<button type="button" class="btn" id="btn-complete-concept">Weiter</button>',
     ];
-    root.innerHTML =
-      progressMarkup() + renderConcept(unit) + `<div class="unit-nav">${nav.join("")}</div>`;
+    root.innerHTML = pageMarkup(
+      renderConcept(unit) + `<div class="unit-nav">${nav.join("")}</div>`,
+    );
     bindConceptHandlers(unit);
+    bindStorageBanner();
     focusCardHeading();
   }
 
@@ -300,20 +398,19 @@ async function bootstrapApp(root) {
     if (!guardNavigation(unitId)) return;
 
     if (isLessonLocked(unit)) {
-      root.innerHTML =
-        progressMarkup() +
-        `<article class="card"><h2 tabindex="-1">Lektion gesperrt</h2>
+      root.innerHTML = pageMarkup(`<article class="card"><h2 tabindex="-1">Lektion gesperrt</h2>
 <p class="locked-hint">Diese Lektion ist noch gesperrt. Schließe zuerst die vorherige Lektion ab.</p>
 <div class="unit-nav">
 <button type="button" class="btn btn-secondary" id="btn-pathmap">Zum Lernpfad</button>
-</div></article>`;
+</div></article>`);
       root.querySelector("#btn-pathmap")?.addEventListener("click", showPathMap);
+      bindStorageBanner();
       focusCardHeading();
       return;
     }
 
     screen = "lesson";
-    activeUnitId = unit.id;
+    trackActiveUnit(unit.id);
     const done = isUnitComplete(unit.id);
     const index = lessons.findIndex((l) => l.id === unit.id);
     const prev = index > 0 ? lessons[index - 1] : null;
@@ -340,8 +437,9 @@ async function bootstrapApp(root) {
       nav.push('<button type="button" class="btn" id="btn-next">Weiter</button>');
     }
 
-    root.innerHTML =
-      progressMarkup() + renderLesson(unit) + `<div class="unit-nav">${nav.join("")}</div>`;
+    root.innerHTML = pageMarkup(
+      renderLesson(unit) + `<div class="unit-nav">${nav.join("")}</div>`,
+    );
 
     root.querySelector("#btn-back-concept")?.addEventListener("click", () => {
       if (concept) showConcept(concept.id);
@@ -357,6 +455,7 @@ async function bootstrapApp(root) {
     root.querySelector("#btn-next")?.addEventListener("click", () => {
       if (next) showLesson(next.id);
     });
+    bindStorageBanner();
     focusCardHeading();
   }
 
@@ -369,7 +468,7 @@ async function bootstrapApp(root) {
     if (!guardNavigation(unitId)) return;
 
     screen = "exercise";
-    activeUnitId = unit.id;
+    trackActiveUnit(unit.id);
     const inputType = getExerciseInputType(unit);
     let canContinue = isUnitComplete(unit.id);
 
@@ -381,10 +480,9 @@ async function bootstrapApp(root) {
         nav.push('<button type="button" class="btn" id="btn-next">Weiter</button>');
       }
 
-      root.innerHTML =
-        progressMarkup() +
-        renderExercise(unit, inputType) +
-        `<div class="unit-nav">${nav.join("")}</div>`;
+      root.innerHTML = pageMarkup(
+        renderExercise(unit, inputType) + `<div class="unit-nav">${nav.join("")}</div>`,
+      );
 
       const feedbackRegion = root.querySelector("#exercise-feedback-region");
       if (feedbackHtml && feedbackRegion) {
@@ -411,6 +509,7 @@ async function bootstrapApp(root) {
         void runSqlPreview();
       });
 
+      bindStorageBanner();
       focusCardHeading();
     }
 
@@ -485,12 +584,12 @@ async function bootstrapApp(root) {
       isComplete: isUnitComplete,
       isLocked: isPathUnitLocked,
     });
-    root.innerHTML =
-      progressMarkup() +
+    root.innerHTML = pageMarkup(
       map +
-      `<div class="unit-nav">
+        `<div class="unit-nav">
 <button type="button" class="btn btn-secondary" id="btn-back-learning">Zurück zum Lernen</button>
-</div>`;
+</div>`,
+    );
 
     root.querySelectorAll(".path-unit").forEach((el, index) => {
       const unit = ordered[index];
@@ -510,9 +609,32 @@ async function bootstrapApp(root) {
       if (next.view === "concept") showConcept(next.unitId);
       else showLesson(next.unitId);
     });
+    bindStorageBanner();
+    persistProgress();
     focusCardHeading();
   }
 
+  /**
+   * @param {string} unitId
+   */
+  function openResumeUnit(unitId) {
+    const unit = curriculum.units.find((u) => u.id === unitId);
+    if (!unit || !path.isUnlocked(unitId)) {
+      renderStart();
+      return;
+    }
+    if (unit.type === "concept") showConcept(unitId);
+    else if (unit.type === "lesson") showLesson(unitId);
+    else if (unit.type === "exercise") showExercise(unitId);
+    else showPathMap();
+  }
+
   syncLessonProgressFromCompleted();
-  renderStart();
+
+  if (savedProgress?.lastUnitId) {
+    const resume = resolveResumeUnitId(path, curriculum, savedProgress.lastUnitId);
+    openResumeUnit(resume.unitId);
+  } else {
+    renderStart();
+  }
 }

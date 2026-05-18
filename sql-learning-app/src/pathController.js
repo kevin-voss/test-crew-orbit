@@ -9,8 +9,9 @@ function passThresholdFor(unit, defaultThreshold) {
 /**
  * @param {import("./curriculum.js").Curriculum} curriculum
  * @param {ReturnType<typeof import("./lessonProgress.js").createLessonProgress>} lessonProgress
+ * @param {{ onUnitPassed?: (unitId: string) => void }} [options]
  */
-export function createPathController(curriculum, lessonProgress) {
+export function createPathController(curriculum, lessonProgress, options = {}) {
   const ordered = [...curriculum.units].sort((a, b) => a.order - b.order);
   const defaultThreshold = curriculum.passThreshold ?? 1;
   /** @type {Map<string, number>} */
@@ -69,6 +70,21 @@ export function createPathController(curriculum, lessonProgress) {
       successCounts.set(unitId, (successCounts.get(unitId) ?? 0) + 1);
       if (unit.type === "lesson" || unit.type === "concept") {
         lessonProgress.markComplete(unitId);
+      }
+      options.onUnitPassed?.(unitId);
+    },
+
+    /**
+     * @param {string[]} unitIds
+     */
+    hydratePassed(unitIds) {
+      for (const unitId of unitIds) {
+        const unit = ordered.find((u) => u.id === unitId);
+        if (!unit) continue;
+        successCounts.set(unitId, passThresholdFor(unit, defaultThreshold));
+        if (unit.type === "lesson" || unit.type === "concept") {
+          lessonProgress.markComplete(unitId);
+        }
       }
     },
 

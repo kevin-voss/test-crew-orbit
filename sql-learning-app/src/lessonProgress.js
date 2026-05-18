@@ -1,15 +1,17 @@
 /**
+ * @param {string[]} [initialCompleted]
  * @returns {{
  *   canAccessLesson: (lesson: { id: string; order?: number }, allLessons: { id: string; order?: number }[]) => boolean;
  *   markComplete: (lessonId: string) => void;
  *   isComplete: (lessonId: string) => boolean;
  *   getCompletedIds: () => string[];
  *   lessonsComplete: (ids: string[]) => boolean;
+ *   hydrate: (ids: string[]) => void;
  * }}
  */
-export function createLessonProgress() {
+export function createLessonProgress(initialCompleted = []) {
   /** @type {Set<string>} */
-  const completed = new Set();
+  const completed = new Set(initialCompleted);
 
   return {
     canAccessLesson(lesson, allLessons) {
@@ -32,6 +34,12 @@ export function createLessonProgress() {
 
     lessonsComplete(ids) {
       return ids.every((id) => completed.has(id));
+    },
+
+    hydrate(ids) {
+      for (const id of ids) {
+        completed.add(id);
+      }
     },
   };
 }
