@@ -334,4 +334,211 @@ describe("QA — curriculum loader fuzz", () => {
     }
     expect(() => loadCurriculum(broken)).toThrow(/difficulty/i);
   });
+
+  it("throws on invalid JSON string input", () => {
+    expect(() => loadCurriculum("{not-json")).toThrow();
+  });
+});
+
+describe("QA — path controller bypass attempts", () => {
+  /** @type {import("../src/curriculum.js").Curriculum} */
+  let curriculum;
+  let ordered;
+
+  beforeAll(async () => {
+    const { loadCurriculum } = await import("../src/curriculum.js");
+    curriculum = loadCurriculum(readFileSync(CURRICULUM_JSON, "utf8"));
+    ordered = [...curriculum.units].sort((a, b) => a.order - b.order);
+  });
+
+  beforeEach(async () => {
+    const { createPathController } = await import("../src/pathController.js");
+    const { createLessonProgress } = await import("../src/lessonProgress.js");
+    path = createPathController(curriculum, createLessonProgress());
+  });
+
+  /** @type {ReturnType<typeof import("../src/pathController.js").createPathController>} */
+  let path;
+
+  it("recordSuccess on a locked unit does not unlock that unit or skip prerequisites", () => {
+    const last = ordered.at(-1);
+    expect(path.isUnlocked(last.id)).toBe(false);
+    path.recordSuccess(last.id);
+    expect(path.isUnlocked(last.id)).toBe(false);
+    expect(path.tryNavigate(last.id).allowed).toBe(false);
+  });
+
+  it("hydratePassed ignores unknown unit ids without throwing", () => {
+    expect(() => path.hydratePassed(["__no_such_unit__"])).not.toThrow();
+    expect(path.isUnitPassed("__no_such_unit__")).toBe(false);
+  });
+});
+
+describe("QA — progress store boundary values", () => {
+  /** @type {typeof import("../src/progressStore.js").createProgressStore} */
+  let createProgressStore;
+
+  beforeAll(async () => {
+    const mod = await import("../src/progressStore.js");
+    createProgressStore = mod.createProgressStore;
+  });
+
+  it("rejects null or missing lastUnitId", () => {
+    const storage = createMemoryStorage();
+    storage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({
+        version: 1,
+        completedUnits: [],
+        lastUnitId: null,
+      }),
+    );
+    expect(createProgressStore(storage).load()).toBeNull();
+  });
+
+  it("accepts empty-string unit ids in completedUnits (storage shape only)", () => {
+    const storage = createMemoryStorage();
+    storage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({
+        version: 1,
+        completedUnits: [""],
+        lastUnitId: "concept-intro",
+      }),
+    );
+    const loaded = createProgressStore(storage).load();
+    expect(loaded?.completedUnits).toEqual([""]);
+  });
+
+  it("handles very large completedUnits arrays without throwing on load", () => {
+    const storage = createMemoryStorage();
+    const huge = Array.from({ length: 5000 }, (_, i) => `phantom-${i}`);
+    storage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({
+        version: 1,
+        completedUnits: huge,
+        lastUnitId: "concept-intro",
+      }),
+    );
+    expect(() => createProgressStore(storage).load()).not.toThrow();
+  });
+});
+
+describe("QA — sql runner advanced injection patterns", () => {
+  /** @type {typeof import("../src/sqlRunner.js").createSqlRunner} */
+  let createSqlRunner;
+
+  beforeAll(async () => {
+    const mod = await import("../src/sqlRunner.js");
+    createSqlRunner = mod.createSqlRunner;
+  });
+
+  it("allows UNION queries that start with SELECT", async () => {
+    const runner = await createSqlRunner({
+      seedSql: readFileSync(SEED_SQL, "utf8"),
+    });
+    const union = await runner.runQuery("SELECT 1 AS a UNION SELECT 2 AS a");
+    expect(union.ok).toBe(true);
+    expect(union.rows?.length).toBeGreaterThan(0);
+  });
+
+  it("rejects WITH/CTE queries even though they begin with WITH (sql.js exec path)", async () => {
+    const runner = await createSqlRunner({
+      seedSql: readFileSync(SEED_SQL, "utf8"),
+    });
+    const cte = await runner.runQuery(
+      "WITH t AS (SELECT 1 AS x) SELECT x FROM t",
+    );
+    expect(cte.ok).toBe(false);
+    expect(cte.error).toBeTruthy();
+  });
+
+  it("accepts UTF-8 BOM before SELECT (common paste from editors)", async () => {
+    const runner = await createSqlRunner({
+      seedSql: readFileSync(SEED_SQL, "utf8"),
+    });
+    const bom = await runner.runQuery("\uFEFFSELECT 1");
+    expect(bom.ok).toBe(true);
+  });
+
+  it("does not execute a second destructive statement after semicolon", async () => {
+    const runner = await createSqlRunner({
+      seedSql: readFileSync(SEED_SQL, "utf8"),
+    });
+    const before = await runner.runQuery("SELECT COUNT(*) AS c FROM schueler");
+    expect(before.ok).toBe(true);
+    const chained = await runner.runQuery(
+      "SELECT 1 AS ok; DELETE FROM schueler",
+    );
+    expect(chained.ok).toBe(true);
+    const after = await runner.runQuery("SELECT COUNT(*) AS c FROM schueler");
+    expect(after.ok).toBe(true);
+    expect(after.rows?.[0]?.c).toBe(before.rows?.[0]?.c);
+  });
+});
+
+describe("QA — exercise grading malformed answers", () => {
+  /** @type {typeof import("../src/exerciseEngine.js").gradeExercise} */
+  let gradeExercise;
+  let mcExercise;
+
+  beforeAll(async () => {
+    const engine = await import("../src/exerciseEngine.js");
+    const { loadCurriculum } = await import("../src/curriculum.js");
+    gradeExercise = engine.gradeExercise;
+    const curriculum = loadCurriculum(readFileSync(CURRICULUM_JSON, "utf8"));
+    mcExercise = curriculum.units.find(
+      (u) => u.type === "exercise" && u.format === "mc",
+    );
+  });
+
+  it("fails closed on undefined, empty, or unknown optionId", () => {
+    const ctx = { lessonsComplete: () => true };
+    expect(gradeExercise(mcExercise, {}, ctx).ok).toBe(false);
+    expect(gradeExercise(mcExercise, { optionId: "" }, ctx).ok).toBe(false);
+    expect(
+      gradeExercise(mcExercise, { optionId: "not-in-options" }, ctx).ok,
+    ).toBe(false);
+  });
+
+  it("match-format exercises still grade via optionId only (no pairing validation)", async () => {
+    const { loadCurriculum } = await import("../src/curriculum.js");
+    const curriculum = loadCurriculum(readFileSync(CURRICULUM_JSON, "utf8"));
+    const matchEx = curriculum.units.find(
+      (u) => u.type === "exercise" && u.format === "match",
+    );
+    const ctx = { lessonsComplete: () => true };
+    const wrong = gradeExercise(matchEx, { optionId: "b" }, ctx);
+    expect(wrong.ok).toBe(false);
+    const right = gradeExercise(
+      matchEx,
+      { optionId: matchEx.correctOptionId },
+      ctx,
+    );
+    expect(right.ok).toBe(true);
+  });
+});
+
+describe("QA — app path completion integrity", () => {
+  /** @type {typeof import("../app.js").isPathComplete} */
+  let isPathComplete;
+  /** @type {import("../src/curriculum.js").Curriculum} */
+  let curriculum;
+
+  beforeAll(async () => {
+    const appMod = await import("../app.js");
+    const { loadCurriculum } = await import("../src/curriculum.js");
+    isPathComplete = appMod.isPathComplete;
+    curriculum = loadCurriculum(readFileSync(CURRICULUM_JSON, "utf8"));
+  });
+
+  it("isPathComplete is false when only concept id is marked complete", () => {
+    const concept = curriculum.units.find((u) => u.type === "concept");
+    expect(isPathComplete(curriculum, [concept.id])).toBe(false);
+  });
+
+  it("isPathComplete is false when storage lists unknown phantom ids only", () => {
+    expect(isPathComplete(curriculum, ["phantom-unit-9999"])).toBe(false);
+  });
 });
