@@ -6,7 +6,7 @@
       "type": "concept",
       "order": 1,
       "title": "Was ist SQL?",
-      "body": "Willkommen – diese Lern-App richtet sich an absolute Anfängerinnen ohne Vorkenntnisse. SQL (Structured Query Language) ist die Sprache, mit der du Daten in einer Datenbank abfragst und veränderst. Stell dir eine Datenbank wie ein Ordner mit Tabellen vor: Jede Tabelle hat Zeilen (Datensätze) und Spalten (Eigenschaften). Mit einer Abfrage holst du dir genau die Informationen heraus, die du brauchst – zum Beispiel alle Schülerinnen und Schüler aus der Tabelle schueler in unserer Schul-Datenbank."
+      "body": "Willkommen – diese Lern-App richtet sich an absolute Anfängerinnen ohne Vorkenntnisse. SQL (Structured Query Language) ist die Sprache, mit der du Daten in einer Datenbank abfragst und veränderst. Stell dir eine Datenbank wie ein Ordner mit Tabellen vor: Jede Tabelle hat Zeilen (Datensätze) und Spalten (Eigenschaften). Mit einer Abfrage holst du dir genau die Informationen heraus, die du brauchst – zum Beispiel alle Schülerinnen und Schüler aus der Tabelle schueler in unserer Schul-Datenbank mit den Tabellen schueler, kurse und noten."
     },
     {
       "id": "lesson-tabellen-1",
@@ -14,7 +14,7 @@
       "order": 2,
       "topicId": "tabellen-daten",
       "title": "Tabellen und Daten verstehen",
-      "body": "In unserer Schul-Datenbank gibt es Tabellen wie schueler, kurse und noten. Jede Zeile ist ein Datensatz, jede Spalte ein Merkmal – zum Beispiel name oder klasse bei schueler. So findest du Informationen strukturiert wieder."
+      "body": "In unserer Schul-Datenbank gibt es Tabellen wie schueler, kurse und noten. Jede Zeile ist ein Datensatz, jede Spalte ein Merkmal – zum Beispiel name oder klasse bei schueler, titel bei kurse. So findest du Informationen strukturiert wieder."
     },
     {
       "id": "ex-tabellen-1",
@@ -59,7 +59,7 @@
       "order": 5,
       "topicId": "select",
       "title": "SELECT – Daten auslesen",
-      "body": "Mit SELECT wählst du Spalten aus einer Tabelle. Beispiel: SELECT name FROM schueler; liefert alle Namen aus der Tabelle schueler."
+      "body": "Mit SELECT wählst du Spalten aus einer Tabelle. Beispiel: SELECT name FROM schueler; liefert alle Namen aus der Tabelle schueler. SELECT titel FROM kurse; zeigt Kurstitel."
     },
     {
       "id": "ex-select-1",
@@ -81,17 +81,35 @@
       "feedbackCorrect": "Gut gemacht! SELECT liest Daten aus."
     },
     {
+      "id": "ex-select-2",
+      "type": "exercise",
+      "order": 7,
+      "topicId": "select",
+      "difficulty": 2,
+      "format": "match",
+      "lessonIds": ["lesson-select-1"],
+      "title": "Übung: SELECT und FROM",
+      "body": "Welches SQL-Teil nennt die Tabelle?",
+      "options": [
+        { "id": "a", "label": "FROM" },
+        { "id": "b", "label": "Die Tabelle nach FROM, z. B. FROM schueler" }
+      ],
+      "correctOptionId": "a",
+      "feedbackWrong": "Tipp: Nach SELECT kommt FROM mit dem Tabellennamen.",
+      "feedbackCorrect": "Super! FROM schueler oder FROM kurse wählt die Tabelle."
+    },
+    {
       "id": "lesson-where-1",
       "type": "lesson",
-      "order": 7,
+      "order": 8,
       "topicId": "where",
       "title": "WHERE – Ergebnisse filtern",
-      "body": "WHERE schränkt Zeilen ein: SELECT name FROM schueler WHERE klasse = '10a'; zeigt nur Schülerinnen und Schüler der Klasse 10a."
+      "body": "WHERE schränkt Zeilen ein: SELECT name FROM schueler WHERE klasse = '10a'; zeigt nur Schülerinnen und Schüler der Klasse 10a. So filterst du auch noten nach einer Note."
     },
     {
       "id": "ex-where-1",
       "type": "exercise",
-      "order": 8,
+      "order": 9,
       "topicId": "where",
       "difficulty": 2,
       "format": "match",
@@ -107,17 +125,36 @@
       "feedbackCorrect": "Super! WHERE filtert passende Zeilen."
     },
     {
+      "id": "ex-where-2",
+      "type": "exercise",
+      "order": 10,
+      "topicId": "where",
+      "difficulty": 2,
+      "format": "mc",
+      "lessonIds": ["lesson-where-1"],
+      "title": "Übung: Bedingungen",
+      "body": "Welche Abfrage zeigt nur Schülerinnen und Schüler der Klasse 10a?",
+      "options": [
+        { "id": "a", "label": "SELECT name FROM schueler WHERE klasse = '10a'" },
+        { "id": "b", "label": "SELECT name FROM schueler ORDER BY klasse" },
+        { "id": "c", "label": "SELECT COUNT(*) FROM schueler" }
+      ],
+      "correctOptionId": "a",
+      "feedbackWrong": "Schau in die Lektion – WHERE mit klasse = '10a' filtert die Klasse.",
+      "feedbackCorrect": "Richtig! WHERE klasse = '10a' wählt die passende Klasse."
+    },
+    {
       "id": "lesson-order-by-1",
       "type": "lesson",
-      "order": 9,
+      "order": 11,
       "topicId": "order-by",
       "title": "ORDER BY – Sortieren",
-      "body": "ORDER BY sortiert das Ergebnis, z. B. SELECT name FROM schueler ORDER BY name; für eine alphabetische Liste."
+      "body": "ORDER BY sortiert das Ergebnis, z. B. SELECT name FROM schueler ORDER BY name; für eine alphabetische Liste. SELECT titel FROM kurse ORDER BY fach; sortiert Kurse nach Fach."
     },
     {
       "id": "ex-order-by-1",
       "type": "exercise",
-      "order": 10,
+      "order": 12,
       "topicId": "order-by",
       "difficulty": 2,
       "format": "mc",
@@ -134,17 +171,35 @@
       "feedbackCorrect": "Richtig! ORDER BY sortiert dein Ergebnis."
     },
     {
+      "id": "ex-order-by-2",
+      "type": "exercise",
+      "order": 13,
+      "topicId": "order-by",
+      "difficulty": 2,
+      "format": "match",
+      "lessonIds": ["lesson-order-by-1"],
+      "title": "Übung: Sortierreihenfolge",
+      "body": "Was bewirkt ORDER BY name in SELECT name FROM schueler?",
+      "options": [
+        { "id": "a", "label": "Sortiert nach der Spalte name" },
+        { "id": "b", "label": "Zählt alle Namen" }
+      ],
+      "correctOptionId": "a",
+      "feedbackWrong": "ORDER BY legt fest, nach welcher Spalte sortiert wird.",
+      "feedbackCorrect": "Genau! ORDER BY name sortiert alphabetisch nach name."
+    },
+    {
       "id": "lesson-count-1",
       "type": "lesson",
-      "order": 11,
+      "order": 14,
       "topicId": "count",
       "title": "COUNT – Zeilen zählen",
-      "body": "COUNT(*) zählt Zeilen: SELECT COUNT(*) FROM schueler; sagt dir, wie viele Datensätze in schueler stehen."
+      "body": "COUNT(*) zählt Zeilen: SELECT COUNT(*) FROM schueler; sagt dir, wie viele Datensätze in schueler stehen. SELECT COUNT(*) FROM noten; zählt alle Noteneinträge."
     },
     {
       "id": "ex-count-1",
       "type": "exercise",
-      "order": 12,
+      "order": 15,
       "topicId": "count",
       "difficulty": 2,
       "format": "mc",
@@ -161,45 +216,100 @@
       "feedbackCorrect": "Genau! COUNT zählt Zeilen."
     },
     {
+      "id": "ex-count-2",
+      "type": "exercise",
+      "order": 16,
+      "topicId": "count",
+      "difficulty": 3,
+      "format": "match",
+      "lessonIds": ["lesson-count-1"],
+      "title": "Übung: COUNT(*) ",
+      "body": "Was zählt SELECT COUNT(*) FROM noten?",
+      "options": [
+        { "id": "a", "label": "Alle Zeilen in der Tabelle noten" },
+        { "id": "b", "label": "Nur Schülernamen" }
+      ],
+      "correctOptionId": "a",
+      "feedbackWrong": "COUNT(*) zählt jede Zeile in der genannten Tabelle.",
+      "feedbackCorrect": "Richtig! COUNT(*) zählt alle Einträge in noten."
+    },
+    {
       "id": "lesson-joins-1",
       "type": "lesson",
-      "order": 13,
+      "order": 17,
       "topicId": "joins",
       "title": "JOINs – Tabellen verbinden",
-      "body": "Mit JOIN verknüpfst du Tabellen über gemeinsame Spalten. So siehst du z. B. Noten zusammen mit Schülernamen aus schueler und noten."
+      "body": "Mit JOIN verknüpfst du Tabellen über gemeinsame Spalten. So siehst du z. B. Schülernamen zusammen mit Noten aus schueler und noten, wenn schueler.id = noten.schueler_id."
     },
     {
       "id": "ex-joins-1",
       "type": "exercise",
-      "order": 14,
+      "order": 18,
+      "topicId": "joins",
+      "difficulty": 3,
+      "format": "mc",
+      "lessonIds": ["lesson-joins-1"],
+      "title": "Übung: JOIN verstehen",
+      "body": "Wofür nutzt man einen JOIN?",
+      "options": [
+        { "id": "a", "label": "Daten aus mehreren Tabellen zusammenführen" },
+        { "id": "b", "label": "Eine Tabelle dauerhaft löschen" },
+        { "id": "c", "label": "Nur eine Spalte umbenennen" }
+      ],
+      "correctOptionId": "a",
+      "feedbackWrong": "Schau in die Lektion – JOIN verbindet Tabellen.",
+      "feedbackCorrect": "Richtig! JOIN kombiniert passende Zeilen aus zwei Tabellen."
+    },
+    {
+      "id": "ex-joins-2",
+      "type": "exercise",
+      "order": 19,
       "topicId": "joins",
       "difficulty": 3,
       "format": "sql",
       "lessonIds": ["lesson-joins-1", "lesson-select-1"],
       "title": "Übung: JOIN in SQL",
-      "body": "Schreibe eine Abfrage, die alle Namen aus schueler liefert (eine Spalte name).",
-      "expectedSql": "SELECT name FROM schueler",
-      "feedbackWrong": "Deine Abfrage passt noch nicht – prüfe SELECT und die Tabelle schueler.",
-      "feedbackCorrect": "Ausgezeichnet! Du hast die Abfrage korrekt formuliert."
+      "body": "Schreibe eine Abfrage mit JOIN: Zeige name aus schueler und note aus noten, verknüpft über schueler.id = noten.schueler_id.",
+      "expectedSql": "SELECT schueler.name, noten.note FROM schueler JOIN noten ON schueler.id = noten.schueler_id",
+      "feedbackWrong": "Deine Abfrage passt noch nicht – prüfe JOIN, ON und die Tabellen schueler und noten.",
+      "feedbackCorrect": "Ausgezeichnet! Du hast Tabellen mit JOIN verbunden."
     },
     {
       "id": "lesson-group-by-1",
       "type": "lesson",
-      "order": 15,
+      "order": 20,
       "topicId": "group-by",
       "title": "GROUP BY – Gruppieren",
-      "body": "GROUP BY fasst Zeilen mit gleichen Werten zusammen, oft mit COUNT oder AVG – z. B. Noten pro Schüler aus noten."
+      "body": "GROUP BY fasst Zeilen mit gleichen Werten zusammen, oft mit COUNT – z. B. wie viele Noten pro schueler_id in noten: SELECT schueler_id, COUNT(*) FROM noten GROUP BY schueler_id;"
     },
     {
       "id": "ex-group-by-1",
       "type": "exercise",
-      "order": 16,
+      "order": 21,
       "topicId": "group-by",
       "difficulty": 3,
+      "format": "match",
+      "lessonIds": ["lesson-group-by-1"],
+      "title": "Übung: GROUP BY",
+      "body": "Was macht GROUP BY?",
+      "options": [
+        { "id": "a", "label": "Fasst Zeilen mit gleichen Werten in Gruppen zusammen" },
+        { "id": "b", "label": "Sortiert nur alphabetisch" }
+      ],
+      "correctOptionId": "a",
+      "feedbackWrong": "GROUP BY bildet Gruppen für Aggregatfunktionen wie COUNT.",
+      "feedbackCorrect": "Genau! GROUP BY gruppiert deine Ergebnisse."
+    },
+    {
+      "id": "ex-group-by-2",
+      "type": "exercise",
+      "order": 22,
+      "topicId": "group-by",
+      "difficulty": 4,
       "format": "sql",
       "lessonIds": ["lesson-group-by-1"],
       "title": "Übung: GROUP BY in SQL",
-      "body": "Zähle alle Schüler: SELECT COUNT(*) AS cnt FROM schueler",
+      "body": "Zähle alle Schülerinnen und Schüler: SELECT COUNT(*) AS cnt FROM schueler",
       "expectedSql": "SELECT COUNT(*) AS cnt FROM schueler",
       "feedbackWrong": "Versuche COUNT(*) mit der Tabelle schueler.",
       "feedbackCorrect": "Richtig! So zählst du alle Datensätze."
@@ -207,21 +317,40 @@
     {
       "id": "lesson-having-1",
       "type": "lesson",
-      "order": 17,
+      "order": 23,
       "topicId": "having",
       "title": "HAVING – Gruppen filtern",
-      "body": "HAVING filtert gruppierte Ergebnisse nach COUNT oder SUM – ähnlich wie WHERE, aber für Gruppen."
+      "body": "HAVING filtert gruppierte Ergebnisse nach COUNT oder SUM – ähnlich wie WHERE, aber für Gruppen. Beispiel: nur Kurse in noten mit mehr als einer Note."
     },
     {
       "id": "ex-having-1",
       "type": "exercise",
-      "order": 18,
+      "order": 24,
+      "topicId": "having",
+      "difficulty": 4,
+      "format": "mc",
+      "lessonIds": ["lesson-having-1"],
+      "title": "Übung: HAVING",
+      "body": "Wann nutzt du HAVING statt WHERE?",
+      "options": [
+        { "id": "a", "label": "Um gruppierte Ergebnisse nach COUNT zu filtern" },
+        { "id": "b", "label": "Um Tabellen anzulegen" },
+        { "id": "c", "label": "Um Spalten umzubenennen" }
+      ],
+      "correctOptionId": "a",
+      "feedbackWrong": "HAVING kommt nach GROUP BY und filtert Gruppen.",
+      "feedbackCorrect": "Richtig! HAVING filtert aggregierte Gruppen."
+    },
+    {
+      "id": "ex-having-2",
+      "type": "exercise",
+      "order": 25,
       "topicId": "having",
       "difficulty": 4,
       "format": "sql",
       "lessonIds": ["lesson-having-1", "lesson-group-by-1"],
       "title": "Übung: HAVING in SQL",
-      "body": "Finde Kurse mit mehr als 0 Einträgen in noten – nutze COUNT und GROUP BY kurs_id.",
+      "body": "Finde Kurse mit mindestens einer Note in noten – nutze COUNT und GROUP BY kurs_id.",
       "expectedSql": "SELECT kurs_id, COUNT(*) AS cnt FROM noten GROUP BY kurs_id HAVING COUNT(*) > 0",
       "feedbackWrong": "Prüfe GROUP BY und HAVING in der Lektion.",
       "feedbackCorrect": "Sehr gut! HAVING filtert deine Gruppen."
@@ -229,17 +358,36 @@
     {
       "id": "lesson-insert-1",
       "type": "lesson",
-      "order": 19,
+      "order": 26,
       "topicId": "insert",
       "title": "INSERT – Daten einfügen",
-      "body": "INSERT INTO schueler (name, klasse) VALUES ('Neu', '10c'); legt einen neuen Datensatz in schueler an."
+      "body": "INSERT INTO schueler (name, klasse) VALUES ('Neu', '10c'); legt einen neuen Datensatz in schueler an. INSERT INTO kurse (titel, fach) VALUES ('Sport', 'Sport'); erweitert kurse."
     },
     {
       "id": "ex-insert-1",
       "type": "exercise",
-      "order": 20,
+      "order": 27,
       "topicId": "insert",
       "difficulty": 4,
+      "format": "mc",
+      "lessonIds": ["lesson-insert-1"],
+      "title": "Übung: INSERT",
+      "body": "Welches Schlüsselwort fügt neue Zeilen ein?",
+      "options": [
+        { "id": "a", "label": "INSERT" },
+        { "id": "b", "label": "SELECT" },
+        { "id": "c", "label": "ORDER BY" }
+      ],
+      "correctOptionId": "a",
+      "feedbackWrong": "INSERT INTO … VALUES … legt neue Datensätze an.",
+      "feedbackCorrect": "Genau! INSERT fügt neue Zeilen hinzu."
+    },
+    {
+      "id": "ex-insert-2",
+      "type": "exercise",
+      "order": 28,
+      "topicId": "insert",
+      "difficulty": 5,
       "format": "sql",
       "lessonIds": ["lesson-insert-1"],
       "title": "Übung: INSERT in SQL",
@@ -251,15 +399,33 @@
     {
       "id": "lesson-update-1",
       "type": "lesson",
-      "order": 21,
+      "order": 29,
       "topicId": "update",
       "title": "UPDATE – Daten ändern",
-      "body": "UPDATE schueler SET klasse = '10b' WHERE name = 'Anna Müller'; ändert bestehende Zeilen in schueler."
+      "body": "UPDATE schueler SET klasse = '10b' WHERE name = 'Anna Müller'; ändert bestehende Zeilen in schueler. So passt du auch Daten in noten oder kurse an."
     },
     {
       "id": "ex-update-1",
       "type": "exercise",
-      "order": 22,
+      "order": 30,
+      "topicId": "update",
+      "difficulty": 5,
+      "format": "match",
+      "lessonIds": ["lesson-update-1"],
+      "title": "Übung: UPDATE",
+      "body": "Welche Klausel begrenzt, welche Zeilen UPDATE ändert?",
+      "options": [
+        { "id": "a", "label": "WHERE" },
+        { "id": "b", "label": "ORDER BY" }
+      ],
+      "correctOptionId": "a",
+      "feedbackWrong": "Ohne WHERE würden oft alle Zeilen geändert – WHERE schränkt ein.",
+      "feedbackCorrect": "Richtig! WHERE wählt die Zeilen für UPDATE aus."
+    },
+    {
+      "id": "ex-update-2",
+      "type": "exercise",
+      "order": 31,
       "topicId": "update",
       "difficulty": 5,
       "format": "sql",
