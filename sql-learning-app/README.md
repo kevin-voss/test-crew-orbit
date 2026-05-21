@@ -2,6 +2,12 @@
 
 Web-App zum Erlernen von SQL-Grundlagen für absolute Anfänger:innen — Konzept, Lektionen und Übungen mit steigender Schwierigkeit.
 
+## Installation
+
+```bash
+npm install
+```
+
 ## Lokal starten
 
 Statische Dateien; ein einfacher HTTP-Server genügt (z. B. `npx serve .` im Projektordner) und `index.html` im Browser öffnen.
