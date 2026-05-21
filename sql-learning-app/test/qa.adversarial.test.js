@@ -520,6 +520,181 @@ describe("QA — exercise grading malformed answers", () => {
   });
 });
 
+describe("QA — sql runner string-literal and churn", () => {
+  /** @type {typeof import("../src/sqlRunner.js").createSqlRunner} */
+  let createSqlRunner;
+
+  beforeAll(async () => {
+    const mod = await import("../src/sqlRunner.js");
+    createSqlRunner = mod.createSqlRunner;
+  });
+
+  it("does not split on semicolons inside single-quoted string literals", async () => {
+    const runner = await createSqlRunner({
+      seedSql: readFileSync(SEED_SQL, "utf8"),
+    });
+    const before = await runner.runQuery("SELECT COUNT(*) AS c FROM schueler");
+    const chained = await runner.runQuery(
+      "SELECT * FROM schueler WHERE name = 'a;b'; DELETE FROM schueler",
+    );
+    const after = await runner.runQuery("SELECT COUNT(*) AS c FROM schueler");
+    expect(chained.ok).toBe(true);
+    expect(after.rows?.[0]?.c).toBe(before.rows?.[0]?.c);
+  });
+
+  it("does not treat SQL doubled-single-quote escapes as string terminators before semicolon", async () => {
+    const runner = await createSqlRunner({
+      seedSql: readFileSync(SEED_SQL, "utf8"),
+    });
+    const before = await runner.runQuery("SELECT COUNT(*) AS c FROM schueler");
+    const chained = await runner.runQuery(
+      "SELECT 'it''s; marker' AS x; DELETE FROM schueler",
+    );
+    const after = await runner.runQuery("SELECT COUNT(*) AS c FROM schueler");
+    expect(chained.ok).toBe(true);
+    expect(after.rows?.[0]?.c).toBe(before.rows?.[0]?.c);
+  });
+
+  it("does not split on semicolons inside double-quoted string literals", async () => {
+    const runner = await createSqlRunner({
+      seedSql: readFileSync(SEED_SQL, "utf8"),
+    });
+    const before = await runner.runQuery("SELECT COUNT(*) AS c FROM schueler");
+    const chained = await runner.runQuery(
+      'SELECT * FROM schueler WHERE name = "a;b"; DELETE FROM schueler',
+    );
+    const after = await runner.runQuery("SELECT COUNT(*) AS c FROM schueler");
+    expect(chained.ok).toBe(true);
+    expect(after.rows?.[0]?.c).toBe(before.rows?.[0]?.c);
+  });
+
+  it("does not execute DELETE when semicolon appears inside a block comment", async () => {
+    const runner = await createSqlRunner({
+      seedSql: readFileSync(SEED_SQL, "utf8"),
+    });
+    const before = await runner.runQuery("SELECT COUNT(*) AS c FROM schueler");
+    const chained = await runner.runQuery(
+      "SELECT 1 /* ; */ ; DELETE FROM schueler",
+    );
+    const after = await runner.runQuery("SELECT COUNT(*) AS c FROM schueler");
+    expect(chained.ok).toBe(false);
+    expect(after.rows?.[0]?.c).toBe(before.rows?.[0]?.c);
+  });
+
+  it("handles many sequential runQuery calls on one runner without throwing", async () => {
+    const runner = await createSqlRunner({
+      seedSql: readFileSync(SEED_SQL, "utf8"),
+    });
+    const results = await Promise.all(
+      Array.from({ length: 40 }, (_, i) =>
+        runner.runQuery(`SELECT ${i} AS n`),
+      ),
+    );
+    expect(results.every((r) => r.ok)).toBe(true);
+  });
+
+  it("returns a structured error for very long malformed SELECT without throwing", async () => {
+    const runner = await createSqlRunner({
+      seedSql: readFileSync(SEED_SQL, "utf8"),
+    });
+    const huge = `SELECT ${"x".repeat(120_000)}`;
+    expect(() => runner.runQuery(huge)).not.toThrow();
+    const result = await runner.runQuery(huge);
+    expect(result.ok).toBe(false);
+    expect(result.error).toBeTruthy();
+  });
+});
+
+describe("QA — progress store load hygiene", () => {
+  /** @type {typeof import("../src/progressStore.js").createProgressStore} */
+  let createProgressStore;
+
+  beforeAll(async () => {
+    const mod = await import("../src/progressStore.js");
+    createProgressStore = mod.createProgressStore;
+  });
+
+  it("clears corrupt storage key after invalid JSON load", () => {
+    const storage = createMemoryStorage();
+    storage.setItem(STORAGE_KEY, "{not-json");
+    expect(createProgressStore(storage).load()).toBeNull();
+    expect(storage.getItem(STORAGE_KEY)).toBeNull();
+  });
+
+  it("rejects stringified version numbers in persisted JSON", () => {
+    const storage = createMemoryStorage();
+    storage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({
+        version: "1",
+        completedUnits: [],
+        lastUnitId: "concept-intro",
+      }),
+    );
+    expect(createProgressStore(storage).load()).toBeNull();
+    expect(storage.getItem(STORAGE_KEY)).toBeNull();
+  });
+});
+
+describe("QA — resume edge cases", () => {
+  /** @type {import("../src/curriculum.js").Curriculum} */
+  let curriculum;
+  /** @type {typeof import("../app.js").resumeFromStorage} */
+  let resumeFromStorage;
+  /** @type {typeof import("../src/pathController.js").createPathController} */
+  let createPathController;
+  /** @type {typeof import("../src/lessonProgress.js").createLessonProgress} */
+  let createLessonProgress;
+
+  beforeAll(async () => {
+    const { loadCurriculum } = await import("../src/curriculum.js");
+    const appMod = await import("../app.js");
+    const pathMod = await import("../src/pathController.js");
+    const lessonMod = await import("../src/lessonProgress.js");
+    curriculum = loadCurriculum(readFileSync(CURRICULUM_JSON, "utf8"));
+    resumeFromStorage = appMod.resumeFromStorage;
+    createPathController = pathMod.createPathController;
+    createLessonProgress = lessonMod.createLessonProgress;
+  });
+
+  it("resumeFromStorage with whitespace-only lastUnitId falls back to first unlockable unit", () => {
+    const storage = createMemoryStorage();
+    storage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({
+        version: 1,
+        completedUnits: [],
+        lastUnitId: "   ",
+      }),
+    );
+    const ordered = [...curriculum.units].sort((a, b) => a.order - b.order);
+    const resume = resumeFromStorage(curriculum, storage);
+    expect(resume.unitId).toBe(ordered[0].id);
+  });
+
+  it("resumeFromStorage does not unlock exercises when only exercise id is tampered into storage", () => {
+    const sqlEx = curriculum.units.find(
+      (u) => u.type === "exercise" && u.format === "sql",
+    );
+    expect(sqlEx).toBeTruthy();
+    const storage = createMemoryStorage();
+    storage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({
+        version: 1,
+        completedUnits: [sqlEx.id],
+        lastUnitId: sqlEx.id,
+      }),
+    );
+    const resume = resumeFromStorage(curriculum, storage);
+    const path = createPathController(curriculum, createLessonProgress());
+    path.hydratePassed([sqlEx.id]);
+    expect(path.isUnlocked(sqlEx.id)).toBe(false);
+    expect(path.canStartExercise(sqlEx.id)).toBe(false);
+    expect(resume.unitId).not.toBe(sqlEx.id);
+  });
+});
+
 describe("QA — app path completion integrity", () => {
   /** @type {typeof import("../app.js").isPathComplete} */
   let isPathComplete;
