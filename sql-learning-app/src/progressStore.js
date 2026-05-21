@@ -34,6 +34,7 @@ export function createProgressStore(storage) {
           !parsed ||
           parsed.version !== 1 ||
           !Array.isArray(parsed.completedUnits) ||
+          !parsed.completedUnits.every((id) => typeof id === "string") ||
           typeof parsed.lastUnitId !== "string"
         ) {
           return null;

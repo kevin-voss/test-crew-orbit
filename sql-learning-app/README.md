@@ -10,7 +10,13 @@ npm install
 
 ## Lokal starten
 
-Statische Dateien; ein einfacher HTTP-Server genügt (z. B. `npx serve .` im Projektordner) und `index.html` im Browser öffnen.
+Statische Dateien — im Projektordner einen einfachen HTTP-Server starten und die App im Browser öffnen:
+
+```bash
+npx --yes serve . -l 5173
+```
+
+Dann z. B. `http://localhost:5173` aufrufen. Ohne Server funktionieren ES-Module in vielen Browsern nicht zuverlässig.
 
 ## Tests
 
