@@ -11,7 +11,8 @@ See [AGENTS.md](../../AGENTS.md) for stack summary.
 - **Entry**: `app.js` wires `src/pathController.js` and views under `src/views/`.
 - **Delivery**: Static `index.html` + ES modules; `package.json` only defines `test`. Open or serve locally only when the user asks — no bundler or dev script.
 - **SQL**: Use `src/sqlRunner.js` and existing exercise patterns in `src/exerciseEngine.js`; keep learner SQL in-browser via `sql.js`.
-- **Curriculum**: Extend `data/` and `src/curriculum.js` consistently; progression/unlock logic lives in `src/pathController.js` and `src/lessonProgress.js`.
+- **Curriculum**: Treat `data/curriculum.json` as source data; keep `src/curriculum.js` loaders/parsing aligned. Progression/unlock logic lives in `src/pathController.js` and `src/lessonProgress.js`.
+- **Local run**: Static app — `npx --yes serve .` per project README only when the user asks (ES modules need HTTP).
 - **Copy**: User-facing strings are **German**; keep tone aligned with existing lessons.
 - **Progress**: Respect `sql-lern-app-progress-v1` in `src/progressStore.js`; no server sync or accounts.
 - **Tests**: Co-locate Vitest specs in `test/`; follow patterns in existing test files.

@@ -8,10 +8,11 @@ alwaysApply: true
 - Work inside a single top-level project: `cd <project-name>` before edits or package commands.
 - Read that project’s `package.json` for scripts; there is no repo-root build or test.
 - Match each project’s existing stack (React/Vite, plain HTML/JS, Maven, Python, etc.). Do not introduce new frameworks without an explicit user request.
-- Conventions and project catalog: [AGENTS.md](../../AGENTS.md) and [`.claude/rules.md`](../../.claude/rules.md).
+- Conventions and project catalog: [AGENTS.md](../../AGENTS.md) and [`.claude/rules.md`](../../.claude/rules.md). **`sql-learning-app/`** stack details live in [AGENTS.md](../../AGENTS.md), not the `.claude/rules.md` catalog.
 
 ## Boundaries
 
 - Default project unless the user names another: `sql-learning-app/` (see [AGENTS.md](../../AGENTS.md)).
+- **Skills**: For default focus, skip `.cursor/skills/react`, `shadcn-ui`, and `typescript` unless the user names another project or explicitly requests them.
 - Crew Orbit worker output goes under `/workspace/crew-orbit/` (outside this clone). Do not commit `crew-orbit/` if it appears locally (`.gitignore`).
 - Run tests, installs, builds, or dev servers only when the user asks — not as automatic “verification” after edits.

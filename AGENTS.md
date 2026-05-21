@@ -10,7 +10,7 @@ Canonical instructions for AI agents in this repository. Tool-specific files (e.
 
 ## Shared conventions
 
-- Detailed monorepo and per-project notes: [`.claude/rules.md`](.claude/rules.md)
+- Detailed monorepo and per-project notes: [`.claude/rules.md`](.claude/rules.md) (other root projects; **`sql-learning-app/` is documented in this file**)
 - Claude Code entry point: [`CLAUDE.md`](CLAUDE.md)
 
 ## Active focus: `sql-learning-app/`
@@ -30,10 +30,10 @@ Do **not** add React, Vite, or bundlers to this project unless explicitly reques
 ## Cursor
 
 - **Always-on**: [`.cursor/rules/monorepo.mdc`](.cursor/rules/monorepo.mdc)
-- **Path-scoped** (`sql-learning-app/**`): [`.cursor/rules/sql-learning-app.mdc`](.cursor/rules/sql-learning-app.mdc)
-- **Skills**: [`.cursor/skills/react`](.cursor/skills/react), [`shadcn-ui`](.cursor/skills/shadcn-ui), [`typescript`](.cursor/skills/typescript) — other projects only; skip for `sql-learning-app/` unless requested
+- **Path-scoped** (`sql-learning-app/**`): [`.cursor/rules/sql-learning-app.mdc`](.cursor/rules/sql-learning-app.mdc) — attaches when editing files under that tree
+- **Skills**: [`.cursor/skills/react`](.cursor/skills/react), [`shadcn-ui`](.cursor/skills/shadcn-ui), [`typescript`](.cursor/skills/typescript) — other root projects only; skip for `sql-learning-app/` unless requested
 - **Commands / hooks**: none configured
 
 ## Crew Orbit metadata
 
-Worker output (plans, validate results) lives under `/workspace/crew-orbit/` — **not** in this git repo. Do not commit `crew-orbit/` (see `.gitignore`).
+Worker output (plans, validate results) lives under **`/workspace/crew-orbit/<feature>/...`** — outside this clone. Do not commit `crew-orbit/` if it appears under the repo root (see `.gitignore`).
