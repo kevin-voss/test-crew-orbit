@@ -12,5 +12,6 @@ alwaysApply: true
 
 ## Boundaries
 
-- Do not commit paths under `crew-orbit/` (local Crew Orbit metadata; already in `.gitignore`).
+- Default project unless the user names another: `sql-learning-app/` (see [AGENTS.md](../../AGENTS.md)).
+- Crew Orbit worker output goes under `/workspace/crew-orbit/` (outside this clone). Do not commit `crew-orbit/` if it appears locally (`.gitignore`).
 - Run tests, installs, builds, or dev servers only when the user asks — not as automatic “verification” after edits.

@@ -27,6 +27,13 @@ German-language SQL learning app for beginners.
 
 Do **not** add React, Vite, or bundlers to this project unless explicitly requested. Cursor skills under `.cursor/skills/react` and `shadcn-ui` do not apply here.
 
+## Cursor
+
+- **Always-on**: [`.cursor/rules/monorepo.mdc`](.cursor/rules/monorepo.mdc)
+- **Path-scoped** (`sql-learning-app/**`): [`.cursor/rules/sql-learning-app.mdc`](.cursor/rules/sql-learning-app.mdc)
+- **Skills**: [`.cursor/skills/react`](.cursor/skills/react), [`shadcn-ui`](.cursor/skills/shadcn-ui), [`typescript`](.cursor/skills/typescript) — other projects only; skip for `sql-learning-app/` unless requested
+- **Commands / hooks**: none configured
+
 ## Crew Orbit metadata
 
 Worker output (plans, validate results) lives under `/workspace/crew-orbit/` — **not** in this git repo. Do not commit `crew-orbit/` (see `.gitignore`).
