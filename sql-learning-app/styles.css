@@ -351,6 +351,20 @@ textarea:focus-visible {
   color: var(--muted);
 }
 
+.completion-view {
+  text-align: center;
+}
+
+.completion-view h2 {
+  color: var(--success);
+}
+
+.completion-view p {
+  max-width: 42ch;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 @media (max-width: 480px) {
   .unit-nav {
     flex-direction: column;

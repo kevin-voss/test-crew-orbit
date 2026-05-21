@@ -52,6 +52,24 @@ export function renderStorageQuotaWarning() {
   return `<p class="storage-banner storage-banner--warn" role="alert">Der Fortschritt konnte nicht gespeichert werden. Du kannst weiterlernen, aber nach dem Schließen des Tabs gehen Änderungen verloren.</p>`;
 }
 
+/**
+ * @param {import("./src/curriculum.js").Curriculum} curriculum
+ * @param {Iterable<string>} completedUnitIds
+ */
+export function isPathComplete(curriculum, completedUnitIds) {
+  const completed = new Set(completedUnitIds);
+  const ordered = [...curriculum.units].sort((a, b) => a.order - b.order);
+  return ordered.length > 0 && ordered.every((u) => completed.has(u.id));
+}
+
+export function renderCompletionView() {
+  return `<section class="completion-view card" aria-label="Lernpfad abgeschlossen">
+  <h2 tabindex="-1">Geschafft!</h2>
+  <p>Du hast den gesamten SQL-Basics-Lernpfad durchlaufen. Du kennst jetzt Konzept, Grundlagen und Übungen von leicht bis schwer.</p>
+  <p>Du kannst jede Einheit im Lernpfad erneut öffnen, um Inhalte zu wiederholen — dein Fortschritt bleibt gespeichert.</p>
+</section>`;
+}
+
 export function renderStartView() {
   return `<section class="start-overview" aria-label="Lernpfad">
   <h1>Willkommen zur SQL-Lern-App</h1>
@@ -312,9 +330,47 @@ async function bootstrapApp(root) {
   }
 
   function focusCardHeading() {
-    const heading = root.querySelector(".card h2, .start-overview h1");
+    const heading = root.querySelector(
+      ".card h2, .start-overview h1, .completion-view h2",
+    );
     if (heading instanceof HTMLElement) {
       heading.focus();
+    }
+  }
+
+  function showCompletion() {
+    screen = "complete";
+    activeUnitId = null;
+    root.innerHTML =
+      pageMarkup(
+        renderCompletionView() +
+          `<div class="unit-nav">
+<button type="button" class="btn btn-secondary" id="btn-pathmap">Lernpfad ansehen</button>
+<button type="button" class="btn" id="btn-back-start">Zur Startseite</button>
+</div>`,
+      );
+    root.querySelector("#btn-pathmap")?.addEventListener("click", showPathMap);
+    root.querySelector("#btn-back-start")?.addEventListener("click", renderStart);
+    bindStorageBanner();
+    focusCardHeading();
+  }
+
+  /**
+   * @param {string} unitId
+   */
+  function advanceAfterUnit(unitId) {
+    if (isPathComplete(curriculum, completedUnits)) {
+      showCompletion();
+      return;
+    }
+    const index = ordered.findIndex((u) => u.id === unitId);
+    const next = ordered[index + 1];
+    if (next?.type === "lesson" && !isLessonLocked(next)) {
+      showLesson(next.id);
+    } else if (next?.type === "exercise" && !isPathUnitLocked(next)) {
+      showExercise(next.id);
+    } else {
+      showPathMap();
     }
   }
 
@@ -494,11 +550,7 @@ async function bootstrapApp(root) {
         if (!isUnitComplete(unit.id)) {
           markUnitComplete(unit.id);
         }
-        const index = ordered.findIndex((u) => u.id === unit.id);
-        const next = ordered[index + 1];
-        if (next?.type === "lesson") showLesson(next.id);
-        else if (next?.type === "exercise" && !isPathUnitLocked(next)) showExercise(next.id);
-        else showPathMap();
+        advanceAfterUnit(unit.id);
       });
 
       root.querySelector("#btn-check")?.addEventListener("click", () => {
@@ -631,7 +683,9 @@ async function bootstrapApp(root) {
 
   syncLessonProgressFromCompleted();
 
-  if (savedProgress?.lastUnitId) {
+  if (isPathComplete(curriculum, completedUnits)) {
+    showCompletion();
+  } else if (savedProgress?.lastUnitId) {
     const resume = resolveResumeUnitId(path, curriculum, savedProgress.lastUnitId);
     openResumeUnit(resume.unitId);
   } else {
