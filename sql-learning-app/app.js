@@ -1,6 +1,10 @@
 import { createPathController } from "./src/pathController.js";
 import { createLessonProgress } from "./src/lessonProgress.js";
-import { createProgressStore, STORAGE_KEY } from "./src/progressStore.js";
+import {
+  createProgressStore,
+  getResumeUnit,
+  STORAGE_KEY,
+} from "./src/progressStore.js";
 import { loadCurriculum } from "./src/curriculum.js";
 import { renderConcept } from "./src/views/renderConcept.js";
 import { renderLesson } from "./src/views/renderLesson.js";
@@ -40,6 +44,13 @@ export const PERSISTENCE_HINT_KEY = "sql-lern-app-hint-dismissed-v1";
 export function renderPersistenceHint() {
   return `<aside class="storage-banner" role="note">
   <p>Dein Fortschritt wird nur auf diesem Gerät gespeichert — kein Konto nötig. Wenn du Browserdaten löschst, startest du von vorn.</p>
+  <button type="button" class="btn btn-secondary storage-banner__dismiss" id="btn-dismiss-storage-hint">Verstanden</button>
+</aside>`;
+}
+
+export function renderSessionPersistenceHint() {
+  return `<aside class="storage-banner" role="note">
+  <p>Dein Fortschritt gilt nur für diese Browser-Sitzung (Tab). Nach dem Schließen geht er verloren — kein Konto, keine Speicherung auf diesem Gerät.</p>
   <button type="button" class="btn btn-secondary storage-banner__dismiss" id="btn-dismiss-storage-hint">Verstanden</button>
 </aside>`;
 }
@@ -93,16 +104,7 @@ export function renderStartView() {
  * @param {string | undefined} lastUnitId
  */
 export function resolveResumeUnitId(path, curriculum, lastUnitId) {
-  const ordered = [...curriculum.units].sort((a, b) => a.order - b.order);
-  const targetId = lastUnitId ?? ordered[0]?.id ?? "";
-  if (path.isUnlocked(targetId)) {
-    return { unitId: targetId, locked: false };
-  }
-  const fallback = ordered.find((u) => path.isUnlocked(u.id));
-  return {
-    unitId: fallback?.id ?? ordered[0]?.id ?? "",
-    locked: true,
-  };
+  return getResumeUnit(path, curriculum, lastUnitId);
 }
 
 export function resumeFromStorage(curriculum, storage) {
@@ -114,7 +116,7 @@ export function resumeFromStorage(curriculum, storage) {
     path.hydratePassed(saved.completedUnits);
   }
 
-  return resolveResumeUnitId(path, curriculum, saved?.lastUnitId);
+  return getResumeUnit(path, curriculum, saved?.lastUnitId);
 }
 
 /**
@@ -190,6 +192,7 @@ async function bootstrapApp(root) {
   let lastUnitId = savedProgress?.lastUnitId ?? "";
   let storageQuotaWarning = false;
   let persistenceHintHtml = "";
+  let sessionHintDismissed = false;
 
   if (savedProgress?.completedUnits?.length) {
     for (const id of savedProgress.completedUnits) {
@@ -200,6 +203,8 @@ async function bootstrapApp(root) {
 
   if (storageCorrupt) {
     persistenceHintHtml = renderStorageCorruptNotice();
+  } else if (!browserStorage && !sessionHintDismissed) {
+    persistenceHintHtml = renderSessionPersistenceHint();
   } else if (
     browserStorage &&
     !savedProgress &&
@@ -234,7 +239,11 @@ async function bootstrapApp(root) {
     root
       .querySelector("#btn-dismiss-storage-hint")
       ?.addEventListener("click", () => {
-        browserStorage?.setItem(PERSISTENCE_HINT_KEY, "1");
+        if (browserStorage) {
+          browserStorage.setItem(PERSISTENCE_HINT_KEY, "1");
+        } else {
+          sessionHintDismissed = true;
+        }
         persistenceHintHtml = "";
         root.querySelectorAll(".storage-banner").forEach((el) => el.remove());
       });
@@ -686,7 +695,7 @@ async function bootstrapApp(root) {
   if (isPathComplete(curriculum, completedUnits)) {
     showCompletion();
   } else if (savedProgress?.lastUnitId) {
-    const resume = resolveResumeUnitId(path, curriculum, savedProgress.lastUnitId);
+    const resume = getResumeUnit(path, curriculum, savedProgress.lastUnitId);
     openResumeUnit(resume.unitId);
   } else {
     renderStart();
