@@ -3,7 +3,7 @@ const CATALOG_ID = "pokedex-catalog";
 function formatStat(value, unit) {
   if (value == null || Number.isNaN(Number(value))) return "Unavailable";
   const n = Number(value);
-  if (!Number.isFinite(n) || n < 0) return "Unavailable";
+  if (!Number.isFinite(n) || n <= 0) return "Unavailable";
   const text = Number.isInteger(n) ? String(n) : String(n);
   return `${text} ${unit}`;
 }
@@ -27,6 +27,12 @@ function spriteSrc(pokemon, variant) {
  */
 export function handleSpriteError(img) {
   const wrap = img.closest(".sprite-figure");
+  if (wrap?.classList.contains("has-error") || wrap?.querySelector(".sprite-error")) {
+    return;
+  }
+  if (img.nextElementSibling?.classList.contains("sprite-error")) {
+    return;
+  }
   const msg = document.createElement("p");
   msg.className = "sprite-error";
   msg.textContent = "Image unavailable";
