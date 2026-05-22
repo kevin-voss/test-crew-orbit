@@ -1,0 +1,644 @@
+[
+  {
+    "nationalDexNumber": 1,
+    "name": "Bulbasaur",
+    "weight": 6.9,
+    "height": 0.7,
+    "types": [
+      "Grass",
+      "Poison"
+    ],
+    "spriteNormal": "assets/sprites/1.png",
+    "spriteShiny": "assets/sprites/1-shiny.png"
+  },
+  {
+    "nationalDexNumber": 2,
+    "name": "Ivysaur",
+    "weight": 13,
+    "height": 1,
+    "types": [
+      "Grass",
+      "Poison"
+    ],
+    "spriteNormal": "assets/sprites/2.png",
+    "spriteShiny": "assets/sprites/2-shiny.png"
+  },
+  {
+    "nationalDexNumber": 3,
+    "name": "Venusaur",
+    "weight": 100,
+    "height": 2,
+    "types": [
+      "Grass",
+      "Poison"
+    ],
+    "spriteNormal": "assets/sprites/3.png",
+    "spriteShiny": "assets/sprites/3-shiny.png"
+  },
+  {
+    "nationalDexNumber": 4,
+    "name": "Charmander",
+    "weight": 8.5,
+    "height": 0.6,
+    "types": [
+      "Fire"
+    ],
+    "spriteNormal": "assets/sprites/4.png",
+    "spriteShiny": "assets/sprites/4-shiny.png"
+  },
+  {
+    "nationalDexNumber": 5,
+    "name": "Charmeleon",
+    "weight": 19,
+    "height": 1.1,
+    "types": [
+      "Fire"
+    ],
+    "spriteNormal": "assets/sprites/5.png",
+    "spriteShiny": "assets/sprites/5-shiny.png"
+  },
+  {
+    "nationalDexNumber": 6,
+    "name": "Charizard",
+    "weight": 90.5,
+    "height": 1.7,
+    "types": [
+      "Fire",
+      "Flying"
+    ],
+    "spriteNormal": "assets/sprites/6.png",
+    "spriteShiny": "assets/sprites/6-shiny.png"
+  },
+  {
+    "nationalDexNumber": 7,
+    "name": "Squirtle",
+    "weight": 9,
+    "height": 0.5,
+    "types": [
+      "Water"
+    ],
+    "spriteNormal": "assets/sprites/7.png",
+    "spriteShiny": "assets/sprites/7-shiny.png"
+  },
+  {
+    "nationalDexNumber": 8,
+    "name": "Wartortle",
+    "weight": 22.5,
+    "height": 1,
+    "types": [
+      "Water"
+    ],
+    "spriteNormal": "assets/sprites/8.png",
+    "spriteShiny": "assets/sprites/8-shiny.png"
+  },
+  {
+    "nationalDexNumber": 9,
+    "name": "Blastoise",
+    "weight": 85.5,
+    "height": 1.6,
+    "types": [
+      "Water"
+    ],
+    "spriteNormal": "assets/sprites/9.png",
+    "spriteShiny": "assets/sprites/9-shiny.png"
+  },
+  {
+    "nationalDexNumber": 10,
+    "name": "Caterpie",
+    "weight": 2.9,
+    "height": 0.3,
+    "types": [
+      "Bug"
+    ],
+    "spriteNormal": "assets/sprites/10.png",
+    "spriteShiny": "assets/sprites/10-shiny.png"
+  },
+  {
+    "nationalDexNumber": 11,
+    "name": "Metapod",
+    "weight": 9.9,
+    "height": 0.7,
+    "types": [
+      "Bug"
+    ],
+    "spriteNormal": "assets/sprites/11.png",
+    "spriteShiny": "assets/sprites/11-shiny.png"
+  },
+  {
+    "nationalDexNumber": 12,
+    "name": "Butterfree",
+    "weight": 32,
+    "height": 1.1,
+    "types": [
+      "Bug",
+      "Flying"
+    ],
+    "spriteNormal": "assets/sprites/12.png",
+    "spriteShiny": "assets/sprites/12-shiny.png"
+  },
+  {
+    "nationalDexNumber": 13,
+    "name": "Weedle",
+    "weight": 3.2,
+    "height": 0.3,
+    "types": [
+      "Bug",
+      "Poison"
+    ],
+    "spriteNormal": "assets/sprites/13.png",
+    "spriteShiny": "assets/sprites/13-shiny.png"
+  },
+  {
+    "nationalDexNumber": 14,
+    "name": "Kakuna",
+    "weight": 10,
+    "height": 0.6,
+    "types": [
+      "Bug",
+      "Poison"
+    ],
+    "spriteNormal": "assets/sprites/14.png",
+    "spriteShiny": "assets/sprites/14-shiny.png"
+  },
+  {
+    "nationalDexNumber": 15,
+    "name": "Beedrill",
+    "weight": 29.5,
+    "height": 1,
+    "types": [
+      "Bug",
+      "Poison"
+    ],
+    "spriteNormal": "assets/sprites/15.png",
+    "spriteShiny": "assets/sprites/15-shiny.png"
+  },
+  {
+    "nationalDexNumber": 16,
+    "name": "Pidgey",
+    "weight": 1.8,
+    "height": 0.3,
+    "types": [
+      "Normal",
+      "Flying"
+    ],
+    "spriteNormal": "assets/sprites/16.png",
+    "spriteShiny": "assets/sprites/16-shiny.png"
+  },
+  {
+    "nationalDexNumber": 17,
+    "name": "Pidgeotto",
+    "weight": 30,
+    "height": 1.1,
+    "types": [
+      "Normal",
+      "Flying"
+    ],
+    "spriteNormal": "assets/sprites/17.png",
+    "spriteShiny": "assets/sprites/17-shiny.png"
+  },
+  {
+    "nationalDexNumber": 18,
+    "name": "Pidgeot",
+    "weight": 39.5,
+    "height": 1.5,
+    "types": [
+      "Normal",
+      "Flying"
+    ],
+    "spriteNormal": "assets/sprites/18.png",
+    "spriteShiny": "assets/sprites/18-shiny.png"
+  },
+  {
+    "nationalDexNumber": 19,
+    "name": "Rattata",
+    "weight": 3.5,
+    "height": 0.3,
+    "types": [
+      "Normal"
+    ],
+    "spriteNormal": "assets/sprites/19.png",
+    "spriteShiny": "assets/sprites/19-shiny.png"
+  },
+  {
+    "nationalDexNumber": 20,
+    "name": "Raticate",
+    "weight": 18.5,
+    "height": 0.7,
+    "types": [
+      "Normal"
+    ],
+    "spriteNormal": "assets/sprites/20.png",
+    "spriteShiny": "assets/sprites/20-shiny.png"
+  },
+  {
+    "nationalDexNumber": 21,
+    "name": "Spearow",
+    "weight": 2,
+    "height": 0.3,
+    "types": [
+      "Normal",
+      "Flying"
+    ],
+    "spriteNormal": "assets/sprites/21.png",
+    "spriteShiny": "assets/sprites/21-shiny.png"
+  },
+  {
+    "nationalDexNumber": 22,
+    "name": "Fearow",
+    "weight": 38,
+    "height": 1.2,
+    "types": [
+      "Normal",
+      "Flying"
+    ],
+    "spriteNormal": "assets/sprites/22.png",
+    "spriteShiny": "assets/sprites/22-shiny.png"
+  },
+  {
+    "nationalDexNumber": 23,
+    "name": "Ekans",
+    "weight": 6.9,
+    "height": 2,
+    "types": [
+      "Poison"
+    ],
+    "spriteNormal": "assets/sprites/23.png",
+    "spriteShiny": "assets/sprites/23-shiny.png"
+  },
+  {
+    "nationalDexNumber": 24,
+    "name": "Arbok",
+    "weight": 65,
+    "height": 3.5,
+    "types": [
+      "Poison"
+    ],
+    "spriteNormal": "assets/sprites/24.png",
+    "spriteShiny": "assets/sprites/24-shiny.png"
+  },
+  {
+    "nationalDexNumber": 25,
+    "name": "Pikachu",
+    "weight": 6,
+    "height": 0.4,
+    "types": [
+      "Electric"
+    ],
+    "spriteNormal": "assets/sprites/25.png",
+    "spriteShiny": "assets/sprites/25-shiny.png"
+  },
+  {
+    "nationalDexNumber": 26,
+    "name": "Raichu",
+    "weight": 30,
+    "height": 0.8,
+    "types": [
+      "Electric"
+    ],
+    "spriteNormal": "assets/sprites/26.png",
+    "spriteShiny": "assets/sprites/26-shiny.png"
+  },
+  {
+    "nationalDexNumber": 27,
+    "name": "Sandshrew",
+    "weight": 12,
+    "height": 0.6,
+    "types": [
+      "Ground"
+    ],
+    "spriteNormal": "assets/sprites/27.png",
+    "spriteShiny": "assets/sprites/27-shiny.png"
+  },
+  {
+    "nationalDexNumber": 28,
+    "name": "Sandslash",
+    "weight": 29.5,
+    "height": 1,
+    "types": [
+      "Ground"
+    ],
+    "spriteNormal": "assets/sprites/28.png",
+    "spriteShiny": "assets/sprites/28-shiny.png"
+  },
+  {
+    "nationalDexNumber": 29,
+    "name": "Nidoran♀",
+    "weight": 7,
+    "height": 0.4,
+    "types": [
+      "Poison"
+    ],
+    "spriteNormal": "assets/sprites/29.png",
+    "spriteShiny": "assets/sprites/29-shiny.png"
+  },
+  {
+    "nationalDexNumber": 30,
+    "name": "Nidorina",
+    "weight": 20,
+    "height": 0.8,
+    "types": [
+      "Poison"
+    ],
+    "spriteNormal": "assets/sprites/30.png",
+    "spriteShiny": "assets/sprites/30-shiny.png"
+  },
+  {
+    "nationalDexNumber": 31,
+    "name": "Nidoqueen",
+    "weight": 60,
+    "height": 1.3,
+    "types": [
+      "Poison",
+      "Ground"
+    ],
+    "spriteNormal": "assets/sprites/31.png",
+    "spriteShiny": "assets/sprites/31-shiny.png"
+  },
+  {
+    "nationalDexNumber": 32,
+    "name": "Nidoran♂",
+    "weight": 9,
+    "height": 0.5,
+    "types": [
+      "Poison"
+    ],
+    "spriteNormal": "assets/sprites/32.png",
+    "spriteShiny": "assets/sprites/32-shiny.png"
+  },
+  {
+    "nationalDexNumber": 33,
+    "name": "Nidorino",
+    "weight": 19.5,
+    "height": 0.9,
+    "types": [
+      "Poison"
+    ],
+    "spriteNormal": "assets/sprites/33.png",
+    "spriteShiny": "assets/sprites/33-shiny.png"
+  },
+  {
+    "nationalDexNumber": 34,
+    "name": "Nidoking",
+    "weight": 62,
+    "height": 1.4,
+    "types": [
+      "Poison",
+      "Ground"
+    ],
+    "spriteNormal": "assets/sprites/34.png",
+    "spriteShiny": "assets/sprites/34-shiny.png"
+  },
+  {
+    "nationalDexNumber": 35,
+    "name": "Clefairy",
+    "weight": 7.5,
+    "height": 0.6,
+    "types": [
+      "Fairy"
+    ],
+    "spriteNormal": "assets/sprites/35.png",
+    "spriteShiny": "assets/sprites/35-shiny.png"
+  },
+  {
+    "nationalDexNumber": 36,
+    "name": "Clefable",
+    "weight": 40,
+    "height": 1.3,
+    "types": [
+      "Fairy"
+    ],
+    "spriteNormal": "assets/sprites/36.png",
+    "spriteShiny": "assets/sprites/36-shiny.png"
+  },
+  {
+    "nationalDexNumber": 37,
+    "name": "Vulpix",
+    "weight": 9.9,
+    "height": 0.6,
+    "types": [
+      "Fire"
+    ],
+    "spriteNormal": "assets/sprites/37.png",
+    "spriteShiny": "assets/sprites/37-shiny.png"
+  },
+  {
+    "nationalDexNumber": 38,
+    "name": "Ninetales",
+    "weight": 19.9,
+    "height": 1.1,
+    "types": [
+      "Fire"
+    ],
+    "spriteNormal": "assets/sprites/38.png",
+    "spriteShiny": "assets/sprites/38-shiny.png"
+  },
+  {
+    "nationalDexNumber": 39,
+    "name": "Jigglypuff",
+    "weight": 5.5,
+    "height": 0.5,
+    "types": [
+      "Normal",
+      "Fairy"
+    ],
+    "spriteNormal": "assets/sprites/39.png",
+    "spriteShiny": "assets/sprites/39-shiny.png"
+  },
+  {
+    "nationalDexNumber": 40,
+    "name": "Wigglytuff",
+    "weight": 12,
+    "height": 1,
+    "types": [
+      "Normal",
+      "Fairy"
+    ],
+    "spriteNormal": "assets/sprites/40.png",
+    "spriteShiny": "assets/sprites/40-shiny.png"
+  },
+  {
+    "nationalDexNumber": 41,
+    "name": "Zubat",
+    "weight": 7.5,
+    "height": 0.8,
+    "types": [
+      "Poison",
+      "Flying"
+    ],
+    "spriteNormal": "assets/sprites/41.png",
+    "spriteShiny": "assets/sprites/41-shiny.png"
+  },
+  {
+    "nationalDexNumber": 42,
+    "name": "Golbat",
+    "weight": 55,
+    "height": 1.6,
+    "types": [
+      "Poison",
+      "Flying"
+    ],
+    "spriteNormal": "assets/sprites/42.png",
+    "spriteShiny": "assets/sprites/42-shiny.png"
+  },
+  {
+    "nationalDexNumber": 43,
+    "name": "Oddish",
+    "weight": 5.4,
+    "height": 0.5,
+    "types": [
+      "Grass",
+      "Poison"
+    ],
+    "spriteNormal": "assets/sprites/43.png",
+    "spriteShiny": "assets/sprites/43-shiny.png"
+  },
+  {
+    "nationalDexNumber": 44,
+    "name": "Gloom",
+    "weight": 8.6,
+    "height": 0.8,
+    "types": [
+      "Grass",
+      "Poison"
+    ],
+    "spriteNormal": "assets/sprites/44.png",
+    "spriteShiny": "assets/sprites/44-shiny.png"
+  },
+  {
+    "nationalDexNumber": 45,
+    "name": "Vileplume",
+    "weight": 18.6,
+    "height": 1.2,
+    "types": [
+      "Grass",
+      "Poison"
+    ],
+    "spriteNormal": "assets/sprites/45.png",
+    "spriteShiny": "assets/sprites/45-shiny.png"
+  },
+  {
+    "nationalDexNumber": 46,
+    "name": "Paras",
+    "weight": 5.4,
+    "height": 0.3,
+    "types": [
+      "Bug",
+      "Grass"
+    ],
+    "spriteNormal": "assets/sprites/46.png",
+    "spriteShiny": "assets/sprites/46-shiny.png"
+  },
+  {
+    "nationalDexNumber": 47,
+    "name": "Parasect",
+    "weight": 29.5,
+    "height": 1,
+    "types": [
+      "Bug",
+      "Grass"
+    ],
+    "spriteNormal": "assets/sprites/47.png",
+    "spriteShiny": "assets/sprites/47-shiny.png"
+  },
+  {
+    "nationalDexNumber": 48,
+    "name": "Venonat",
+    "weight": 30,
+    "height": 1,
+    "types": [
+      "Bug",
+      "Poison"
+    ],
+    "spriteNormal": "assets/sprites/48.png",
+    "spriteShiny": "assets/sprites/48-shiny.png"
+  },
+  {
+    "nationalDexNumber": 49,
+    "name": "Venomoth",
+    "weight": 12.5,
+    "height": 1.5,
+    "types": [
+      "Bug",
+      "Poison"
+    ],
+    "spriteNormal": "assets/sprites/49.png",
+    "spriteShiny": "assets/sprites/49-shiny.png"
+  },
+  {
+    "nationalDexNumber": 50,
+    "name": "Diglett",
+    "weight": 0.8,
+    "height": 0.2,
+    "types": [
+      "Ground"
+    ],
+    "spriteNormal": "assets/sprites/50.png",
+    "spriteShiny": "assets/sprites/50-shiny.png"
+  },
+  {
+    "nationalDexNumber": 51,
+    "name": "Dugtrio",
+    "weight": 33.3,
+    "height": 0.7,
+    "types": [
+      "Ground"
+    ],
+    "spriteNormal": "assets/sprites/51.png",
+    "spriteShiny": "assets/sprites/51-shiny.png"
+  },
+  {
+    "nationalDexNumber": 52,
+    "name": "Meowth",
+    "weight": 4.2,
+    "height": 0.4,
+    "types": [
+      "Normal"
+    ],
+    "spriteNormal": "assets/sprites/52.png",
+    "spriteShiny": "assets/sprites/52-shiny.png"
+  },
+  {
+    "nationalDexNumber": 53,
+    "name": "Persian",
+    "weight": 32,
+    "height": 1,
+    "types": [
+      "Normal"
+    ],
+    "spriteNormal": "assets/sprites/53.png",
+    "spriteShiny": "assets/sprites/53-shiny.png"
+  },
+  {
+    "nationalDexNumber": 54,
+    "name": "Psyduck",
+    "weight": 19.6,
+    "height": 0.8,
+    "types": [
+      "Water"
+    ],
+    "spriteNormal": "assets/sprites/54.png",
+    "spriteShiny": "assets/sprites/54-shiny.png"
+  },
+  {
+    "nationalDexNumber": 55,
+    "name": "Golduck",
+    "weight": 76.6,
+    "height": 1.7,
+    "types": [
+      "Water"
+    ],
+    "spriteNormal": "assets/sprites/55.png",
+    "spriteShiny": "assets/sprites/55-shiny.png"
+  },
+  {
+    "nationalDexNumber": 56,
+    "name": "Mankey",
+    "weight": 28,
+    "height": 0.5,
+    "types": [
+      "Fighting"
+    ],
+    "spriteNormal": "assets/sprites/56.png",
+    "spriteShiny": "assets/sprites/56-shiny.png"
+  }
+]
