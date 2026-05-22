@@ -3,6 +3,7 @@ const CATALOG_ID = "pokedex-catalog";
 function formatStat(value, unit) {
   if (value == null || Number.isNaN(Number(value))) return "Unavailable";
   const n = Number(value);
+  if (!Number.isFinite(n) || n < 0) return "Unavailable";
   const text = Number.isInteger(n) ? String(n) : String(n);
   return `${text} ${unit}`;
 }
@@ -26,10 +27,13 @@ function spriteSrc(pokemon, variant) {
  */
 export function handleSpriteError(img) {
   const wrap = img.closest(".sprite-figure");
-  if (!wrap) return;
   const msg = document.createElement("p");
   msg.className = "sprite-error";
   msg.textContent = "Image unavailable";
+  if (!wrap) {
+    img.insertAdjacentElement("afterend", msg);
+    return;
+  }
   img.replaceWith(msg);
   wrap.classList.add("has-error");
 }
@@ -77,14 +81,19 @@ function createSpriteFigure(pokemon, variant) {
 export function createPokemonCard(pokemon) {
   const card = document.createElement("article");
   card.className = "pokemon-card";
-  card.dataset.dex = String(pokemon.nationalDexNumber);
+  const dex = pokemon.nationalDexNumber;
+  card.dataset.dex =
+    dex != null && dex !== "" && !Number.isNaN(Number(dex))
+      ? String(dex)
+      : "unknown";
 
   const header = document.createElement("header");
   header.className = "pokemon-card__header";
 
   const number = document.createElement("span");
   number.className = "pokemon-card__number";
-  number.textContent = `#${pokemon.nationalDexNumber}`;
+  number.textContent =
+    dex != null && dex !== "" && !Number.isNaN(Number(dex)) ? `#${dex}` : "#—";
 
   const name = document.createElement("h2");
   name.className = "pokemon-card__name";
@@ -163,11 +172,34 @@ export function wireShinyToggle(card, _pokemon) {
  * @param {object[]} pokemonList
  */
 export function renderCatalog(container, pokemonList) {
+  if (!Array.isArray(pokemonList)) {
+    throw new TypeError("pokemonList must be an array");
+  }
   container.replaceChildren();
+  if (pokemonList.length === 0) {
+    const empty = document.createElement("p");
+    empty.className = "catalog-empty";
+    empty.setAttribute("role", "alert");
+    empty.textContent = "No Pokémon to display.";
+    container.appendChild(empty);
+    return;
+  }
   const sorted = [...pokemonList].sort(
-    (a, b) => a.nationalDexNumber - b.nationalDexNumber,
+    (a, b) => (a.nationalDexNumber ?? 0) - (b.nationalDexNumber ?? 0),
   );
+  const seen = new Set();
+  const entries = [];
   for (const pokemon of sorted) {
+    const dex = pokemon.nationalDexNumber;
+    if (dex != null && seen.has(dex)) continue;
+    if (dex != null) seen.add(dex);
+    entries.push(pokemon);
+  }
+  const inScope = entries.filter((p) => {
+    const d = Number(p.nationalDexNumber);
+    return Number.isFinite(d) && d >= 1 && d <= 56;
+  });
+  for (const pokemon of inScope) {
     container.appendChild(createPokemonCard(pokemon));
   }
 }
