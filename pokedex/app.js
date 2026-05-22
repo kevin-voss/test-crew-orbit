@@ -53,7 +53,7 @@ function createSpriteFigure(pokemon, variant) {
   img.className = variant === "shiny" ? "sprite-shiny" : "sprite-normal";
   img.dataset.variant = variant;
   img.loading = "lazy";
-  img.alt = `${pokemon.name} (${variant})`;
+  img.alt = `${pokemon.name} ${variant === "shiny" ? "shiny" : "normal"}`;
   img.src = spriteSrc(pokemon, variant);
   if (variant === "shiny") img.hidden = true;
 
@@ -66,6 +66,7 @@ function createSpriteFigure(pokemon, variant) {
   });
 
   figure.appendChild(img);
+  if (img.complete && img.naturalWidth > 0) loading.remove();
   return figure;
 }
 
