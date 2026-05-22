@@ -13,9 +13,22 @@ Canonical instructions for AI agents in this repository. Tool-specific files (e.
 - Detailed monorepo and per-project notes: [`.claude/rules.md`](.claude/rules.md) (other root projects; **`sql-learning-app/` is documented in this file**)
 - Claude Code entry point: [`CLAUDE.md`](CLAUDE.md)
 
-## Active focus: `sql-learning-app/`
+## Active focus: `pokedex/` (Crew Orbit `feature-pokedexbenny`)
 
-German-language SQL learning app for beginners.
+Static HTML/CSS/JS Pokédex for national dex #1–#56 (weight, height, types, shiny sprites).
+
+| Area | Choice |
+|------|--------|
+| UI | Vanilla JS (`app.js`), static `index.html` + `styles.css` |
+| Data | `data/pokemon.json`; maintain via `scripts/validate-pokemon.mjs` / `scripts/generate-pokemon-data.mjs` |
+| Assets | `assets/` sprites; `fetch` requires HTTP (see project README) |
+| Tests | Vitest in `test/` (`vitest.config.js`, `test/setup-dom.mjs`) — run only when the user asks |
+
+Do **not** add React, Vite, or bundlers unless explicitly requested. Cursor skills under `.cursor/skills/react` and `shadcn-ui` do not apply here.
+
+### Also documented: `sql-learning-app/`
+
+German-language SQL learning app for beginners (default when no project is named and work is not under `pokedex/`).
 
 | Area | Choice |
 |------|--------|
@@ -25,13 +38,11 @@ German-language SQL learning app for beginners.
 | Tests | Vitest in `test/` — run only when the user asks |
 | Persistence | `localStorage` key `sql-lern-app-progress-v1` (local only, no account) |
 
-Do **not** add React, Vite, or bundlers to this project unless explicitly requested. Cursor skills under `.cursor/skills/react` and `shadcn-ui` do not apply here.
-
 ## Cursor
 
 - **Always-on**: [`.cursor/rules/monorepo.mdc`](.cursor/rules/monorepo.mdc)
-- **Path-scoped** (`sql-learning-app/**`): [`.cursor/rules/sql-learning-app.mdc`](.cursor/rules/sql-learning-app.mdc) — attaches when editing files under that tree
-- **Skills**: [`.cursor/skills/react`](.cursor/skills/react), [`shadcn-ui`](.cursor/skills/shadcn-ui), [`typescript`](.cursor/skills/typescript) — other root projects only; skip for `sql-learning-app/` unless requested
+- **Path-scoped**: [`pokedex.mdc`](.cursor/rules/pokedex.mdc) (`pokedex/**`), [`sql-learning-app.mdc`](.cursor/rules/sql-learning-app.mdc) (`sql-learning-app/**`)
+- **Skills**: [`.cursor/skills/react`](.cursor/skills/react), [`shadcn-ui`](.cursor/skills/shadcn-ui), [`typescript`](.cursor/skills/typescript) — other root projects only; skip for `pokedex/` and `sql-learning-app/` unless requested
 - **Commands / hooks**: none configured
 
 ## Crew Orbit metadata

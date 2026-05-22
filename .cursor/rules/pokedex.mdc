@@ -1,0 +1,17 @@
+---
+description: pokedex — vanilla JS Pokédex, static assets, Vitest
+globs: pokedex/**
+alwaysApply: false
+---
+
+# pokedex
+
+See [AGENTS.md](../../AGENTS.md) for stack summary.
+
+- **Entry**: `app.js` + static `index.html` / `styles.css`; ES modules (`"type": "module"`).
+- **Delivery**: No bundler or dev script in `package.json`. Local run needs HTTP (`fetch`); use project README (`python3 -m http.server`) only when the user asks.
+- **Data**: `data/pokemon.json` (dex #1–#56). Keep `scripts/validate-pokemon.mjs` and `scripts/generate-pokemon-data.mjs` aligned when editing schema or entries.
+- **Assets**: Sprites under `assets/`; respect shiny/normal paths and existing error fallback (`?brokenSprite=`).
+- **Copy**: User-facing strings are **English**.
+- **Tests**: Vitest in `test/` (`vitest.config.js`, `test/setup-dom.mjs`); run only when the user asks.
+- **Not in scope**: React, Vite, shadcn, or TypeScript unless the user explicitly requests it.
