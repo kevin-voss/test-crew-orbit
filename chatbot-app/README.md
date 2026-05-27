@@ -14,6 +14,22 @@ Browser chat app for conversational exchange with an LLM, including natural-lang
 - Node 18+ or Bun
 - Optional: `OPENAI_API_KEY` in `backend/.env` for live LLM calls
 
+## Frontend only
+
+Run the chat shell without the backend (UI loads; Send requires the API proxy from step 03+):
+
+```bash
+cd chatbot-app/frontend
+npm install   # or: bun install
+npm run dev
+```
+
+```bash
+cd chatbot-app/frontend
+npm test              # Vitest (shell + acceptance when hook/API present)
+npm run build
+```
+
 ## Setup
 
 ```bash
