@@ -8,6 +8,7 @@ export default function App() {
     validationError,
     errorMessage,
     status,
+    dismissError,
   } = useChatSession();
 
   return (
@@ -16,6 +17,7 @@ export default function App() {
       onSend={sendMessage}
       validationError={validationError}
       errorMessage={errorMessage}
+      onDismissError={dismissError}
       isLoading={status === "loading"}
     />
   );

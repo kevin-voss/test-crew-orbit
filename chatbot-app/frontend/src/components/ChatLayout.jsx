@@ -1,5 +1,6 @@
 import { MessageList } from "./MessageList.jsx";
 import { MessageInput } from "./MessageInput.jsx";
+import { ChatStatus } from "./ChatStatus.jsx";
 
 /**
  * @param {{
@@ -7,6 +8,7 @@ import { MessageInput } from "./MessageInput.jsx";
  *   onSend: (text: string) => void | Promise<void>,
  *   validationError?: string,
  *   errorMessage?: string,
+ *   onDismissError?: () => void,
  *   isLoading?: boolean,
  * }} props
  */
@@ -15,6 +17,7 @@ export function ChatLayout({
   onSend,
   validationError,
   errorMessage,
+  onDismissError,
   isLoading,
 }) {
   return (
@@ -26,11 +29,11 @@ export function ChatLayout({
         </p>
       </header>
 
-      {errorMessage ? (
-        <div className="chat-error" role="alert">
-          {errorMessage}
-        </div>
-      ) : null}
+      <ChatStatus
+        errorMessage={errorMessage}
+        onDismissError={onDismissError}
+        isLoading={isLoading}
+      />
 
       <MessageList messages={messages} isLoading={isLoading} />
 

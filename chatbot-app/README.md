@@ -59,6 +59,8 @@ npm run dev
 
 Open http://localhost:5173. The Vite dev server proxies `/api` to the backend on port 3001.
 
+If sends fail with a network error, confirm the backend is running on port 3001 and that you started the frontend via `npm run dev` (so the Vite proxy is active). Opening `index.html` directly without the dev server will not proxy `/api`.
+
 ## Environment
 
 | Variable | Description |

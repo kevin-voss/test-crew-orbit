@@ -67,11 +67,16 @@ export function useChatSession() {
     [messages],
   );
 
+  const dismissError = useCallback(() => {
+    setErrorMessage("");
+  }, []);
+
   return {
     messages,
     status,
     validationError,
     errorMessage,
     sendMessage,
+    dismissError,
   };
 }
