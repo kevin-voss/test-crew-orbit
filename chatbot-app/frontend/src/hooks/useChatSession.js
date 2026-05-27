@@ -45,7 +45,9 @@ export function useChatSession() {
 
       try {
         const history = messages.map(({ role, content }) => ({ role, content }));
-        const reply = await chatClient.sendMessage({ message: text, history });
+        const reply = chatClient.assertValidReply(
+          await chatClient.sendMessage({ message: text, history }),
+        );
         setMessages((prev) => [
           ...prev,
           {

@@ -24,7 +24,12 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     setupFiles: ["./test/setup-dom.mjs"],
-    include: ["test/acceptance.test.js", "test/useChatSession.test.js"],
+    include: [
+      "test/acceptance.test.js",
+      "test/useChatSession.test.js",
+      "test/chatClient.qa.test.js",
+      "test/useChatSession.qa.test.js",
+    ],
     transformMode: {
       web: [/\.[jt]sx?$/],
       ssr: [/\.[jt]sx?$/],

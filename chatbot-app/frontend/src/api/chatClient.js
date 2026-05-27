@@ -1,3 +1,16 @@
+const INVISIBLE_ONLY = /^[\s\u200b-\u200d\ufeff]*$/;
+
+/**
+ * @param {unknown} reply
+ * @returns {string}
+ */
+export function assertValidReply(reply) {
+  if (typeof reply !== "string" || INVISIBLE_ONLY.test(reply)) {
+    throw new Error("Couldn't get a reply. Try again.");
+  }
+  return reply;
+}
+
 /**
  * @param {{ message: string, history: Array<{ role: string, content: string }> }} payload
  * @returns {Promise<string>}
@@ -15,9 +28,5 @@ export async function sendMessage({ message, history }) {
     throw new Error(data.error ?? "Couldn't get a reply. Try again.");
   }
 
-  if (!data.reply) {
-    throw new Error("Couldn't get a reply. Try again.");
-  }
-
-  return data.reply;
+  return assertValidReply(data.reply);
 }
