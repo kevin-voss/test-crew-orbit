@@ -12,7 +12,7 @@ alwaysApply: true
 
 ## Boundaries
 
-- Default project unless the user names another: see **Active focus** in [AGENTS.md](../../AGENTS.md) (currently `pokedex/`).
-- **Skills**: For vanilla-JS focus (`pokedex/`, `sql-learning-app/`), skip `.cursor/skills/react`, `shadcn-ui`, and `typescript` unless the user names another project or explicitly requests them.
+- Default project unless the user names another: see **Active focus** in [AGENTS.md](../../AGENTS.md) (currently `chatbot-app/`).
+- **Skills**: For vanilla-JS projects (`pokedex/`, `sql-learning-app/`), skip `.cursor/skills/react`, `shadcn-ui`, and `typescript`. For `chatbot-app/` and other React/Vite root projects, those skills apply; use `design-system` for layout polish; `shadcn-ui` / `tailwind-css` only when that stack exists in the tree.
 - Crew Orbit worker output goes under `/workspace/crew-orbit/` (outside this clone). Do not commit `crew-orbit/` if it appears locally (`.gitignore`).
 - Run tests, installs, builds, or dev servers only when the user asks — not as automatic “verification” after edits.

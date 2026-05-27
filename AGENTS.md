@@ -13,7 +13,21 @@ Canonical instructions for AI agents in this repository. Tool-specific files (e.
 - Detailed monorepo and per-project notes: [`.claude/rules.md`](.claude/rules.md) (other root projects; **`sql-learning-app/` is documented in this file**)
 - Claude Code entry point: [`CLAUDE.md`](CLAUDE.md)
 
-## Active focus: `pokedex/` (Crew Orbit `feature-pokedexbenny`)
+## Active focus: `chatbot-app/` (Crew Orbit `feature-chatbot`)
+
+Browser LLM chat: React + Vite frontend, Express API backend (keys stay server-side).
+
+| Area | Choice |
+|------|--------|
+| Layout | `chatbot-app/frontend/` and `chatbot-app/backend/` — separate `package.json` each; `cd` into the side you change |
+| UI | React 18 (`frontend/src/`), Vite dev/build; plain CSS in `frontend/src/index.css` |
+| API | Express (`backend/server.js`); `OPENAI_API_KEY` in `backend/.env` only |
+| History | Session-only (in-memory until refresh); see project README |
+| Tests | Vitest in `frontend/` and `backend/` — run only when the user asks |
+
+Use Cursor skills `.cursor/skills/react` and `typescript` here. `shadcn-ui` / `tailwind-css` only if the user adds that stack.
+
+### Also documented: `pokedex/`
 
 Static HTML/CSS/JS Pokédex for national dex #1–#56 (weight, height, types, shiny sprites).
 
@@ -41,8 +55,8 @@ German-language SQL learning app for beginners (default when no project is named
 ## Cursor
 
 - **Always-on**: [`.cursor/rules/monorepo.mdc`](.cursor/rules/monorepo.mdc)
-- **Path-scoped**: [`pokedex.mdc`](.cursor/rules/pokedex.mdc) (`pokedex/**`), [`sql-learning-app.mdc`](.cursor/rules/sql-learning-app.mdc) (`sql-learning-app/**`)
-- **Skills**: [`.cursor/skills/react`](.cursor/skills/react), [`shadcn-ui`](.cursor/skills/shadcn-ui), [`typescript`](.cursor/skills/typescript) — other root projects only; skip for `pokedex/` and `sql-learning-app/` unless requested
+- **Path-scoped**: [`chatbot-app.mdc`](.cursor/rules/chatbot-app.mdc) (`chatbot-app/**`), [`pokedex.mdc`](.cursor/rules/pokedex.mdc) (`pokedex/**`), [`sql-learning-app.mdc`](.cursor/rules/sql-learning-app.mdc) (`sql-learning-app/**`)
+- **Skills**: [`react`](.cursor/skills/react), [`typescript`](.cursor/skills/typescript) for `chatbot-app/` and other React root projects; [`design-system`](.cursor/skills/design-system) for UI polish; [`shadcn-ui`](.cursor/skills/shadcn-ui) / [`tailwind-css`](.cursor/skills/tailwind-css) when that stack is in use; skip React/TS/shadcn for `pokedex/` and `sql-learning-app/` unless requested; [`caveman`](.cursor/skills/caveman) only when the user asks for terse output
 - **Commands / hooks**: none configured
 
 ## Crew Orbit metadata

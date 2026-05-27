@@ -1,0 +1,17 @@
+---
+description: chatbot-app — React/Vite frontend, Express backend, Vitest
+globs: chatbot-app/**
+alwaysApply: false
+---
+
+# chatbot-app
+
+See [AGENTS.md](../../AGENTS.md) for stack summary.
+
+- **Scope**: `frontend/` (UI) and `backend/` (API) each have their own `package.json` — `cd` into the package you edit before install, dev, build, or test commands.
+- **Frontend**: React 18 + Vite under `frontend/src/`; plain CSS (`index.css`). Full chat needs the backend proxy (see project README).
+- **Backend**: Express in `server.js`; keep `OPENAI_API_KEY` and other secrets in `backend/.env` only — never expose keys in the client bundle or Vite env prefixed for the browser.
+- **History**: Session-only, in-memory until refresh; do not add persistence unless the user asks.
+- **Copy**: User-facing strings are **English**.
+- **Tests**: Vitest in both `frontend/` and `backend/`; run only when the user asks.
+- **Skills**: Prefer `.cursor/skills/react` and `typescript` here; `design-system` for UI structure; skip vanilla-JS-only constraints from other path rules.
