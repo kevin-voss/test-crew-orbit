@@ -10,7 +10,9 @@ Canonical instructions for AI agents in this repository. Tool-specific files (e.
 
 ## Shared conventions
 
-- Detailed monorepo and per-project notes: [`.claude/rules.md`](.claude/rules.md) (other root projects; **`sql-learning-app/` is documented in this file**)
+- **Project discovery**: `cd <project-name>` at repo root, then read that folder’s `package.json` (scripts, deps) and README before editing.
+- **Other root projects** (e.g. `habit-tracker/`, `weather-dashboard/`, `live-streaming-chat/`): catalog and stack notes in [`.claude/rules.md`](.claude/rules.md). Prefer matching each project’s existing patterns — do not assume `chatbot-app/` stack.
+- Per-project detail for **`pokedex/`** and **`sql-learning-app/`** lives in this file (not the `.claude/rules.md` catalog).
 - Claude Code entry point: [`CLAUDE.md`](CLAUDE.md)
 
 ## Active focus: `chatbot-app/` (Crew Orbit `feature-chatbot`)
@@ -42,7 +44,7 @@ Do **not** add React, Vite, or bundlers unless explicitly requested. Cursor skil
 
 ### Also documented: `sql-learning-app/`
 
-German-language SQL learning app for beginners (default when no project is named and work is not under `pokedex/`).
+German-language SQL learning app for beginners.
 
 | Area | Choice |
 |------|--------|

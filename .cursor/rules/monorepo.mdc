@@ -8,11 +8,12 @@ alwaysApply: true
 - Work inside a single top-level project: `cd <project-name>` before edits or package commands.
 - Read that project’s `package.json` for scripts; there is no repo-root build or test.
 - Match each project’s existing stack (React/Vite, plain HTML/JS, Maven, Python, etc.). Do not introduce new frameworks without an explicit user request.
-- Conventions and project catalog: [AGENTS.md](../../AGENTS.md) and [`.claude/rules.md`](../../.claude/rules.md). Per-project stack for **`pokedex/`** and **`sql-learning-app/`** lives in [AGENTS.md](../../AGENTS.md), not the `.claude/rules.md` catalog.
+- Conventions: [AGENTS.md](../../AGENTS.md) (active focus + documented stacks). Full project catalog: [`.claude/rules.md`](../../.claude/rules.md).
 
 ## Boundaries
 
-- Default project unless the user names another: see **Active focus** in [AGENTS.md](../../AGENTS.md) (currently `chatbot-app/`).
-- **Skills**: For vanilla-JS projects (`pokedex/`, `sql-learning-app/`), skip `.cursor/skills/react`, `shadcn-ui`, and `typescript`. For `chatbot-app/` and other React/Vite root projects, those skills apply; use `design-system` for layout polish; `shadcn-ui` / `tailwind-css` only when that stack exists in the tree.
+- Default project unless the user names another: see **Active focus** in [AGENTS.md](../../AGENTS.md) (currently `chatbot-app/`). If the user path or request names a folder (e.g. `habit-tracker/`), work there — do not assume active focus.
+- **Stack discovery**: `cd <project-name>`, read that folder’s `package.json` / README, and match what is already in the tree. Do not add frameworks the project does not use.
+- **Skills**: Use `.cursor/skills/react`, `typescript`, `shadcn-ui`, and `tailwind-css` only when the target project’s deps or source already use that stack; use `design-system` for UI polish. Skip React/TS/shadcn skills for plain HTML/JS apps and path-scoped vanilla rules (`pokedex/`, `sql-learning-app/`). Projects not in AGENTS.md: see [`.claude/rules.md`](../../.claude/rules.md).
 - Crew Orbit worker output goes under `/workspace/crew-orbit/` (outside this clone). Do not commit `crew-orbit/` if it appears locally (`.gitignore`).
 - Run tests, installs, builds, or dev servers only when the user asks — not as automatic “verification” after edits.
